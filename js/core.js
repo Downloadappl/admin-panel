@@ -235,12 +235,15 @@
       let fieldsHtml = fields.map(f => {
         const val = initialData[f.name] ?? f.default ?? '';
         const isFull = f.full ? 'col-full' : '';
+        const hintHtml = f.hint ? `<span class="field-hint" style="display:block;font-size:0.8rem;color:var(--text-muted);margin-top:4px;">${Core.esc(f.hint)}</span>` : '';
 
         if (f.type === 'textarea') {
           return `
             <div class="field ${isFull}">
               <label for="${f.name}">${Core.esc(f.label)}</label>
               <textarea id="${f.name}" name="${f.name}" rows="${f.rows || 3}" placeholder="${Core.esc(f.placeholder || '')}">${Core.esc(val)}</textarea>
+              ${hintHtml}
+              ${f.name === 'screenshots' ? `<div id="screenshotsPreview" style="display:flex;gap:10px;overflow-x:auto;padding-top:10px;min-height:20px;"></div>` : ''}
             </div>
           `;
         }
@@ -255,6 +258,7 @@
             <div class="field ${isFull}">
               <label for="${f.name}">${Core.esc(f.label)}</label>
               <select id="${f.name}" name="${f.name}">${opts}</select>
+              ${hintHtml}
             </div>
           `;
         }
@@ -278,6 +282,8 @@
                    placeholder="${Core.esc(f.placeholder || '')}"
                    ${f.required ? 'required' : ''} 
                    ${f.step ? `step="${f.step}"` : ''}>
+            ${hintHtml}
+            ${f.name === 'iconUrl' ? `<div id="iconPreview" style="margin-top:8px;display:flex;align-items:center;gap:10px;"><div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;overflow:hidden;"><img id="iconPreviewImg" src="${Core.esc(val)}" alt="" style="width:100%;height:100%;object-fit:cover;${val ? '' : 'display:none;'}" onerror="this.style.display='none'"></div><span style="font-size:0.75rem;color:var(--text-muted)">معاينة الأيقونة</span></div>` : ''}
           </div>
         `;
       }).join('');
@@ -320,6 +326,42 @@
         if (e.target === backdrop) closeModal();
       });
 
+      // Live Image Preview for iconUrl
+      const iconInput = backdrop.querySelector('#iconUrl');
+      const iconImg = backdrop.querySelector('#iconPreviewImg');
+      if (iconInput && iconImg) {
+        iconInput.addEventListener('input', () => {
+          const u = iconInput.value.trim();
+          if (u) {
+            iconImg.src = u;
+            iconImg.style.display = 'block';
+          } else {
+            iconImg.style.display = 'none';
+          }
+        });
+      }
+
+      // Live Screenshot Preview for screenshots
+      const ssInput = backdrop.querySelector('#screenshots');
+      const ssContainer = backdrop.querySelector('#screenshotsPreview');
+      function updateSsPreviews() {
+        if (!ssInput || !ssContainer) return;
+        const urls = ssInput.value.split(/[\r\n,]+/).map(s => s.trim()).filter(Boolean);
+        if (!urls.length) {
+          ssContainer.innerHTML = '';
+          return;
+        }
+        ssContainer.innerHTML = urls.map(u => `
+          <div style="width:120px;height:70px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.12);background:rgba(0,0,0,0.3);flex-shrink:0;">
+            <img src="${Core.esc(u)}" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.display='none'">
+          </div>
+        `).join('');
+      }
+      if (ssInput && ssContainer) {
+        ssInput.addEventListener('input', updateSsPreviews);
+        updateSsPreviews();
+      }
+
       const form = backdrop.querySelector('#dynamicModalForm');
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -335,8 +377,9 @@
           } else if (f.type === 'number') {
             const raw = fd.get(f.name);
             out[f.name] = raw === '' ? null : Number(raw);
-          } else if (f.type === 'json-array') {
-            out[f.name] = String(fd.get(f.name) || '').split(',').map(s => s.trim()).filter(Boolean);
+          } else if (f.type === 'json-array' || f.name === 'screenshots' || f.name === 'keywords') {
+            const raw = String(fd.get(f.name) || '');
+            out[f.name] = raw.split(/[\r\n,]+/).map(s => s.trim()).filter(Boolean);
           } else {
             out[f.name] = fd.get(f.name);
           }

@@ -16,10 +16,10 @@
     <aside class="sidebar" id="appSidebar">
       <div class="sidebar-header">
         <div class="brand-badge">
-          <div class="brand-logo">AH</div>
+          <div class="brand-logo" style="background:linear-gradient(135deg, #06b6d4, #6366f1);color:#000;font-weight:900;">TV</div>
           <div class="brand-info">
-            <h2>AppHub</h2>
-            <span>لوحة الإدارة الذكية</span>
+            <h2>AppHub TV</h2>
+            <span>متجر الشاشات والتلفاز</span>
           </div>
         </div>
       </div>
@@ -31,8 +31,8 @@
           <span>لوحة التحكم</span>
         </a>
         <a href="apps.html" class="nav-link" data-page="apps">
-          <i data-lucide="smartphone"></i>
-          <span>التطبيقات</span>
+          <i data-lucide="tv"></i>
+          <span>تطبيقات الشاشة</span>
         </a>
         <a href="categories.html" class="nav-link" data-page="categories">
           <i data-lucide="folder-tree"></i>
@@ -85,7 +85,7 @@
           <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="فتح القائمة">
             <i data-lucide="menu"></i>
           </button>
-          <h1>إدارة التطبيقات والألعاب</h1>
+          <h1>إدارة تطبيقات متجر الشاشة (Android TV)</h1>
         </div>
         <div class="header-actions">
           <button class="btn btn-primary btn-sm" id="openAddAppModalBtn">
@@ -195,30 +195,26 @@
         if (!catOpts.length) catOpts.push({ value: 'misc', label: 'تطبيقات عامة' });
 
         return [
-          { name: 'name', label: 'اسم التطبيق', required: true, placeholder: 'مثال: StreamBox' },
-          { name: 'id', label: 'المعرف (ID) — اتركه فارغاً للإنشاء التلقائي', placeholder: 'streambox-app' },
-          { name: 'shortDescription', label: 'وصف مختصر', full: true, placeholder: 'أفضل تطبيق لمشاهدة...' },
-          { name: 'fullDescription', label: 'الوصف الكامل', type: 'textarea', rows: 4, full: true, placeholder: 'تفاصيل وميزات التطبيق...' },
+          { name: 'name', label: 'اسم التطبيق *', required: true, placeholder: 'مثال: YouTube TV أو Smart Media' },
+          { name: 'iconUrl', label: 'رابط صورة الأيقونة (URL مباشر) *', required: true, full: true, placeholder: 'https://example.com/icon.png', hint: 'الصور تكون عبر رابط ويب مباشر وليس رفع ملف' },
+          { name: 'shortDescription', label: 'وصف مختصر *', required: true, full: true, placeholder: 'أفضل تطبيق لمشاهدة القنوات والأفلام بجودة عالية...' },
+          { name: 'fullDescription', label: 'الوصف الكامل وميزات التطبيق', type: 'textarea', rows: 4, full: true, placeholder: 'اكتب هنا تفاصيل وميزات التطبيق والتوافق مع شاشات التلفزيون...' },
+          { name: 'screenshots', label: 'روابط لقطات الشاشة (URLs) — يُسمح بلقطة شاشة واحدة (1) على الأقل', type: 'textarea', rows: 3, full: true, placeholder: 'https://example.com/screen1.png\nhttps://example.com/screen2.png', hint: 'ضع رابط لقطة شاشة واحدة على الأقل أو عدة روابط (رابط لكل سطر أو مفصولة بفواصل) عبر روابط مباشرة' },
+          { name: 'packageName', label: 'اسم الحزمة (Package Name)', full: true, placeholder: 'مثال: com.google.android.youtube.tv', hint: 'مهم جداً للتحقق من التثبيت وتفعيل أزرار فتح التطبيق وإزالته' },
+          { name: 'apkUrl', label: 'رابط تحميل ملف APK المباشر', full: true, placeholder: 'https://github.com/.../releases/download/.../app.apk' },
           { name: 'categoryId', label: 'القسم', type: 'select', options: catOpts },
-          { name: 'categoryName', label: 'اسم القسم (اختياري)' },
-          { name: 'versionName', label: 'رقم الإصدار (Version Name)', placeholder: '1.0.0' },
-          { name: 'versionCode', label: 'رمز الإصدار (Version Code)', type: 'number', placeholder: '1' },
-          { name: 'sizeBytes', label: 'حجم ملف APK (بالبايت)', type: 'number', placeholder: 'مثال: 25000000' },
-          { name: 'developer', label: 'المطور أو الشركة' },
-          { name: 'packageName', label: 'اسم الحزمة (Package Name)', placeholder: 'com.example.app' },
-          { name: 'apkUrl', label: 'رابط تحميل APK المباشر', full: true, placeholder: 'https://...' },
-          { name: 'iconUrl', label: 'رابط صورة الأيقونة', full: true, placeholder: 'https://...' },
-          { name: 'sha256', label: 'بصمة SHA-256 (اختياري)', full: true },
-          { name: 'minSdk', label: 'الحد الأدنى لنظام أندرويد (API)', type: 'number', default: 21 },
-          { name: 'keywords', label: 'الكلمات الدلالية (مفصولة بفواصل)', type: 'json-array', full: true },
-          { name: 'targetType', label: 'الأجهزة المتوافقة', type: 'select', options: [
-            { value: 'BOTH', label: 'الهاتف والتلفزيون (TV)' },
-            { value: 'PHONE', label: 'الهاتف فقط' },
-            { value: 'TV', label: 'التلفزيون فقط' }
+          { name: 'developer', label: 'المطور أو الاستوديو', placeholder: 'مثال: Google LLC' },
+          { name: 'versionName', label: 'رقم الإصدار (Version Name)', placeholder: '1.0.0', default: '1.0.0' },
+          { name: 'versionCode', label: 'رمز الإصدار (Version Code)', type: 'number', placeholder: '1', default: 1 },
+          { name: 'sizeBytes', label: 'حجم ملف APK (بالبايت)', type: 'number', placeholder: 'مثال: 25000000 (حوالي 25MB)' },
+          { name: 'targetType', label: 'نوع الجهاز المتوافق', type: 'select', options: [
+            { value: 'TV', label: 'شاشات التلفزيون (Android TV)' },
+            { value: 'BOTH', label: 'التلفزيون والهاتف معاً' },
+            { value: 'PHONE', label: 'الهاتف فقط' }
           ]},
-          { name: 'isFeatured', label: 'تطبيق مميز (يظهر في الواجهة الأولى)', type: 'checkbox' },
-          { name: 'isGame', label: 'هذا التطبيق عبارة عن لعبة', type: 'checkbox' },
-          { name: 'published', label: 'منشور في المتجر (مرئي للمستخدمين)', type: 'checkbox', default: true },
+          { name: 'isFeatured', label: 'تطبيق مميز (يظهر في البانر البارز وشريط الواجهة)', type: 'checkbox', default: false },
+          { name: 'isGame', label: 'تصنيف كـ لعبة ترفيهية', type: 'checkbox', default: false },
+          { name: 'published', label: 'منشور في المتجر ومتاح للتحميل فوراً', type: 'checkbox', default: true },
         ];
       }
 
@@ -351,7 +347,8 @@
       function openAppEditor(existingApp = null) {
         const isEdit = !!existingApp;
         const initialData = Object.assign({}, existingApp || {}, {
-          keywords: (existingApp && existingApp.keywords || []).join(', ')
+          keywords: (existingApp && existingApp.keywords || []).join(', '),
+          screenshots: (existingApp && existingApp.screenshots || []).join('\n')
         });
 
         Core.openModal({
