@@ -1,8 +1,7 @@
 (function () {
   'use strict';
 
-  // API base URL: configurable via the settings screen, or the value below.
-  // The default points at the deployed AppHub Worker so the panel works as-is.
+  // ===== Configuration =====
   const DEFAULT_API_BASE = 'https://apphub.khhjmwmmy.workers.dev';
   let API_BASE = (localStorage.getItem('apphub_api_base') || DEFAULT_API_BASE).replace(/\/$/, '');
 
@@ -16,7 +15,7 @@
     stats: null
   };
 
-  // Helpers
+  // ===== Helpers =====
   const $ = (s, p = document) => p.querySelector(s);
   const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -30,24 +29,16 @@
     return (b/(1024*1024*1024)).toFixed(2) + ' GB';
   };
   const toast = (msg, type = 'info') => {
-    let el = $('#toast');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'toast';
-      el.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 16px;border-radius:8px;background:#121821;color:#e6edf3;border:1px solid #2a3445;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.4);transition:opacity .2s;max-width:90vw;text-align:center';
-      document.body.appendChild(el);
-    }
+    const el = $('#toast');
+    if (!el) return;
     el.textContent = msg;
-    el.style.borderColor = type === 'error' ? '#f87171' : type === 'success' ? '#4ade80' : '#2a3445';
-    el.style.opacity = '1';
+    el.className = 'toast show ' + type;
     clearTimeout(el._t);
-    el._t = setTimeout(() => { el.style.opacity = '0'; }, 3000);
+    el._t = setTimeout(() => { el.className = 'toast'; }, 3200);
   };
 
   async function api(path, opts = {}) {
-    if (!API_BASE) {
-      throw new Error('لم يتم إعداد عنوان الخادم (API). افتح الإعدادات وأدخل عنوان الخادم أولاً.');
-    }
+    if (!API_BASE) throw new Error('لم يتم إعداد عنوان الخادم. افتح الإعدادات وأدخل الرابط.');
     const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
     if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
     const url = API_BASE.replace(/\/$/, '') + path;
@@ -58,29 +49,33 @@
       try { data = text ? JSON.parse(text) : null; } catch (_) { data = text; }
       if (!res.ok) {
         const msg = (data && (data.error || data.message)) || ('HTTP ' + res.status);
-        const err = new Error(msg);
-        err.status = res.status;
-        err.data = data;
+        const err = new Error(msg); err.status = res.status; err.data = data;
         throw err;
       }
       return data;
     } catch (e) {
-      if (e.message === 'Failed to fetch') {
-        throw new Error('تعذر الاتصال بالخادم. تأكد من أن الخادم يعمل وأن العنوان صحيح.');
-      }
+      if (e.message === 'Failed to fetch') throw new Error('تعذر الاتصال بالخادم. تحقق من الرابط والاتصال.');
       throw e;
     }
   }
 
-  // Views
+  // ===== View management =====
   function showView(name) {
-    $$('.view').forEach(v => v.setAttribute('aria-hidden', v.id === name ? 'false' : 'true'));
-    $$('.topnav a').forEach(a => a.classList.toggle('active', a.dataset.tab === name.replace('View','')));
-    const isConfig = name === 'configView';
-    const loggedIn = !!state.token;
-    $('#loginView').setAttribute('aria-hidden', (!loggedIn && !isConfig) ? 'false' : 'true');
-    $('.topbar').style.display = (loggedIn && !isConfig) ? 'flex' : 'none';
-    $('.main').style.paddingTop = (loggedIn && !isConfig) ? '1.5rem' : '0';
+    $$('.auth-screen, .app-shell, .panel-view').forEach(v => {
+      if (v.classList.contains('panel-view')) {
+        v.setAttribute('aria-hidden', v.id === name ? 'false' : 'true');
+      }
+    });
+    // Auth screens
+    ['configView', 'loginView'].forEach(id => {
+      const el = $('#' + id);
+      if (el) el.setAttribute('aria-hidden', el.id === name ? 'false' : 'true');
+    });
+    // App shell
+    const shell = $('#appShell');
+    if (shell) shell.setAttribute('aria-hidden', (name === 'configView' || name === 'loginView') ? 'true' : 'false');
+    // Sidebar active
+    $$('.nav-item').forEach(a => a.classList.toggle('active', a.dataset.view === name));
   }
 
   async function checkAuth() {
@@ -90,6 +85,8 @@
       const me = await api('/api/admin/me');
       state.admin = me;
       $('#userName').textContent = me.username || 'مدير';
+      $('#userAvatar').textContent = (me.username || 'م').charAt(0).toUpperCase();
+      $('#serverLabel').textContent = new URL(API_BASE).host;
       return true;
     } catch (e) {
       if (e.status === 401) {
@@ -109,55 +106,63 @@
     state.admin = data.admin;
     localStorage.setItem('apphub_admin_token', state.token);
     $('#userName').textContent = (data.admin && data.admin.username) || 'مدير';
+    $('#userAvatar').textContent = ((data.admin && data.admin.username) || 'م').charAt(0).toUpperCase();
+    $('#serverLabel').textContent = new URL(API_BASE).host;
     await loadAll();
     showView('dashboardView');
   }
 
-  async function logout() {
-    try { await api('/api/admin/logout', { method: 'POST' }); } catch (_) {}
+  function logout() {
     state.token = ''; state.admin = null;
     localStorage.removeItem('apphub_admin_token');
     showView('loginView');
   }
 
-  // Data
+  // ===== Data loading =====
   async function loadAll() {
-    await Promise.all([loadApps(), loadCategories(), loadStats(), loadSettings(), loadVersions()]);
-    renderDashboard();
-    renderApps();
-    renderCategories();
-    renderStats();
-    renderSettings();
-    renderVersions();
-    populateVersionFilter();
+    try {
+      await Promise.all([loadApps(), loadCategories(), loadStats(), loadSettings(), loadVersions()]);
+      renderDashboard();
+      renderApps();
+      renderCategories();
+      renderStats();
+      renderSettings();
+      renderVersions();
+      populateVersionFilter();
+    } catch (e) { toast(e.message, 'error'); }
   }
 
   async function loadApps() {
-    try { const d = await api('/api/admin/apps'); state.apps = (d && d.items) || d || []; } catch (e) { state.apps = []; console.warn(e); }
+    try { const d = await api('/api/admin/apps'); state.apps = (d && d.items) || d || []; }
+    catch (e) { state.apps = []; console.warn(e); }
   }
   async function loadCategories() {
-    try { const d = await api('/api/admin/categories'); state.categories = (d && d.items) || d || []; } catch (e) { state.categories = []; }
+    try { const d = await api('/api/admin/categories'); state.categories = (d && d.items) || d || []; }
+    catch (e) { state.categories = []; }
   }
   async function loadVersions(appId = '') {
-    try { const q = appId ? ('?appId=' + encodeURIComponent(appId)) : ''; const d = await api('/api/admin/versions' + q); state.versions = (d && d.items) || d || []; } catch (e) { state.versions = []; }
+    try { const q = appId ? ('?appId=' + encodeURIComponent(appId)) : ''; const d = await api('/api/admin/versions' + q); state.versions = (d && d.items) || d || []; }
+    catch (e) { state.versions = []; }
   }
   async function loadStats() {
-    try { state.stats = await api('/api/admin/stats'); } catch (e) { state.stats = null; }
+    try { state.stats = await api('/api/admin/stats'); }
+    catch (e) { state.stats = null; }
   }
   async function loadSettings() {
-    try { state.settings = await api('/api/settings'); } catch (e) { state.settings = {}; }
+    try { state.settings = await api('/api/settings'); }
+    catch (e) { state.settings = {}; }
   }
 
-  // Rendering
+  // ===== Rendering =====
   function renderDashboard() {
     const s = state.stats || {};
     const cards = [
-      { label: 'إجمالي التطبيقات', value: s.totalApps ?? state.apps.length },
-      { label: 'الألعاب', value: s.totalGames ?? state.apps.filter(a=>a.isGame).length },
-      { label: 'الأقسام', value: s.totalCategories ?? state.categories.length },
-      { label: 'إجمالي التحميلات', value: s.totalDownloads ?? 0 }
+      { label: 'إجمالي التطبيقات', value: s.totalApps ?? state.apps.length, icon: '📱' },
+      { label: 'الألعاب', value: s.totalGames ?? state.apps.filter(a=>a.isGame).length, icon: '🎮' },
+      { label: 'الأقسام', value: s.totalCategories ?? state.categories.length, icon: '🗂️' },
+      { label: 'إجمالي التحميلات', value: s.totalDownloads ?? 0, icon: '⬇️' }
     ];
-    $('#statsGrid').innerHTML = cards.map(c => `<div class="stat-card"><div class="stat-value">${esc(c.value)}</div><div class="stat-label">${esc(c.label)}</div></div>`).join('');
+    $('#statsGrid').innerHTML = cards.map(c => `<div class="stat-card"><div class="stat-value">${esc(c.value)}</div><div class="stat-label">${esc(c.icon)} ${esc(c.label)}</div></div>`).join('');
 
     const latest = (s.latestApps && s.latestApps.length ? s.latestApps : [...state.apps].sort((a,b)=>new Date(b.updatedAt||0)-new Date(a.updatedAt||0))).slice(0,5);
     const top = (s.topApps && s.topApps.length ? s.topApps : [...state.apps].sort((a,b)=>(b.downloadCount||0)-(a.downloadCount||0))).slice(0,5);
@@ -166,7 +171,7 @@
   }
 
   function miniTable(items, keys, headers) {
-    if (!items || !items.length) return '<p class="muted">لا توجد بيانات</p>';
+    if (!items || !items.length) return '<div class="empty-state">لا توجد بيانات</div>';
     return `<table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${items.map(it=>`<tr>${keys.map(k=>`<td>${esc(k==='updatedAt'?fmtDate(it[k]):it[k])}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   }
 
@@ -187,7 +192,9 @@
         <button data-action="delete-app" data-id="${esc(a.id)}" class="delete" title="حذف">🗑️</button>
       </td>
     </tr>`).join('');
-    $('#appsTable').innerHTML = `<table><thead><tr><th>التطبيق</th><th>القسم</th><th>الإصدار</th><th>الحجم</th><th>التحميلات</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>${rows || '<tr><td colspan="7" class="muted">لا توجد تطبيقات</td></tr>'}</tbody></table>`;
+    $('#appsTable').innerHTML = rows
+      ? `<table><thead><tr><th>التطبيق</th><th>القسم</th><th>الإصدار</th><th>الحجم</th><th>التحميلات</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>${rows}</tbody></table>`
+      : '<div class="empty-state">لا توجد تطبيقات — اضغط "+ إضافة تطبيق" للبدء</div>';
   }
 
   function renderCategories() {
@@ -200,7 +207,9 @@
         <button data-action="delete-cat" data-id="${esc(c.id)}" class="delete" title="حذف">🗑️</button>
       </td>
     </tr>`).join('');
-    $('#categoriesTable').innerHTML = `<table><thead><tr><th>القسم</th><th>الترتيب</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>${rows || '<tr><td colspan="4" class="muted">لا توجد أقسام</td></tr>'}</tbody></table>`;
+    $('#categoriesTable').innerHTML = rows
+      ? `<table><thead><tr><th>القسم</th><th>الترتيب</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody>${rows}</tbody></table>`
+      : '<div class="empty-state">لا توجد أقسام</div>';
   }
 
   function renderVersions() {
@@ -215,7 +224,9 @@
         <td>${fmtDate(v.createdAt)}</td>
       </tr>`;
     }).join('');
-    $('#versionsTable').innerHTML = `<table><thead><tr><th>التطبيق</th><th>الإصدار</th><th>الكود</th><th>الحجم</th><th>رابط APK</th><th>التاريخ</th></tr></thead><tbody>${rows || '<tr><td colspan="6" class="muted">لا توجد إصدارات</td></tr>'}</tbody></table>`;
+    $('#versionsTable').innerHTML = rows
+      ? `<table><thead><tr><th>التطبيق</th><th>الإصدار</th><th>الكود</th><th>الحجم</th><th>رابط APK</th><th>التاريخ</th></tr></thead><tbody>${rows}</tbody></table>`
+      : '<div class="empty-state">لا توجد إصدارات</div>';
   }
 
   function renderStats() {
@@ -227,6 +238,11 @@
       { label: 'إجمالي التحميلات', value: s.totalDownloads ?? 0 }
     ];
     $('#statsGridDetail').innerHTML = cards.map(c => `<div class="stat-card"><div class="stat-value">${esc(c.value)}</div><div class="stat-label">${esc(c.label)}</div></div>`).join('');
+
+    const top = (s.topApps && s.topApps.length ? s.topApps : [...state.apps].sort((a,b)=>(b.downloadCount||0)-(a.downloadCount||0))).slice(0,8);
+    const latest = (s.latestApps && s.latestApps.length ? s.latestApps : [...state.apps].sort((a,b)=>new Date(b.updatedAt||0)-new Date(a.updatedAt||0))).slice(0,8);
+    $('#statsTopApps').innerHTML = miniTable(top, ['name','downloadCount','categoryName'], ['التطبيق','التحميلات','القسم']);
+    $('#statsLatestApps').innerHTML = miniTable(latest, ['name','versionName','updatedAt'], ['التطبيق','الإصدار','التحديث']);
   }
 
   function renderSettings() {
@@ -234,6 +250,7 @@
     if ($('#storeName')) $('#storeName').value = s.storeName || '';
     if ($('#welcomeMessage')) $('#welcomeMessage').value = s.welcomeMessage || '';
     if ($('#storeDescription')) $('#storeDescription').value = s.storeDescription || '';
+    if ($('#apiBaseSettings')) $('#apiBaseSettings').value = API_BASE;
   }
 
   function populateVersionFilter() {
@@ -244,26 +261,21 @@
     sel.value = current;
   }
 
-  // Config screen
+  // ===== Config screen (server URL) =====
   function showConfigScreen() {
     showView('configView');
     const input = $('#apiBaseInput');
     if (input) input.value = API_BASE;
     const hint = $('#configHint');
-    if (hint) {
-      hint.textContent = API_BASE
-        ? 'الخادم متصل حالياً بـ: ' + API_BASE
-        : 'لم يتم إعداد عنوان الخادم بعد. أدخل عنوان خادم Backend الخاص بك.';
-    }
+    if (hint) hint.textContent = API_BASE ? 'الخادم متصل حالياً بـ: ' + API_BASE : 'لم يتم إعداد عنوان الخادم بعد.';
   }
-
   function saveConfig() {
     const input = $('#apiBaseInput');
     if (!input) return;
     const val = input.value.trim();
     if (val) {
-      API_BASE = val;
-      localStorage.setItem('apphub_api_base', val);
+      API_BASE = val.replace(/\/$/, '');
+      localStorage.setItem('apphub_api_base', API_BASE);
       toast('تم حفظ عنوان الخادم', 'success');
       checkAuth().then(ok => { if (ok) loadAll(); });
     } else {
@@ -273,7 +285,7 @@
     }
   }
 
-  // Modal
+  // ===== Modal =====
   function openModal(title, fields, data = {}, onSubmit) {
     const tpl = $('#modalTpl');
     const backdrop = tpl.content.firstElementChild.cloneNode(true);
@@ -283,13 +295,15 @@
       const val = data[f.name] ?? f.default ?? '';
       if (f.type === 'textarea') return `<div class="field ${f.full?'full-width':''}"><label for="${f.name}">${esc(f.label)}</label><textarea id="${f.name}" name="${f.name}" rows="${f.rows||3}">${esc(val)}</textarea></div>`;
       if (f.type === 'select') return `<div class="field ${f.full?'full-width':''}"><label for="${f.name}">${esc(f.label)}</label><select id="${f.name}" name="${f.name}">${(f.options||[]).map(o=>`<option value="${esc(o.value)}" ${String(val)===String(o.value)?'selected':''}>${esc(o.label)}</option>`).join('')}</select></div>`;
-      if (f.type === 'checkbox') return `<div class="field"><label><input type="checkbox" id="${f.name}" name="${f.name}" ${val?'checked':''} style="width:auto;margin-left:8px"> ${esc(f.label)}</label></div>`;
-      return `<div class="field ${f.full?'full-width':''}"><label for="${f.name}">${esc(f.label)}</label><input type="${f.type||'text'}" id="${f.name}" name="${f.name}" value="${esc(val)}" ${f.required?'required':''} ${f.step?`step="${f.step}"`:''}></div>`;
+      if (f.type === 'checkbox') return `<div class="field"><label class="check-label"><input type="checkbox" id="${f.name}" name="${f.name}" ${val?'checked':''}> ${esc(f.label)}</label></div>`;
+      return `<div class="field ${f.full?'full-width':''}"><label for="${f.name}">${esc(f.label)}</label><input type="${f.type||'text'}" id="${f.name}" name="${f.name}" value="${esc(val)}" ${f.required?'required':''} ${f.step?`step="${f.step}"`:''} ${f.placeholder?`placeholder="${esc(f.placeholder)}"`:''}></div>`;
     }).join('');
     document.body.appendChild(backdrop);
     requestAnimationFrame(() => backdrop.classList.add('open'));
     const close = () => { backdrop.classList.remove('open'); setTimeout(() => backdrop.remove(), 180); };
-    backdrop.addEventListener('click', (e) => { if (e.target === backdrop || e.target.classList.contains('modal-close') || e.target.classList.contains('modal-cancel')) close(); });
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop || e.target.classList.contains('modal-close') || e.target.classList.contains('modal-cancel')) close();
+    });
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const fd = new FormData(form);
@@ -300,28 +314,30 @@
         else if (f.type === 'json-array') out[f.name] = String(fd.get(f.name)||'').split(',').map(s=>s.trim()).filter(Boolean);
         else out[f.name] = fd.get(f.name);
       });
-      try { await onSubmit(out); close(); } catch (err) { toast(err.message || 'فشل الحفظ', 'error'); }
+      try { await onSubmit(out); close(); }
+      catch (err) { toast(err.message || 'فشل الحفظ', 'error'); }
     });
   }
 
+  // ===== Fields =====
   function appFields() {
     const catOpts = state.categories.map(c => ({ value: c.id, label: c.name }));
     if (!catOpts.length) catOpts.push({ value: 'misc', label: 'تطبيقات متنوعة' });
     return [
-      { name: 'name', label: 'اسم التطبيق', required: true },
-      { name: 'id', label: 'المعرف (ID)', required: false },
-      { name: 'shortDescription', label: 'وصف مختصر', full: true },
+      { name: 'name', label: 'اسم التطبيق', required: true, placeholder: 'مثال: StreamBox' },
+      { name: 'id', label: 'المعرف (ID) — اختياري', placeholder: 'يُنشأ تلقائياً' },
+      { name: 'shortDescription', label: 'وصف مختصر', full: true, placeholder: 'جملة قصيرة' },
       { name: 'fullDescription', label: 'وصف كامل', type: 'textarea', rows: 4, full: true },
       { name: 'categoryId', label: 'القسم', type: 'select', options: catOpts },
       { name: 'categoryName', label: 'اسم القسم (اختياري)' },
-      { name: 'versionName', label: 'رقم الإصدار (Version Name)' },
-      { name: 'versionCode', label: 'رمز الإصدار (Version Code)', type: 'number' },
-      { name: 'sizeBytes', label: 'حجم APK (بايت)', type: 'number' },
+      { name: 'versionName', label: 'رقم الإصدار (Version Name)', placeholder: '1.0.0' },
+      { name: 'versionCode', label: 'رمز الإصدار (Version Code)', type: 'number', placeholder: '1' },
+      { name: 'sizeBytes', label: 'حجم APK (بايت)', type: 'number', placeholder: '0' },
       { name: 'developer', label: 'المطور' },
-      { name: 'packageName', label: 'Package Name' },
-      { name: 'apkUrl', label: 'رابط APK المباشر', full: true },
-      { name: 'iconUrl', label: 'رابط الأيقونة', full: true },
-      { name: 'sha256', label: 'SHA-256 (اختياري)', full: true },
+      { name: 'packageName', label: 'Package Name', placeholder: 'com.example.app' },
+      { name: 'apkUrl', label: 'رابط APK المباشر (GitHub Releases، CDN، ...)', full: true, placeholder: 'https://...' },
+      { name: 'iconUrl', label: 'رابط الأيقونة', full: true, placeholder: 'https://...' },
+      { name: 'sha256', label: 'SHA-256 (اختياري)', full: true, placeholder: 'hex digest' },
       { name: 'minSdk', label: 'الحد الأدنى لـ Android (API)', type: 'number', default: 21 },
       { name: 'keywords', label: 'كلمات مفتاحية (مفصولة بفواصل)', type: 'json-array', full: true },
       { name: 'targetType', label: 'نوع الجهاز', type: 'select', options: [{value:'BOTH',label:'الهاتف والتلفزيون'},{value:'PHONE',label:'الهاتف'},{value:'TV',label:'التلفزيون'}] },
@@ -331,11 +347,25 @@
     ];
   }
 
+  function catFields() {
+    return [
+      { name: 'name', label: 'اسم القسم', required: true },
+      { name: 'id', label: 'المعرف (ID)' },
+      { name: 'icon', label: 'رابط/اسم الأيقونة' },
+      { name: 'order', label: 'الترتيب', type: 'number', default: 0 },
+      { name: 'published', label: 'منشور', type: 'checkbox', default: true },
+    ];
+  }
+
+  // ===== CRUD =====
   async function addOrEditApp(existing) {
     const isEdit = !!existing;
     const data = Object.assign({}, existing || {}, { keywords: (existing && existing.keywords || []).join(', ') });
-    openModal(isEdit ? 'تعديل التطبيق' : 'إضافة تطبيق', appFields(), data, async (out) => {
-      if (out.categoryId) { const c = state.categories.find(x=>x.id===out.categoryId); if (c && !out.categoryName) out.categoryName = c.name; }
+    openModal(isEdit ? 'تعديل: ' + (existing.name || '') : 'إضافة تطبيق جديد', appFields(), data, async (out) => {
+      if (out.categoryId) {
+        const c = state.categories.find(x => x.id === out.categoryId);
+        if (c && !out.categoryName) out.categoryName = c.name;
+      }
       if (isEdit) {
         await api('/api/admin/apps/' + encodeURIComponent(existing.id), { method: 'PUT', body: JSON.stringify(out) });
         toast('تم تحديث التطبيق', 'success');
@@ -350,7 +380,8 @@
   }
 
   async function deleteApp(id) {
-    if (!confirm('هل تريد حذف هذا التطبيق؟')) return;
+    const app = state.apps.find(a => a.id === id);
+    if (!confirm('هل تريد حذف "' + (app ? app.name : id) + '"؟ لا يمكن التراجع.')) return;
     try {
       await api('/api/admin/apps/' + encodeURIComponent(id), { method: 'DELETE' });
       toast('تم الحذف', 'success');
@@ -358,19 +389,9 @@
     } catch (e) { toast(e.message, 'error'); }
   }
 
-  function catFields() {
-    return [
-      { name: 'name', label: 'اسم القسم', required: true },
-      { name: 'id', label: 'المعرف (ID)' },
-      { name: 'icon', label: 'رابط/اسم الأيقونة' },
-      { name: 'order', label: 'الترتيب', type: 'number', default: 0 },
-      { name: 'published', label: 'منشور', type: 'checkbox', default: true },
-    ];
-  }
-
   async function addOrEditCategory(existing) {
     const isEdit = !!existing;
-    openModal(isEdit ? 'تعديل القسم' : 'إضافة قسم', catFields(), existing || {}, async (out) => {
+    openModal(isEdit ? 'تعديل القسم' : 'إضافة قسم جديد', catFields(), existing || {}, async (out) => {
       if (isEdit) {
         await api('/api/admin/categories/' + encodeURIComponent(existing.id), { method: 'PUT', body: JSON.stringify(out) });
         toast('تم تحديث القسم', 'success');
@@ -384,7 +405,8 @@
   }
 
   async function deleteCategory(id) {
-    if (!confirm('هل تريد حذف هذا القسم؟')) return;
+    const cat = state.categories.find(c => c.id === id);
+    if (!confirm('هل تريد حذف قسم "' + (cat ? cat.name : id) + '"؟')) return;
     try {
       await api('/api/admin/categories/' + encodeURIComponent(id), { method: 'DELETE' });
       toast('تم الحذف', 'success');
@@ -392,42 +414,44 @@
     } catch (e) { toast(e.message, 'error'); }
   }
 
-  // Events
+  // ===== Events =====
   function bindEvents() {
+    // Auth
     $('#loginForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const u = $('#username').value.trim();
       const p = $('#password').value;
       const errEl = $('#loginError');
       errEl.hidden = true;
-      try { await login(u, p); } catch (err) {
+      try { await login(u, p); }
+      catch (err) {
         errEl.textContent = err.message || 'فشل تسجيل الدخول';
         errEl.hidden = false;
-        if (err.message && err.message.includes('تعذر الاتصال')) {
-          errEl.innerHTML += '<br><a href="#" id="goConfigLink" style="color:var(--primary)">انتقل إلى إعدادات الخادم</a>';
-          setTimeout(() => {
-            $('#goConfigLink')?.addEventListener('click', (ev) => { ev.preventDefault(); showConfigScreen(); });
-          }, 0);
-        }
       }
     });
     $('#logoutBtn')?.addEventListener('click', logout);
-
-    $$('.topnav a').forEach(a => a.addEventListener('click', (e) => {
-      e.preventDefault();
-      const tab = a.dataset.tab;
-      showView(tab + 'View');
-      if (tab === 'dashboard') { loadStats().then(renderDashboard); }
-      if (tab === 'stats') { loadStats().then(renderStats); }
-      if (tab === 'versions') { loadVersions($('#versionAppFilter').value).then(renderVersions); }
-    }));
+    $('#openConfigFromLogin')?.addEventListener('click', showConfigScreen);
+    $('#changeServerBtn')?.addEventListener('click', showConfigScreen);
 
     // Config
-    $('#configForm')?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      saveConfig();
-    });
+    $('#configForm')?.addEventListener('submit', (e) => { e.preventDefault(); saveConfig(); });
 
+    // Navigation
+    $$('.nav-item').forEach(a => a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const view = a.dataset.view;
+      showView(view);
+      if (view === 'dashboardView') { loadStats().then(renderDashboard); }
+      if (view === 'statsView') { loadStats().then(renderStats); }
+      if (view === 'versionsView') { loadVersions($('#versionAppFilter').value).then(renderVersions); }
+      if (view === 'settingsView') { loadSettings().then(renderSettings); }
+    }));
+
+    // Refresh
+    $('#refreshBtn')?.addEventListener('click', loadAll);
+    $('#refreshStatsBtn')?.addEventListener('click', () => { loadStats().then(renderStats); });
+
+    // Apps
     $('#addAppBtn')?.addEventListener('click', () => addOrEditApp(null));
     $('#addCategoryBtn')?.addEventListener('click', () => addOrEditCategory(null));
 
@@ -436,17 +460,19 @@
       if (!btn) return;
       const action = btn.dataset.action;
       const id = btn.dataset.id;
-      if (action === 'edit-app') addOrEditApp(state.apps.find(a=>a.id===id));
+      if (action === 'edit-app') addOrEditApp(state.apps.find(a => a.id === id));
       if (action === 'delete-app') deleteApp(id);
-      if (action === 'edit-cat') addOrEditCategory(state.categories.find(c=>c.id===id));
+      if (action === 'edit-cat') addOrEditCategory(state.categories.find(c => c.id === id));
       if (action === 'delete-cat') deleteCategory(id);
     });
 
+    // Versions filter
     $('#versionAppFilter')?.addEventListener('change', async (e) => {
       await loadVersions(e.target.value);
       renderVersions();
     });
 
+    // Settings form
     $('#settingsForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       try {
@@ -461,19 +487,35 @@
       } catch (err) { toast(err.message, 'error'); }
     });
 
-    // Open config from login error link
-    document.addEventListener('click', (e) => {
-      if (e.target.id === 'goConfigLink') { e.preventDefault(); showConfigScreen(); }
+    // Server settings
+    $('#serverSettingsForm')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = $('#apiBaseSettings').value.trim();
+      if (val) {
+        API_BASE = val.replace(/\/$/, '');
+        localStorage.setItem('apphub_api_base', API_BASE);
+        toast('تم حفظ رابط الخادم', 'success');
+        checkAuth().then(ok => { if (ok) loadAll(); });
+      }
+    });
+    $('#testConnectionBtn')?.addEventListener('click', async () => {
+      const val = $('#apiBaseSettings').value.trim();
+      const status = $('#connectionStatus');
+      if (!val) { status.textContent = 'أدخل رابط الخادم أولاً'; return; }
+      status.textContent = 'جارٍ الاختبار...';
+      try {
+        const res = await fetch(val.replace(/\/$/, '') + '/api/health');
+        if (res.ok) { status.textContent = '✅ الاتصال ناجح'; status.style.color = 'var(--success)'; }
+        else { status.textContent = '❌ فشل الاتصال: HTTP ' + res.status; status.style.color = 'var(--danger)'; }
+      } catch (e) {
+        status.textContent = '❌ تعذر الاتصال: ' + e.message; status.style.color = 'var(--danger)';
+      }
     });
   }
 
-  // Init
+  // ===== Init =====
   async function init() {
     bindEvents();
-    if (!API_BASE) {
-      showConfigScreen();
-      return;
-    }
     if (await checkAuth()) {
       await loadAll();
       showView('dashboardView');
