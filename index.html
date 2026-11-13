@@ -3,129 +3,246 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AppHub Admin Panel</title>
+  <title>AppHub — لوحة التحكم</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div id="app">
-    <!-- لا حاجة لديناميك لوحدة المتصفح -->
 
-    <!-- شاشة تسجيل الدخول (يتم عرضها أولاً) -->
-    <section id="loginView" class="view login-view" aria-hidden="false">
-      <div class="login-card">
-        <h1>تسجيل الدخول</h1>
-        <p class="muted">لوحة تحكم متجر تطبيقات AppHub</p>
-        <form id="loginForm">
-          <div class="field">
-            <label for="username">اسم المستخدم</label>
-            <input type="text" id="username" name="username" autocomplete="username" required>
-          </div>
-          <div class="field">
-            <label for="password">كلمة المرور</label>
-            <input type="password" id="password" name="password" autocomplete="current-password" required>
-          </div>
-          <button type="submit" class="btn btn-primary btn-block">دخول</button>
-          <p id="loginError" class="error" hidden></p>
-        </form>
+  <!-- ===== شاشة إعداد الخادم ===== -->
+  <section id="configView" class="auth-screen" aria-hidden="true">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="brand-icon">AH</div>
+        <h1>AppHub</h1>
+        <p class="muted">إعداد اتصال الخادم</p>
       </div>
-    </section>
-
-    <!-- لوحة المعلومات الرئيسية -->
-    <section id="dashboardView" class="view" aria-hidden="true">
-      <div class="view-header">
-        <h1>لوحة التحكم</h1>
-        <button class="btn btn-primary" id="refreshBtn">تحديث</button>
-      </div>
-
-      <!-- الشبكة الإحصائية -->
-      <div class="stats-grid" id="statsGrid"></div>
-
-      <!-- الصفوف -->
-      <div class="cards-row">
-        <article class="card">
-          <h2>أحدث التطبيقات</h2>
-          <div class="table-wrap" id="latestApps"></div>
-        </article>
-        <article class="card">
-          <h2>أكثر التطبيقات تحميلاً</h2>
-          <div class="table-wrap" id="topApps"></div>
-        </article>
-      </div>
-    </section>
-
-    <!-- إدارة التطبيقات -->
-    <section id="appsView" class="view" aria-hidden="true">
-      <div class="view-header">
-        <h1>التطبيقات</h1>
-        <button class="btn btn-primary" id="addAppBtn">إضافة تطبيق</button>
-      </div>
-      <div class="table-wrap" id="appsTable"></div>
-    </section>
-
-    <!-- إدارة الأقسام -->
-    <section id="categoriesView" class="view" aria-hidden="true">
-      <div class="view-header">
-        <h1>الأقسام</h_HOME_><button class="btn btn-primary" id="addCategoryBtn">إضافة قسم</button>
-      </div>
-      <div class="table-wrap" id="categoriesTable"></div>
-    </section>
-
-    <!-- إصدار التطبيقات -->
-    <section id="versionsView" class="view" aria-hidden="true">
-      <div class="view-header">
-        <h1>الإصدارات</h1>
-      </div>
-      <div class="filter-row">
-        <select id="versionAppFilter">
-          <option value="">— جميع التطبيقات —</option>
-        </select>
-      </div>
-      <div class="table-wrap" id="versionsTable"></div>
-    </section>
-
-    <!-- الإحصائيات -->
-    <section id="statsView" class="view" aria-hidden="true">
-      <h1>إحصائيات المتجر</h1>
-      <div class="stats-grid" id="statsGridDetail"></div>
-    </section>
-
-    <!-- الإعدادات -->
-    <section id="settingsView" class="view" aria-hidden="true">
-      <h1>إعدادات المتجر</h1>
-      <form id="settingsForm" class="form-grid">
+      <form id="configForm">
         <div class="field">
-          <label for="storeName">اسم المتجر</label>
-          <input type="text" id="storeName" name="storeName">
+          <label for="apiBaseInput">رابط الخادم (API URL)</label>
+          <input type="url" id="apiBaseInput" name="apiBase" placeholder="https://apphub.example.workers.dev" dir="ltr" required>
+          <small class="muted">أدخل رابط Cloudflare Worker أو خادم Backend.</small>
         </div>
-        <div class="field">
-          <label for="welcomeMessage">رسالة ترحيبية</label>
-          <input type="text" id="welcomeMessage" name="welcomeMessage">
-        </div>
-        <div class="field full-width">
-          <label for="storeDescription">وصف المتجر</label>
-          <textarea id="storeDescription" name="storeDescription" rows="3"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+        <button type="submit" class="btn btn-primary btn-block">حفظ ومتابعة</button>
+        <p id="configHint" class="hint-text"></p>
       </form>
-    </section>
+    </div>
+  </section>
 
-    <!-- قالب النوافذ المنبثقة -->
-    <template id="modalTpl">
-      <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <div class="modal">
-          <header class="modal-header">
-            <h2 id="modalTitle"></h2>
-            <button class="modal-close" aria-label="إغلاق">&times;</button>
-          </header>
-          <form class="modal-body" id="modalForm"></form>
-          <footer class="modal-footer">
-            <button type="button" class="btn btn-ghost modal-cancel">إلغاء</button>
-            <button type="submit" form="modalForm" class="btn btn-primary">حفظ</button>
-          </footer>
+  <!-- ===== شاشة تسجيل الدخول ===== -->
+  <section id="loginView" class="auth-screen" aria-hidden="true">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="brand-icon">AH</div>
+        <h1>تسجيل الدخول</h1>
+        <p class="muted">لوحة تحكم متجر AppHub</p>
+      </div>
+      <form id="loginForm">
+        <div class="field">
+          <label for="username">اسم المستخدم</label>
+          <input type="text" id="username" name="username" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password">كلمة المرور</label>
+          <input type="password" id="password" name="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">دخول</button>
+        <p id="loginError" class="error" hidden></p>
+      </form>
+      <div class="auth-footer">
+        <button type="button" class="btn btn-ghost btn-sm" id="openConfigFromLogin">تغيير رابط الخادم</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== التطبيق الرئيسي (بعد تسجيل الدخول) ===== -->
+  <div id="appShell" class="app-shell" aria-hidden="true">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon sm">AH</div>
+        <div>
+          <strong>AppHub</strong>
+          <small class="muted">لوحة التحكم</small>
         </div>
       </div>
-    </template>
+      <nav class="side-nav" id="sideNav">
+        <a href="#dashboard" data-view="dashboardView" class="nav-item active"><span class="nav-icon">📊</span>لوحة التحكم</a>
+        <a href="#apps" data-view="appsView" class="nav-item"><span class="nav-icon">📱</span>التطبيقات</a>
+        <a href="#categories" data-view="categoriesView" class="nav-item"><span class="nav-icon">🗂️</span>الأقسام</a>
+        <a href="#versions" data-view="versionsView" class="nav-item"><span class="nav-icon">🏷️</span>الإصدارات</a>
+        <a href="#stats" data-view="statsView" class="nav-item"><span class="nav-icon">📈</span>الإحصائيات</a>
+        <a href="#settings" data-view="settingsView" class="nav-item"><span class="nav-icon">⚙️</span>الإعدادات</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="avatar" id="userAvatar">A</div>
+          <div class="user-meta">
+            <strong id="userName">—</strong>
+            <small class="muted" id="serverLabel"></small>
+          </div>
+        </div>
+        <div class="sidebar-actions">
+          <button class="btn btn-ghost btn-sm btn-block" id="changeServerBtn">تغيير الخادم</button>
+          <button class="btn btn-ghost btn-sm btn-block danger-text" id="logoutBtn">تسجيل الخروج</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <!-- لوحة التحكم -->
+      <section id="dashboardView" class="panel-view" aria-hidden="true">
+        <header class="panel-header">
+          <div>
+            <h1>لوحة التحكم</h1>
+            <p class="muted">نظرة عامة على المتجر</p>
+          </div>
+          <button class="btn btn-ghost" id="refreshBtn">تحديث</button>
+        </header>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div class="cards-row">
+          <article class="card">
+            <div class="card-head"><h2>أحدث التطبيقات</h2></div>
+            <div class="table-wrap" id="latestApps"></div>
+          </article>
+          <article class="card">
+            <div class="card-head"><h2>الأكثر تحميلاً</h2></div>
+            <div class="table-wrap" id="topApps"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- التطبيقات -->
+      <section id="appsView" class="panel-view" aria-hidden="true">
+        <header class="panel-header">
+          <div>
+            <h1>التطبيقات</h1>
+            <p class="muted">إدارة جميع التطبيقات والألعاب</p>
+          </div>
+          <button class="btn btn-primary" id="addAppBtn">+ إضافة تطبيق</button>
+        </header>
+        <div class="card">
+          <div class="table-wrap" id="appsTable"></div>
+        </div>
+      </section>
+
+      <!-- الأقسام -->
+      <section id="categoriesView" class="panel-view" aria-hidden="true">
+        <header class="panel-header">
+          <div>
+            <h1>الأقسام</h1>
+            <p class="muted">تنظيم أقسام المتجر</p>
+          </div>
+          <button class="btn btn-primary" id="addCategoryBtn">+ إضافة قسم</button>
+        </header>
+        <div class="card">
+          <div class="table-wrap" id="categoriesTable"></div>
+        </div>
+      </section>
+
+      <!-- الإصدارات -->
+      <section id="versionsView" class="panel-view" aria-hidden="true">
+        <header class="panel-header">
+          <div>
+            <h1>الإصدارات</h1>
+            <p class="muted">سجل إصدارات التطبيقات</p>
+          </div>
+        </header>
+        <div class="card">
+          <div class="filter-row">
+            <label for="versionAppFilter" class="muted">تصفية حسب التطبيق:</label>
+            <select id="versionAppFilter">
+              <option value="">— جميع التطبيقات —</option>
+            </select>
+          </div>
+          <div class="table-wrap" id="versionsTable"></div>
+        </div>
+      </section>
+
+      <!-- الإحصائيات -->
+      <section id="statsView" class="panel-view" aria-hidden="true">
+        <header class="panel-header">
+          <div>
+            <h1>الإحصائيات</h1>
+            <p class="muted">إحصائيات المتجر التفصيلية</p>
+          </div>
+          <button class="btn btn-ghost" id="refreshStatsBtn">تحديث</button>
+        </header>
+        <div class="stats-grid" id="statsGridDetail"></div>
+        <div class="cards-row">
+          <article class="card">
+            <div class="card-head"><h2>الأكثر تحميلاً</h2></div>
+            <div class="table-wrap" id="statsTopApps"></div>
+          </article>
+          <article class="card">
+            <div class="card-head"><h2>أحدث الإضافات</h2></div>
+            <div class="table-wrap" id="statsLatestApps"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- الإعدادات -->
+      <section id="settingsView" class="panel-view" aria-hidden="true">
+        <header class="panel-header">
+          <div>
+            <h1>الإعدادات</h1>
+            <p class="muted">إعدادات المتجر والخادم</p>
+          </div>
+        </header>
+        <div class="settings-grid">
+          <article class="card">
+            <div class="card-head"><h2>معلومات المتجر</h2></div>
+            <form id="settingsForm" class="form-stack">
+              <div class="field">
+                <label for="storeName">اسم المتجر</label>
+                <input type="text" id="storeName" name="storeName">
+              </div>
+              <div class="field">
+                <label for="welcomeMessage">رسالة ترحيبية</label>
+                <input type="text" id="welcomeMessage" name="welcomeMessage">
+              </div>
+              <div class="field">
+                <label for="storeDescription">وصف المتجر</label>
+                <textarea id="storeDescription" name="storeDescription" rows="3"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+            </form>
+          </article>
+          <article class="card">
+            <div class="card-head"><h2>اتصال الخادم</h2></div>
+            <form id="serverSettingsForm" class="form-stack">
+              <div class="field">
+                <label for="apiBaseSettings">رابط الخادم (API URL)</label>
+                <input type="url" id="apiBaseSettings" name="apiBase" dir="ltr" placeholder="https://...workers.dev">
+              </div>
+              <div class="btn-row">
+                <button type="submit" class="btn btn-primary">حفظ الرابط</button>
+                <button type="button" class="btn btn-ghost" id="testConnectionBtn">اختبار الاتصال</button>
+              </div>
+              <p id="connectionStatus" class="hint-text"></p>
+            </form>
+          </article>
+        </div>
+      </section>
+    </main>
   </div>
+
+  <!-- قالب النافذة المنبثقة -->
+  <template id="modalTpl">
+    <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal">
+        <header class="modal-header">
+          <h2 id="modalTitle"></h2>
+          <button type="button" class="modal-close" aria-label="إغلاق">&times;</button>
+        </header>
+        <form class="modal-body" id="modalForm"></form>
+        <footer class="modal-footer">
+          <button type="button" class="btn btn-ghost modal-cancel">إلغاء</button>
+          <button type="submit" form="modalForm" class="btn btn-primary">حفظ</button>
+        </footer>
+      </div>
+    </div>
+  </template>
+
+  <div id="toast" class="toast" aria-live="polite"></div>
 
   <script src="js/app.js"></script>
 </body>
