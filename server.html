@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إعداد الخادم — AppHub</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="assets/lucide.min.js"></script>
+</head>
+<body>
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-logo">
+          <i data-lucide="server" style="width:32px;height:32px;"></i>
+        </div>
+        <h1>إعداد اتصال الخادم</h1>
+        <p>قم بتحديد رابط خادم الـ API الخاص بمتجر AppHub</p>
+      </div>
+
+      <form id="serverConfigForm">
+        <div class="field">
+          <label for="apiUrlInput">رابط الخادم (API URL)</label>
+          <div class="input-with-icon">
+            <input type="url" id="apiUrlInput" name="apiUrl" placeholder="https://apphub.example.workers.dev" dir="ltr" required>
+            <span class="input-icon"><i data-lucide="link"></i></span>
+          </div>
+          <small>أدخل رابط Cloudflare Worker أو خادم الواجهة الخلفية (Backend).</small>
+        </div>
+
+        <div id="testStatusBox" style="display:none;margin-bottom:1.25rem;">
+          <div id="statusBadge" class="badge" style="width:100%;padding:0.75rem 1rem;justify-content:flex-start;font-size:0.86rem;">
+            <i id="statusIcon" data-lucide="activity"></i>
+            <span id="statusMessage"></span>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          <button type="button" class="btn btn-secondary btn-block" id="testBtn">
+            <i data-lucide="activity"></i>
+            <span>اختبار الاتصال بالخادم</span>
+          </button>
+
+          <button type="submit" class="btn btn-primary btn-block" style="padding:0.85rem;">
+            <i data-lucide="check"></i>
+            <span>حفظ ومتابعة</span>
+          </button>
+        </div>
+      </form>
+
+      <div class="auth-footer" style="display:flex;justify-content:space-between;align-items:center;">
+        <a href="login.html" class="btn btn-ghost btn-sm">
+          <i data-lucide="arrow-right"></i>
+          <span>العودة لتسجيل الدخول</span>
+        </a>
+        <button type="button" class="btn btn-ghost btn-sm" id="resetDefaultBtn">
+          <i data-lucide="rotate-ccw"></i>
+          <span>الافتراضي</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastNotice" class="toast-notice"></div>
+
+  <script src="js/core.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      Core.initIcons();
+
+      const input = document.getElementById('apiUrlInput');
+      const form = document.getElementById('serverConfigForm');
+      const testBtn = document.getElementById('testBtn');
+      const resetBtn = document.getElementById('resetDefaultBtn');
+      const statusBox = document.getElementById('testStatusBox');
+      const statusBadge = document.getElementById('statusBadge');
+      const statusIcon = document.getElementById('statusIcon');
+      const statusMessage = document.getElementById('statusMessage');
+
+      input.value = Core.getApiBase();
+
+      resetBtn.addEventListener('click', () => {
+        input.value = Core.DEFAULT_API_BASE;
+        Core.toast('تمت استعادة الرابط الافتراضي', 'info');
+      });
+
+      testBtn.addEventListener('click', async () => {
+        const val = input.value.trim().replace(/\/$/, '');
+        if (!val) {
+          Core.toast('يرجى كتابة الرابط أولاً', 'error');
+          return;
+        }
+
+        testBtn.disabled = true;
+        testBtn.innerHTML = `<span>جارٍ فحص الاتصال...</span>`;
+        statusBox.style.display = 'block';
+        statusBadge.className = 'badge badge-neutral';
+        statusMessage.textContent = 'جارٍ إرسال طلب الاختبار (Health Check)...';
+
+        try {
+          const res = await fetch(val + '/api/health', { method: 'GET' });
+          if (res.ok) {
+            statusBadge.className = 'badge badge-success';
+            statusMessage.textContent = 'الاتصال ناجح! الخادم يعمل بشكل سليم.';
+            statusIcon.setAttribute('data-lucide', 'check-circle-2');
+          } else {
+            statusBadge.className = 'badge badge-warning';
+            statusMessage.textContent = 'الخادم استجاب بالرمز: HTTP ' + res.status;
+            statusIcon.setAttribute('data-lucide', 'alert-triangle');
+          }
+        } catch (e) {
+          statusBadge.className = 'badge badge-danger';
+          statusMessage.textContent = 'فشل الاتصال: ' + (e.message || 'تعذر الوصول إلى الخادم');
+          statusIcon.setAttribute('data-lucide', 'alert-circle');
+        } finally {
+          testBtn.disabled = false;
+          testBtn.innerHTML = `<i data-lucide="activity"></i><span>اختبار الاتصال بالخادم</span>`;
+          Core.initIcons();
+        }
+      });
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const val = input.value.trim().replace(/\/$/, '');
+        if (!val) {
+          Core.toast('يرجى إدخال الرابط', 'error');
+          return;
+        }
+
+        Core.setApiBase(val);
+        Core.toast('تم حفظ رابط الخادم بنجاح', 'success');
+
+        setTimeout(() => {
+          if (Core.getToken()) {
+            window.location.href = 'index.html';
+          } else {
+            window.location.href = 'login.html';
+          }
+        }, 500);
+      });
+    });
+  </script>
+</body>
+</html>

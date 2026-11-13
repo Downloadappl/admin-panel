@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الإعدادات — AppHub</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="assets/lucide.min.js"></script>
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-layout">
+    <!-- ===== القائمة الجانبية ===== -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand-badge">
+          <div class="brand-logo">AH</div>
+          <div class="brand-info">
+            <h2>AppHub</h2>
+            <span>لوحة الإدارة الذكية</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-title">القائمة الرئيسية</span>
+        <a href="index.html" class="nav-link" data-page="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>لوحة التحكم</span>
+        </a>
+        <a href="apps.html" class="nav-link" data-page="apps">
+          <i data-lucide="smartphone"></i>
+          <span>التطبيقات</span>
+        </a>
+        <a href="categories.html" class="nav-link" data-page="categories">
+          <i data-lucide="folder-tree"></i>
+          <span>الأقسام</span>
+        </a>
+        <a href="versions.html" class="nav-link" data-page="versions">
+          <i data-lucide="tag"></i>
+          <span>الإصدارات</span>
+        </a>
+
+        <span class="nav-section-title">التحليلات والنظام</span>
+        <a href="stats.html" class="nav-link" data-page="stats">
+          <i data-lucide="bar-chart-3"></i>
+          <span>الإحصائيات</span>
+        </a>
+        <a href="settings.html" class="nav-link" data-page="settings">
+          <i data-lucide="settings"></i>
+          <span>الإعدادات</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-card">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">مدير النظام</div>
+            <div class="server-badge">
+              <span class="server-dot"></span>
+              <span id="serverLabel">متصل</span>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar-actions-grid">
+          <a href="server.html" class="btn btn-ghost btn-sm" title="إعداد الخادم">
+            <i data-lucide="server"></i>
+            <span>الخادم</span>
+          </a>
+          <button class="btn btn-danger btn-sm btn-logout" title="تسجيل الخروج">
+            <i data-lucide="log-out"></i>
+            <span>خروج</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== المحتوى الرئيسي ===== -->
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-title-wrap">
+          <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="فتح القائمة">
+            <i data-lucide="menu"></i>
+          </button>
+          <h1>إعدادات المتجر والنظام</h1>
+        </div>
+      </header>
+
+      <main class="page-container">
+        <div class="two-col-grid" style="align-items:start;">
+          <!-- إعدادات المتجر -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i data-lucide="store"></i>
+                <h2>معلومات المتجر العامة</h2>
+              </div>
+            </div>
+
+            <form id="storeSettingsForm">
+              <div class="field">
+                <label for="storeName">اسم متجر التطبيقات</label>
+                <div class="input-with-icon">
+                  <input type="text" id="storeName" name="storeName" placeholder="مثال: AppHub Store">
+                  <span class="input-icon"><i data-lucide="type"></i></span>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="welcomeMessage">الرسالة الترحيبية للمستخدمين</label>
+                <div class="input-with-icon">
+                  <input type="text" id="welcomeMessage" name="welcomeMessage" placeholder="أهلاً بك في متجر AppHub">
+                  <span class="input-icon"><i data-lucide="message-square"></i></span>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="storeDescription">وصف المتجر ونبذة عنه</label>
+                <textarea id="storeDescription" name="storeDescription" rows="4" placeholder="متجر يقدم أحدث وأفضل التطبيقات والألعاب..."></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary" id="saveStoreBtn">
+                <i data-lucide="save"></i>
+                <span>حفظ معلومات المتجر</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- إعدادات الخادم والاتصال -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i data-lucide="server"></i>
+                <h2>اتصال الخادم (Backend API)</h2>
+              </div>
+            </div>
+
+            <form id="serverSettingsForm">
+              <div class="field">
+                <label for="apiBaseInput">رابط الخادم الحالي</label>
+                <div class="input-with-icon">
+                  <input type="url" id="apiBaseInput" name="apiBase" dir="ltr" placeholder="https://...workers.dev" required>
+                  <span class="input-icon"><i data-lucide="link"></i></span>
+                </div>
+                <small>يتم توجيه جميع طلبات التطبيقات والبيانات إلى هذا العنوان.</small>
+              </div>
+
+              <div id="connStatusBox" style="display:none;margin-bottom:1rem;">
+                <div id="connBadge" class="badge" style="width:100%;padding:0.65rem 0.85rem;justify-content:flex-start;">
+                  <span id="connStatusText"></span>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <button type="submit" class="btn btn-primary" id="saveServerBtn">
+                  <i data-lucide="check"></i>
+                  <span>حفظ وتطبيق الرابط</span>
+                </button>
+
+                <button type="button" class="btn btn-secondary" id="testConnBtn">
+                  <i data-lucide="activity"></i>
+                  <span>اختبار الاتصال</span>
+                </button>
+              </div>
+
+              <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;">
+                <span class="text-muted" style="font-size:0.85rem;">صفحة الإعداد المخصصة:</span>
+                <a href="server.html" class="btn btn-ghost btn-sm">
+                  <i data-lucide="external-link"></i>
+                  <span>صفحة إعداد الخادم</span>
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- شريط التنقل السفلي للهواتف -->
+  <nav class="mobile-bottom-nav">
+    <a href="index.html" class="bottom-nav-item" data-page="dashboard">
+      <i data-lucide="layout-dashboard"></i>
+      <span>الرئيسية</span>
+    </a>
+    <a href="apps.html" class="bottom-nav-item" data-page="apps">
+      <i data-lucide="smartphone"></i>
+      <span>التطبيقات</span>
+    </a>
+    <a href="categories.html" class="bottom-nav-item" data-page="categories">
+      <i data-lucide="folder-tree"></i>
+      <span>الأقسام</span>
+    </a>
+    <a href="stats.html" class="bottom-nav-item" data-page="stats">
+      <i data-lucide="bar-chart-3"></i>
+      <span>الإحصائيات</span>
+    </a>
+    <a href="settings.html" class="bottom-nav-item active" data-page="settings">
+      <i data-lucide="settings"></i>
+      <span>الإعدادات</span>
+    </a>
+  </nav>
+
+  <div id="toastNotice" class="toast-notice"></div>
+
+  <script src="js/core.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Core.setupLayout('settings');
+
+      const isAuthed = await Core.checkAuth();
+      if (!isAuthed) return;
+
+      const storeNameInput = document.getElementById('storeName');
+      const welcomeInput = document.getElementById('welcomeMessage');
+      const descInput = document.getElementById('storeDescription');
+      const apiBaseInput = document.getElementById('apiBaseInput');
+
+      apiBaseInput.value = Core.getApiBase();
+
+      async function loadSettings() {
+        try {
+          const res = await Core.api('/api/settings');
+          const settings = res || {};
+          if (storeNameInput) storeNameInput.value = settings.storeName || '';
+          if (welcomeInput) welcomeInput.value = settings.welcomeMessage || '';
+          if (descInput) descInput.value = settings.storeDescription || '';
+        } catch (e) {
+          console.warn('Could not load settings:', e);
+        }
+      }
+
+      // Save Store Form
+      document.getElementById('storeSettingsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('saveStoreBtn');
+        btn.disabled = true;
+        btn.innerHTML = `<span>جارٍ الحفظ...</span>`;
+
+        try {
+          const payload = {
+            storeName: storeNameInput.value.trim(),
+            welcomeMessage: welcomeInput.value.trim(),
+            storeDescription: descInput.value.trim()
+          };
+          await Core.api('/api/admin/settings', {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          });
+          Core.toast('تم حفظ إعدادات المتجر بنجاح', 'success');
+        } catch (err) {
+          Core.toast('فشل حفظ الإعدادات: ' + err.message, 'error');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = `<i data-lucide="save"></i><span>حفظ معلومات المتجر</span>`;
+          Core.initIcons();
+        }
+      });
+
+      // Save Server Form
+      document.getElementById('serverSettingsForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const val = apiBaseInput.value.trim().replace(/\/$/, '');
+        if (!val) {
+          Core.toast('يرجى كتابة رابط الخادم', 'error');
+          return;
+        }
+        Core.setApiBase(val);
+        Core.toast('تم حفظ رابط الخادم بنجاح', 'success');
+      });
+
+      // Test Connection Button
+      const testBtn = document.getElementById('testConnBtn');
+      const connBox = document.getElementById('connStatusBox');
+      const connBadge = document.getElementById('connBadge');
+      const connText = document.getElementById('connStatusText');
+
+      testBtn.addEventListener('click', async () => {
+        const val = apiBaseInput.value.trim().replace(/\/$/, '');
+        if (!val) {
+          Core.toast('يرجى إدخال الرابط أولاً', 'error');
+          return;
+        }
+
+        testBtn.disabled = true;
+        testBtn.innerHTML = `<span>جارٍ الفحص...</span>`;
+        connBox.style.display = 'block';
+        connBadge.className = 'badge badge-neutral';
+        connText.textContent = 'جارٍ فحص استجابة الخادم...';
+
+        try {
+          const res = await fetch(val + '/api/health');
+          if (res.ok) {
+            connBadge.className = 'badge badge-success';
+            connText.textContent = 'الاتصال ناجح! الخادم يستجيب بشكل سليم.';
+          } else {
+            connBadge.className = 'badge badge-warning';
+            connText.textContent = 'الخادم استجاب بالرمز: HTTP ' + res.status;
+          }
+        } catch (err) {
+          connBadge.className = 'badge badge-danger';
+          connText.textContent = 'فشل الاتصال: ' + err.message;
+        } finally {
+          testBtn.disabled = false;
+          testBtn.innerHTML = `<i data-lucide="activity"></i><span>اختبار الاتصال</span>`;
+          Core.initIcons();
+        }
+      });
+
+      loadSettings();
+    });
+  </script>
+</body>
+</html>

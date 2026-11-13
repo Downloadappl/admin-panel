@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل الدخول — AppHub</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="assets/lucide.min.js"></script>
+</head>
+<body>
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-logo">AH</div>
+        <h1>تسجيل الدخول</h1>
+        <p>لوحة التحكم الإدارية لمتجر AppHub</p>
+        <div class="server-status-pill" id="currentServerBadge">
+          <span class="server-dot"></span>
+          <span id="serverHostDisplay">جارٍ التحقق من الخادم...</span>
+        </div>
+      </div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="username">اسم المستخدم</label>
+          <div class="input-with-icon">
+            <input type="text" id="username" name="username" placeholder="أدخل اسم المستخدم" autocomplete="username" required autofocus>
+            <span class="input-icon"><i data-lucide="user"></i></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">كلمة المرور</label>
+          <div class="input-with-icon">
+            <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+            <span class="input-icon"><i data-lucide="lock"></i></span>
+          </div>
+        </div>
+
+        <div id="loginError" class="badge badge-danger" style="display:none;width:100%;padding:0.6rem;margin-bottom:1rem;justify-content:center;">
+          <i data-lucide="alert-circle"></i>
+          <span id="loginErrorText"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="loginBtn" style="padding:0.85rem;">
+          <i data-lucide="log-in"></i>
+          <span>تسجيل الدخول</span>
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <a href="server.html" class="btn btn-ghost btn-sm">
+          <i data-lucide="server"></i>
+          <span>إعداد رابط الخادم (API)</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastNotice" class="toast-notice"></div>
+
+  <script src="js/core.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Core.initIcons();
+
+      const apiBase = Core.getApiBase();
+      const hostDisplay = document.getElementById('serverHostDisplay');
+      try {
+        hostDisplay.textContent = new URL(apiBase).host;
+      } catch (_) {
+        hostDisplay.textContent = apiBase || 'غير محدد';
+      }
+
+      // If already logged in, check if token is valid and redirect
+      const token = Core.getToken();
+      if (token) {
+        try {
+          await Core.api('/api/admin/me');
+          window.location.href = 'index.html';
+          return;
+        } catch (_) {
+          Core.setToken('');
+        }
+      }
+
+      const form = document.getElementById('loginForm');
+      const errBox = document.getElementById('loginError');
+      const errText = document.getElementById('loginErrorText');
+      const btn = document.getElementById('loginBtn');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errBox.style.display = 'none';
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        btn.disabled = true;
+        btn.innerHTML = `<span>جارٍ تسجيل الدخول...</span>`;
+
+        try {
+          const res = await Core.api('/api/admin/login', {
+            method: 'POST',
+            body: JSON.stringify({ username, password })
+          });
+
+          if (res && res.token) {
+            Core.setToken(res.token);
+            Core.toast('تم تسجيل الدخول بنجاح', 'success');
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 400);
+          } else {
+            throw new Error('بيانات الدخول غير صحيحة');
+          }
+        } catch (err) {
+          errBox.style.display = 'inline-flex';
+          errText.textContent = err.message || 'فشل تسجيل الدخول، يرجى المحاولة ثانية';
+          Core.initIcons();
+          btn.disabled = false;
+          btn.innerHTML = `<i data-lucide="log-in"></i><span>تسجيل الدخول</span>`;
+          Core.initIcons();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

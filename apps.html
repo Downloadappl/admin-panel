@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة التطبيقات — AppHub</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="assets/lucide.min.js"></script>
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-layout">
+    <!-- ===== القائمة الجانبية ===== -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand-badge">
+          <div class="brand-logo">AH</div>
+          <div class="brand-info">
+            <h2>AppHub</h2>
+            <span>لوحة الإدارة الذكية</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-title">القائمة الرئيسية</span>
+        <a href="index.html" class="nav-link" data-page="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>لوحة التحكم</span>
+        </a>
+        <a href="apps.html" class="nav-link" data-page="apps">
+          <i data-lucide="smartphone"></i>
+          <span>التطبيقات</span>
+        </a>
+        <a href="categories.html" class="nav-link" data-page="categories">
+          <i data-lucide="folder-tree"></i>
+          <span>الأقسام</span>
+        </a>
+        <a href="versions.html" class="nav-link" data-page="versions">
+          <i data-lucide="tag"></i>
+          <span>الإصدارات</span>
+        </a>
+
+        <span class="nav-section-title">التحليلات والنظام</span>
+        <a href="stats.html" class="nav-link" data-page="stats">
+          <i data-lucide="bar-chart-3"></i>
+          <span>الإحصائيات</span>
+        </a>
+        <a href="settings.html" class="nav-link" data-page="settings">
+          <i data-lucide="settings"></i>
+          <span>الإعدادات</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-card">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">مدير النظام</div>
+            <div class="server-badge">
+              <span class="server-dot"></span>
+              <span id="serverLabel">متصل</span>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar-actions-grid">
+          <a href="server.html" class="btn btn-ghost btn-sm" title="إعداد الخادم">
+            <i data-lucide="server"></i>
+            <span>الخادم</span>
+          </a>
+          <button class="btn btn-danger btn-sm btn-logout" title="تسجيل الخروج">
+            <i data-lucide="log-out"></i>
+            <span>خروج</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== المحتوى الرئيسي ===== -->
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-title-wrap">
+          <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="فتح القائمة">
+            <i data-lucide="menu"></i>
+          </button>
+          <h1>إدارة التطبيقات والألعاب</h1>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-primary btn-sm" id="openAddAppModalBtn">
+            <i data-lucide="plus"></i>
+            <span>إضافة تطبيق</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="page-container">
+        <!-- شريط البحث والفلترة -->
+        <div class="toolbar-bar">
+          <div class="search-box">
+            <div class="input-with-icon">
+              <input type="text" id="searchInput" placeholder="ابحث باسم التطبيق أو المعرف...">
+              <span class="input-icon"><i data-lucide="search"></i></span>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+            <select id="filterCategory" style="width:auto;min-width:160px;">
+              <option value="">جميع الأقسام</option>
+            </select>
+
+            <select id="filterType" style="width:auto;min-width:140px;">
+              <option value="all">الكل</option>
+              <option value="app">تطبيقات فقط</option>
+              <option value="game">ألعاب فقط</option>
+              <option value="featured">المميزة فقط</option>
+            </select>
+
+            <button class="btn btn-ghost btn-icon" id="refreshBtn" title="تحديث القائمة">
+              <i data-lucide="refresh-cw"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- جدول التطبيقات -->
+        <div class="card" style="padding:0;">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>التطبيق</th>
+                  <th>القسم</th>
+                  <th>الإصدار</th>
+                  <th>الحجم</th>
+                  <th>التحميلات</th>
+                  <th>الحالة</th>
+                  <th style="text-align:left;">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="appsTableBody">
+                <tr>
+                  <td colspan="7" class="empty-state">
+                    <div class="empty-icon"><i data-lucide="loader-2"></i></div>
+                    <p>جارٍ تحميل قائمة التطبيقات...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- شريط التنقل السفلي للهواتف -->
+  <nav class="mobile-bottom-nav">
+    <a href="index.html" class="bottom-nav-item" data-page="dashboard">
+      <i data-lucide="layout-dashboard"></i>
+      <span>الرئيسية</span>
+    </a>
+    <a href="apps.html" class="bottom-nav-item active" data-page="apps">
+      <i data-lucide="smartphone"></i>
+      <span>التطبيقات</span>
+    </a>
+    <a href="categories.html" class="bottom-nav-item" data-page="categories">
+      <i data-lucide="folder-tree"></i>
+      <span>الأقسام</span>
+    </a>
+    <a href="stats.html" class="bottom-nav-item" data-page="stats">
+      <i data-lucide="bar-chart-3"></i>
+      <span>الإحصائيات</span>
+    </a>
+    <a href="settings.html" class="bottom-nav-item" data-page="settings">
+      <i data-lucide="settings"></i>
+      <span>الإعدادات</span>
+    </a>
+  </nav>
+
+  <div id="toastNotice" class="toast-notice"></div>
+
+  <script src="js/core.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Core.setupLayout('apps');
+
+      const isAuthed = await Core.checkAuth();
+      if (!isAuthed) return;
+
+      let allApps = [];
+      let allCategories = [];
+
+      function getAppFormFields() {
+        const catOpts = allCategories.map(c => ({ value: c.id, label: c.name }));
+        if (!catOpts.length) catOpts.push({ value: 'misc', label: 'تطبيقات عامة' });
+
+        return [
+          { name: 'name', label: 'اسم التطبيق', required: true, placeholder: 'مثال: StreamBox' },
+          { name: 'id', label: 'المعرف (ID) — اتركه فارغاً للإنشاء التلقائي', placeholder: 'streambox-app' },
+          { name: 'shortDescription', label: 'وصف مختصر', full: true, placeholder: 'أفضل تطبيق لمشاهدة...' },
+          { name: 'fullDescription', label: 'الوصف الكامل', type: 'textarea', rows: 4, full: true, placeholder: 'تفاصيل وميزات التطبيق...' },
+          { name: 'categoryId', label: 'القسم', type: 'select', options: catOpts },
+          { name: 'categoryName', label: 'اسم القسم (اختياري)' },
+          { name: 'versionName', label: 'رقم الإصدار (Version Name)', placeholder: '1.0.0' },
+          { name: 'versionCode', label: 'رمز الإصدار (Version Code)', type: 'number', placeholder: '1' },
+          { name: 'sizeBytes', label: 'حجم ملف APK (بالبايت)', type: 'number', placeholder: 'مثال: 25000000' },
+          { name: 'developer', label: 'المطور أو الشركة' },
+          { name: 'packageName', label: 'اسم الحزمة (Package Name)', placeholder: 'com.example.app' },
+          { name: 'apkUrl', label: 'رابط تحميل APK المباشر', full: true, placeholder: 'https://...' },
+          { name: 'iconUrl', label: 'رابط صورة الأيقونة', full: true, placeholder: 'https://...' },
+          { name: 'sha256', label: 'بصمة SHA-256 (اختياري)', full: true },
+          { name: 'minSdk', label: 'الحد الأدنى لنظام أندرويد (API)', type: 'number', default: 21 },
+          { name: 'keywords', label: 'الكلمات الدلالية (مفصولة بفواصل)', type: 'json-array', full: true },
+          { name: 'targetType', label: 'الأجهزة المتوافقة', type: 'select', options: [
+            { value: 'BOTH', label: 'الهاتف والتلفزيون (TV)' },
+            { value: 'PHONE', label: 'الهاتف فقط' },
+            { value: 'TV', label: 'التلفزيون فقط' }
+          ]},
+          { name: 'isFeatured', label: 'تطبيق مميز (يظهر في الواجهة الأولى)', type: 'checkbox' },
+          { name: 'isGame', label: 'هذا التطبيق عبارة عن لعبة', type: 'checkbox' },
+          { name: 'published', label: 'منشور في المتجر (مرئي للمستخدمين)', type: 'checkbox', default: true },
+        ];
+      }
+
+      async function loadData() {
+        try {
+          const [appsRes, catsRes] = await Promise.all([
+            Core.api('/api/admin/apps'),
+            Core.api('/api/admin/categories')
+          ]);
+
+          allApps = (appsRes && appsRes.items) || appsRes || [];
+          allCategories = (catsRes && catsRes.items) || catsRes || [];
+
+          populateCategoryFilter();
+          renderAppsTable();
+        } catch (e) {
+          Core.toast('فشل تحميل التطبيقات: ' + e.message, 'error');
+        }
+      }
+
+      function populateCategoryFilter() {
+        const sel = document.getElementById('filterCategory');
+        sel.innerHTML = '<option value="">جميع الأقسام</option>' + allCategories.map(c => `
+          <option value="${Core.esc(c.id)}">${Core.esc(c.name)}</option>
+        `).join('');
+      }
+
+      function renderAppsTable() {
+        const search = document.getElementById('searchInput').value.trim().toLowerCase();
+        const selectedCat = document.getElementById('filterCategory').value;
+        const selectedType = document.getElementById('filterType').value;
+
+        let filtered = allApps.filter(app => {
+          if (search) {
+            const matchesName = (app.name || '').toLowerCase().includes(search);
+            const matchesId = (app.id || '').toLowerCase().includes(search);
+            const matchesPkg = (app.packageName || '').toLowerCase().includes(search);
+            if (!matchesName && !matchesId && !matchesPkg) return false;
+          }
+          if (selectedCat && app.categoryId !== selectedCat) return false;
+          if (selectedType === 'app' && app.isGame) return false;
+          if (selectedType === 'game' && !app.isGame) return false;
+          if (selectedType === 'featured' && !app.isFeatured) return false;
+          return true;
+        });
+
+        const tbody = document.getElementById('appsTableBody');
+        if (!filtered.length) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" class="empty-state">
+                <div class="empty-icon"><i data-lucide="smartphone"></i></div>
+                <p>لم يتم العثور على أي تطبيقات مطابقة</p>
+                <button class="btn btn-primary btn-sm" id="emptyAddBtn">
+                  <i data-lucide="plus"></i>
+                  <span>إضافة تطبيق جديد</span>
+                </button>
+              </td>
+            </tr>
+          `;
+          document.getElementById('emptyAddBtn')?.addEventListener('click', () => openAppEditor());
+          Core.initIcons();
+          return;
+        }
+
+        tbody.innerHTML = filtered.map(a => `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:0.75rem;">
+                ${a.iconUrl ? `<img src="${Core.esc(a.iconUrl)}" alt="" style="width:36px;height:36px;border-radius:8px;object-fit:cover;background:#1a2234;" onerror="this.style.display='none'">` : ''}
+                <div>
+                  <div class="app-row-title">${Core.esc(a.name)}</div>
+                  <div class="app-row-meta">${Core.esc(a.packageName || a.id)}</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge badge-neutral">${Core.esc(a.categoryName || a.categoryId || '—')}</span></td>
+            <td><span class="badge badge-primary">${Core.esc(a.versionName || '1.0')}</span></td>
+            <td><span class="text-muted">${Core.fmtSize(a.sizeBytes)}</span></td>
+            <td><strong>${(a.downloadCount ?? 0).toLocaleString()}</strong></td>
+            <td>
+              <div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+                ${a.isFeatured ? '<span class="badge badge-primary"><i data-lucide="star"></i> مميز</span>' : ''}
+                ${a.isGame ? '<span class="badge badge-warning"><i data-lucide="gamepad-2"></i> لعبة</span>' : ''}
+                ${a.published !== false ? '<span class="badge badge-success"><i data-lucide="check"></i> منشور</span>' : '<span class="badge badge-danger"><i data-lucide="eye-off"></i> مخفي</span>'}
+              </div>
+            </td>
+            <td style="text-align:left;">
+              <div class="table-actions">
+                <button class="btn btn-ghost btn-icon btn-sm edit-app-btn" data-id="${Core.esc(a.id)}" title="تعديل التطبيق">
+                  <i data-lucide="edit-3"></i>
+                </button>
+                <button class="btn btn-danger btn-icon btn-sm delete-app-btn" data-id="${Core.esc(a.id)}" title="حذف التطبيق">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+        // Bind Edit & Delete
+        tbody.querySelectorAll('.edit-app-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-id');
+            const targetApp = allApps.find(x => x.id === id);
+            if (targetApp) openAppEditor(targetApp);
+          });
+        });
+
+        tbody.querySelectorAll('.delete-app-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            const targetApp = allApps.find(x => x.id === id);
+            const name = targetApp ? targetApp.name : id;
+            if (confirm(`هل أنت متأكد من رغبتك في حذف التطبيق "${name}"؟ هذا الإجراء لا يمكن التراجع عنه.`)) {
+              try {
+                await Core.api('/api/admin/apps/' + encodeURIComponent(id), { method: 'DELETE' });
+                Core.toast('تم حذف التطبيق بنجاح', 'success');
+                await loadData();
+              } catch (err) {
+                Core.toast('فشل حذف التطبيق: ' + err.message, 'error');
+              }
+            }
+          });
+        });
+
+        Core.initIcons();
+      }
+
+      function openAppEditor(existingApp = null) {
+        const isEdit = !!existingApp;
+        const initialData = Object.assign({}, existingApp || {}, {
+          keywords: (existingApp && existingApp.keywords || []).join(', ')
+        });
+
+        Core.openModal({
+          title: isEdit ? `تعديل: ${existingApp.name || ''}` : 'إضافة تطبيق جديد',
+          fields: getAppFormFields(),
+          initialData,
+          onSubmit: async (out) => {
+            if (out.categoryId) {
+              const c = allCategories.find(x => x.id === out.categoryId);
+              if (c && !out.categoryName) out.categoryName = c.name;
+            }
+
+            if (isEdit) {
+              await Core.api('/api/admin/apps/' + encodeURIComponent(existingApp.id), {
+                method: 'PUT',
+                body: JSON.stringify(out)
+              });
+              Core.toast('تم تحديث التطبيق بنجاح', 'success');
+            } else {
+              if (!out.id) delete out.id;
+              await Core.api('/api/admin/apps', {
+                method: 'POST',
+                body: JSON.stringify(out)
+              });
+              Core.toast('تمت إضافة التطبيق بنجاح', 'success');
+            }
+            await loadData();
+          }
+        });
+      }
+
+      document.getElementById('openAddAppModalBtn').addEventListener('click', () => openAppEditor());
+      document.getElementById('searchInput').addEventListener('input', renderAppsTable);
+      document.getElementById('filterCategory').addEventListener('change', renderAppsTable);
+      document.getElementById('filterType').addEventListener('change', renderAppsTable);
+      document.getElementById('refreshBtn').addEventListener('click', () => {
+        Core.toast('جارٍ التحديث...', 'info');
+        loadData();
+      });
+
+      loadData();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الإحصائيات والتحليلات — AppHub</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="assets/lucide.min.js"></script>
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-layout">
+    <!-- ===== القائمة الجانبية ===== -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand-badge">
+          <div class="brand-logo">AH</div>
+          <div class="brand-info">
+            <h2>AppHub</h2>
+            <span>لوحة الإدارة الذكية</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-title">القائمة الرئيسية</span>
+        <a href="index.html" class="nav-link" data-page="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>لوحة التحكم</span>
+        </a>
+        <a href="apps.html" class="nav-link" data-page="apps">
+          <i data-lucide="smartphone"></i>
+          <span>التطبيقات</span>
+        </a>
+        <a href="categories.html" class="nav-link" data-page="categories">
+          <i data-lucide="folder-tree"></i>
+          <span>الأقسام</span>
+        </a>
+        <a href="versions.html" class="nav-link" data-page="versions">
+          <i data-lucide="tag"></i>
+          <span>الإصدارات</span>
+        </a>
+
+        <span class="nav-section-title">التحليلات والنظام</span>
+        <a href="stats.html" class="nav-link" data-page="stats">
+          <i data-lucide="bar-chart-3"></i>
+          <span>الإحصائيات</span>
+        </a>
+        <a href="settings.html" class="nav-link" data-page="settings">
+          <i data-lucide="settings"></i>
+          <span>الإعدادات</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-card">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">مدير النظام</div>
+            <div class="server-badge">
+              <span class="server-dot"></span>
+              <span id="serverLabel">متصل</span>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar-actions-grid">
+          <a href="server.html" class="btn btn-ghost btn-sm" title="إعداد الخادم">
+            <i data-lucide="server"></i>
+            <span>الخادم</span>
+          </a>
+          <button class="btn btn-danger btn-sm btn-logout" title="تسجيل الخروج">
+            <i data-lucide="log-out"></i>
+            <span>خروج</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== المحتوى الرئيسي ===== -->
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-title-wrap">
+          <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="فتح القائمة">
+            <i data-lucide="menu"></i>
+          </button>
+          <h1>إحصائيات وتحليلات المتجر</h1>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost btn-sm" id="refreshStatsBtn">
+            <i data-lucide="refresh-cw"></i>
+            <span>تحديث الإحصائيات</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="page-container">
+        <!-- شبكة الإحصائيات العامة -->
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-info">
+              <span class="stat-number" id="statsTotalApps">—</span>
+              <span class="stat-label">إجمالي التطبيقات المتاحة</span>
+            </div>
+            <div class="stat-icon-wrap cyan">
+              <i data-lucide="smartphone"></i>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-info">
+              <span class="stat-number" id="statsTotalGames">—</span>
+              <span class="stat-label">الألعاب الترفيهية</span>
+            </div>
+            <div class="stat-icon-wrap amber">
+              <i data-lucide="gamepad-2"></i>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-info">
+              <span class="stat-number" id="statsTotalCats">—</span>
+              <span class="stat-label">الأقسام النشطة</span>
+            </div>
+            <div class="stat-icon-wrap purple">
+              <i data-lucide="folder-tree"></i>
+            </div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-info">
+              <span class="stat-number" id="statsTotalDownloads">—</span>
+              <span class="stat-label">إجمالي عدد التحميلات</span>
+            </div>
+            <div class="stat-icon-wrap emerald">
+              <i data-lucide="trending-up"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- الجداول التفصيلية -->
+        <div class="two-col-grid">
+          <!-- التطبيقات الأكثر شعبية -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i data-lucide="flame"></i>
+                <h2>أفضل التطبيقات تحميلاً</h2>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width:40px;">#</th>
+                    <th>اسم التطبيق</th>
+                    <th>القسم</th>
+                    <th>مرات التحميل</th>
+                  </tr>
+                </thead>
+                <tbody id="topAppsBody">
+                  <tr>
+                    <td colspan="4" class="empty-state">
+                      <div class="empty-icon"><i data-lucide="loader-2"></i></div>
+                      <p>جارٍ جمع البيانات...</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- أحدث التحديثات والإضافات -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <i data-lucide="history"></i>
+                <h2>أحدث الإضافات والتحديثات</h2>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>اسم التطبيق</th>
+                    <th>الإصدار</th>
+                    <th>تاريخ التحديث</th>
+                  </tr>
+                </thead>
+                <tbody id="latestAppsBody">
+                  <tr>
+                    <td colspan="3" class="empty-state">
+                      <div class="empty-icon"><i data-lucide="loader-2"></i></div>
+                      <p>جارٍ جمع البيانات...</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- شريط التنقل السفلي للهواتف -->
+  <nav class="mobile-bottom-nav">
+    <a href="index.html" class="bottom-nav-item" data-page="dashboard">
+      <i data-lucide="layout-dashboard"></i>
+      <span>الرئيسية</span>
+    </a>
+    <a href="apps.html" class="bottom-nav-item" data-page="apps">
+      <i data-lucide="smartphone"></i>
+      <span>التطبيقات</span>
+    </a>
+    <a href="categories.html" class="bottom-nav-item" data-page="categories">
+      <i data-lucide="folder-tree"></i>
+      <span>الأقسام</span>
+    </a>
+    <a href="stats.html" class="bottom-nav-item active" data-page="stats">
+      <i data-lucide="bar-chart-3"></i>
+      <span>الإحصائيات</span>
+    </a>
+    <a href="settings.html" class="bottom-nav-item" data-page="settings">
+      <i data-lucide="settings"></i>
+      <span>الإعدادات</span>
+    </a>
+  </nav>
+
+  <div id="toastNotice" class="toast-notice"></div>
+
+  <script src="js/core.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Core.setupLayout('stats');
+
+      const isAuthed = await Core.checkAuth();
+      if (!isAuthed) return;
+
+      async function loadStats() {
+        try {
+          const [statsRes, appsRes] = await Promise.allSettled([
+            Core.api('/api/admin/stats'),
+            Core.api('/api/admin/apps')
+          ]);
+
+          const stats = (statsRes.status === 'fulfilled' && statsRes.value) || {};
+          const apps = (appsRes.status === 'fulfilled' && (appsRes.value.items || appsRes.value)) || [];
+
+          document.getElementById('statsTotalApps').textContent = stats.totalApps ?? apps.length;
+          document.getElementById('statsTotalGames').textContent = stats.totalGames ?? apps.filter(a=>a.isGame).length;
+          document.getElementById('statsTotalCats').textContent = stats.totalCategories ?? '—';
+          document.getElementById('statsTotalDownloads').textContent = (stats.totalDownloads ?? 0).toLocaleString();
+
+          // Top apps
+          const topList = (stats.topApps && stats.topApps.length ? stats.topApps : [...apps].sort((a,b) => (b.downloadCount||0) - (a.downloadCount||0))).slice(0, 10);
+          const topBody = document.getElementById('topAppsBody');
+          if (topList.length) {
+            topBody.innerHTML = topList.map((item, idx) => `
+              <tr>
+                <td>
+                  <span class="badge ${idx === 0 ? 'badge-warning' : (idx === 1 ? 'badge-primary' : 'badge-neutral')}" style="min-width:24px;justify-content:center;">
+                    ${idx + 1}
+                  </span>
+                </td>
+                <td>
+                  <div class="app-row-title">${Core.esc(item.name)}</div>
+                  <div class="app-row-meta">${Core.esc(item.developer || item.id || '')}</div>
+                </td>
+                <td><span class="badge badge-neutral">${Core.esc(item.categoryName || 'عام')}</span></td>
+                <td><span class="badge badge-success"><i data-lucide="download"></i> ${(item.downloadCount || 0).toLocaleString()}</span></td>
+              </tr>
+            `).join('');
+          } else {
+            topBody.innerHTML = `<tr><td colspan="4" class="empty-state"><p>لا توجد بيانات متاحة</p></td></tr>`;
+          }
+
+          // Latest apps
+          const latestList = (stats.latestApps && stats.latestApps.length ? stats.latestApps : [...apps].sort((a,b) => new Date(b.updatedAt||0) - new Date(a.updatedAt||0))).slice(0, 10);
+          const latestBody = document.getElementById('latestAppsBody');
+          if (latestList.length) {
+            latestBody.innerHTML = latestList.map(item => `
+              <tr>
+                <td>
+                  <div class="app-row-title">${Core.esc(item.name)}</div>
+                  <div class="app-row-meta">${Core.esc(item.packageName || item.id || '')}</div>
+                </td>
+                <td><span class="badge badge-primary">${Core.esc(item.versionName || '1.0')}</span></td>
+                <td><span class="text-muted">${Core.fmtDate(item.updatedAt || item.createdAt)}</span></td>
+              </tr>
+            `).join('');
+          } else {
+            latestBody.innerHTML = `<tr><td colspan="3" class="empty-state"><p>لا توجد بيانات متاحة</p></td></tr>`;
+          }
+
+          Core.initIcons();
+        } catch (e) {
+          Core.toast('فشل تحديث الإحصائيات: ' + e.message, 'error');
+        }
+      }
+
+      document.getElementById('refreshStatsBtn').addEventListener('click', () => {
+        Core.toast('جارٍ تحديث الإحصائيات...', 'info');
+        loadStats();
+      });
+
+      loadStats();
+    });
+  </script>
+</body>
+</html>

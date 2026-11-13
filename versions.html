@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سجل الإصدارات — AppHub</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="assets/lucide.min.js"></script>
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-layout">
+    <!-- ===== القائمة الجانبية ===== -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand-badge">
+          <div class="brand-logo">AH</div>
+          <div class="brand-info">
+            <h2>AppHub</h2>
+            <span>لوحة الإدارة الذكية</span>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="nav-section-title">القائمة الرئيسية</span>
+        <a href="index.html" class="nav-link" data-page="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>لوحة التحكم</span>
+        </a>
+        <a href="apps.html" class="nav-link" data-page="apps">
+          <i data-lucide="smartphone"></i>
+          <span>التطبيقات</span>
+        </a>
+        <a href="categories.html" class="nav-link" data-page="categories">
+          <i data-lucide="folder-tree"></i>
+          <span>الأقسام</span>
+        </a>
+        <a href="versions.html" class="nav-link" data-page="versions">
+          <i data-lucide="tag"></i>
+          <span>الإصدارات</span>
+        </a>
+
+        <span class="nav-section-title">التحليلات والنظام</span>
+        <a href="stats.html" class="nav-link" data-page="stats">
+          <i data-lucide="bar-chart-3"></i>
+          <span>الإحصائيات</span>
+        </a>
+        <a href="settings.html" class="nav-link" data-page="settings">
+          <i data-lucide="settings"></i>
+          <span>الإعدادات</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-card">
+          <div class="user-avatar" id="userAvatar">A</div>
+          <div class="user-details">
+            <div class="user-name" id="userName">مدير النظام</div>
+            <div class="server-badge">
+              <span class="server-dot"></span>
+              <span id="serverLabel">متصل</span>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar-actions-grid">
+          <a href="server.html" class="btn btn-ghost btn-sm" title="إعداد الخادم">
+            <i data-lucide="server"></i>
+            <span>الخادم</span>
+          </a>
+          <button class="btn btn-danger btn-sm btn-logout" title="تسجيل الخروج">
+            <i data-lucide="log-out"></i>
+            <span>خروج</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ===== المحتوى الرئيسي ===== -->
+    <div class="main-wrapper">
+      <header class="top-header">
+        <div class="header-title-wrap">
+          <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="فتح القائمة">
+            <i data-lucide="menu"></i>
+          </button>
+          <h1>سجل إصدارات التطبيقات</h1>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost btn-sm" id="refreshBtn">
+            <i data-lucide="refresh-cw"></i>
+            <span>تحديث</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="page-container">
+        <div class="toolbar-bar">
+          <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+            <label for="filterApp" style="margin:0;font-weight:600;">تصفية حسب التطبيق:</label>
+            <select id="filterApp" style="width:auto;min-width:220px;">
+              <option value="">— جميع التطبيقات —</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>اسم التطبيق</th>
+                  <th>رقم الإصدار</th>
+                  <th>رمز الإصدار (Code)</th>
+                  <th>الحجم</th>
+                  <th>رابط APK</th>
+                  <th>تاريخ الإضافة</th>
+                </tr>
+              </thead>
+              <tbody id="versionsTableBody">
+                <tr>
+                  <td colspan="6" class="empty-state">
+                    <div class="empty-icon"><i data-lucide="loader-2"></i></div>
+                    <p>جارٍ تحميل الإصدارات...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- شريط التنقل السفلي للهواتف -->
+  <nav class="mobile-bottom-nav">
+    <a href="index.html" class="bottom-nav-item" data-page="dashboard">
+      <i data-lucide="layout-dashboard"></i>
+      <span>الرئيسية</span>
+    </a>
+    <a href="apps.html" class="bottom-nav-item" data-page="apps">
+      <i data-lucide="smartphone"></i>
+      <span>التطبيقات</span>
+    </a>
+    <a href="categories.html" class="bottom-nav-item" data-page="categories">
+      <i data-lucide="folder-tree"></i>
+      <span>الأقسام</span>
+    </a>
+    <a href="stats.html" class="bottom-nav-item" data-page="stats">
+      <i data-lucide="bar-chart-3"></i>
+      <span>الإحصائيات</span>
+    </a>
+    <a href="settings.html" class="bottom-nav-item" data-page="settings">
+      <i data-lucide="settings"></i>
+      <span>الإعدادات</span>
+    </a>
+  </nav>
+
+  <div id="toastNotice" class="toast-notice"></div>
+
+  <script src="js/core.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      Core.setupLayout('versions');
+
+      const isAuthed = await Core.checkAuth();
+      if (!isAuthed) return;
+
+      let allApps = [];
+      let allVersions = [];
+
+      async function loadInitial() {
+        try {
+          const appsRes = await Core.api('/api/admin/apps');
+          allApps = (appsRes && appsRes.items) || appsRes || [];
+          populateAppFilter();
+          await loadVersions();
+        } catch (e) {
+          Core.toast('فشل تحميل البيانات: ' + e.message, 'error');
+        }
+      }
+
+      function populateAppFilter() {
+        const sel = document.getElementById('filterApp');
+        sel.innerHTML = '<option value="">— جميع التطبيقات —</option>' + allApps.map(a => `
+          <option value="${Core.esc(a.id)}">${Core.esc(a.name)}</option>
+        `).join('');
+      }
+
+      async function loadVersions(appId = '') {
+        try {
+          const q = appId ? ('?appId=' + encodeURIComponent(appId)) : '';
+          const res = await Core.api('/api/admin/versions' + q);
+          allVersions = (res && res.items) || res || [];
+          renderVersionsTable();
+        } catch (e) {
+          Core.toast('فشل تحميل الإصدارات: ' + e.message, 'error');
+        }
+      }
+
+      function renderVersionsTable() {
+        const tbody = document.getElementById('versionsTableBody');
+
+        if (!allVersions.length) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="empty-state">
+                <div class="empty-icon"><i data-lucide="tag"></i></div>
+                <p>لا توجد إصدارات مسجلة</p>
+              </td>
+            </tr>
+          `;
+          Core.initIcons();
+          return;
+        }
+
+        tbody.innerHTML = allVersions.map(v => {
+          const app = allApps.find(a => a.id === v.appId);
+          const appName = (app && app.name) || v.appId || '—';
+
+          return `
+            <tr>
+              <td>
+                <div class="app-row-title">${Core.esc(appName)}</div>
+                <div class="app-row-meta">${Core.esc(v.appId || '')}</div>
+              </td>
+              <td><span class="badge badge-primary">${Core.esc(v.versionName || '—')}</span></td>
+              <td><span class="badge badge-neutral">${Core.esc(v.versionCode ?? '—')}</span></td>
+              <td><span class="text-muted">${Core.fmtSize(v.sizeBytes)}</span></td>
+              <td>
+                ${v.apkUrl ? `
+                  <a href="${Core.esc(v.apkUrl)}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="display:inline-flex;padding:0.35rem 0.65rem;" title="${Core.esc(v.apkUrl)}">
+                    <i data-lucide="download"></i>
+                    <span>تحميل APK</span>
+                  </a>
+                ` : '<span class="text-dim">لا يوجد رابط</span>'}
+              </td>
+              <td><span class="text-muted">${Core.fmtDate(v.createdAt)}</span></td>
+            </tr>
+          `;
+        }).join('');
+
+        Core.initIcons();
+      }
+
+      document.getElementById('filterApp').addEventListener('change', (e) => {
+        loadVersions(e.target.value);
+      });
+
+      document.getElementById('refreshBtn').addEventListener('click', () => {
+        Core.toast('جارٍ التحديث...', 'info');
+        loadVersions(document.getElementById('filterApp').value);
+      });
+
+      loadInitial();
+    });
+  </script>
+</body>
+</html>
