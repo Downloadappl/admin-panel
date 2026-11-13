@@ -1,8 +1,10 @@
 (function () {
   'use strict';
 
-  // API base URL: configurable via settings screen or localStorage
-  let API_BASE = localStorage.getItem('apphub_api_base') || '';
+  // API base URL: configurable via the settings screen, or the value below.
+  // The default points at the deployed AppHub Worker so the panel works as-is.
+  const DEFAULT_API_BASE = 'https://apphub.khhjmwmmy.workers.dev';
+  let API_BASE = (localStorage.getItem('apphub_api_base') || DEFAULT_API_BASE).replace(/\/$/, '');
 
   const state = {
     token: localStorage.getItem('apphub_admin_token') || '',
