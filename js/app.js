@@ -1,7 +1,9 @@
 (function () {
   'use strict';
 
-  const API_BASE = (window.APPHUB_API_BASE || localStorage.getItem('apphub_api_base') || '').replace(/\/$/, '') || '';
+  // API base URL: configurable via settings screen or localStorage
+  let API_BASE = localStorage.getItem('apphub_api_base') || '';
+
   const state = {
     token: localStorage.getItem('apphub_admin_token') || '',
     admin: null,
@@ -27,54 +29,74 @@
   };
   const toast = (msg, type = 'info') => {
     let el = $('#toast');
-    if (!el) { el = document.createElement('div'); el.id = 'toast'; el.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 16px;border-radius:8px;background:#121821;color:#e6edf3;border:1px solid #2a3445;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.4);transition:opacity .2s'; document.body.appendChild(el); }
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'toast';
+      el.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 16px;border-radius:8px;background:#121821;color:#e6edf3;border:1px solid #2a3445;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.4);transition:opacity .2s;max-width:90vw;text-align:center';
+      document.body.appendChild(el);
+    }
     el.textContent = msg;
     el.style.borderColor = type === 'error' ? '#f87171' : type === 'success' ? '#4ade80' : '#2a3445';
     el.style.opacity = '1';
     clearTimeout(el._t);
-    el._t = setTimeout(() => { el.style.opacity = '0'; }, 2600);
+    el._t = setTimeout(() => { el.style.opacity = '0'; }, 3000);
   };
 
   async function api(path, opts = {}) {
+    if (!API_BASE) {
+      throw new Error('لم يتم إعداد عنوان الخادم (API). افتح الإعدادات وأدخل عنوان الخادم أولاً.');
+    }
     const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
     if (state.token) headers['Authorization'] = 'Bearer ' + state.token;
-    const url = (API_BASE || '') + path;
-    const res = await fetch(url, Object.assign({}, opts, { headers }));
-    const text = await res.text();
-    let data = null;
-    try { data = text ? JSON.parse(text) : null; } catch (_) { data = text; }
-    if (!res.ok) {
-      const msg = (data && (data.error || data.message)) || ('HTTP ' + res.status);
-      const err = new Error(msg);
-      err.status = res.status;
-      err.data = data;
-      throw err;
+    const url = API_BASE.replace(/\/$/, '') + path;
+    try {
+      const res = await fetch(url, Object.assign({}, opts, { headers }));
+      const text = await res.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch (_) { data = text; }
+      if (!res.ok) {
+        const msg = (data && (data.error || data.message)) || ('HTTP ' + res.status);
+        const err = new Error(msg);
+        err.status = res.status;
+        err.data = data;
+        throw err;
+      }
+      return data;
+    } catch (e) {
+      if (e.message === 'Failed to fetch') {
+        throw new Error('تعذر الاتصال بالخادم. تأكد من أن الخادم يعمل وأن العنوان صحيح.');
+      }
+      throw e;
     }
-    return data;
   }
 
-  // Auth
+  // Views
   function showView(name) {
     $$('.view').forEach(v => v.setAttribute('aria-hidden', v.id === name ? 'false' : 'true'));
     $$('.topnav a').forEach(a => a.classList.toggle('active', a.dataset.tab === name.replace('View','')));
+    const isConfig = name === 'configView';
     const loggedIn = !!state.token;
-    $('#loginView').setAttribute('aria-hidden', loggedIn ? 'true' : 'false');
-    $('.topbar').style.display = loggedIn ? 'flex' : 'none';
-    $('.main').style.paddingTop = loggedIn ? '1.5rem' : '0';
+    $('#loginView').setAttribute('aria-hidden', (!loggedIn && !isConfig) ? 'false' : 'true');
+    $('.topbar').style.display = (loggedIn && !isConfig) ? 'flex' : 'none';
+    $('.main').style.paddingTop = (loggedIn && !isConfig) ? '1.5rem' : '0';
   }
 
   async function checkAuth() {
+    if (!API_BASE) { showView('configView'); return false; }
     if (!state.token) { showView('loginView'); return false; }
     try {
       const me = await api('/api/admin/me');
       state.admin = me;
       $('#userName').textContent = me.username || 'مدير';
-      $('.topbar').style.display = 'flex';
       return true;
     } catch (e) {
-      state.token = ''; state.admin = null;
-      localStorage.removeItem('apphub_admin_token');
-      showView('loginView');
+      if (e.status === 401) {
+        state.token = ''; state.admin = null;
+        localStorage.removeItem('apphub_admin_token');
+        showView('loginView');
+      } else {
+        showView('configView');
+      }
       return false;
     }
   }
@@ -96,7 +118,7 @@
     showView('loginView');
   }
 
-  // Data loading
+  // Data
   async function loadAll() {
     await Promise.all([loadApps(), loadCategories(), loadStats(), loadSettings(), loadVersions()]);
     renderDashboard();
@@ -220,7 +242,36 @@
     sel.value = current;
   }
 
-  // Modals & CRUD
+  // Config screen
+  function showConfigScreen() {
+    showView('configView');
+    const input = $('#apiBaseInput');
+    if (input) input.value = API_BASE;
+    const hint = $('#configHint');
+    if (hint) {
+      hint.textContent = API_BASE
+        ? 'الخادم متصل حالياً بـ: ' + API_BASE
+        : 'لم يتم إعداد عنوان الخادم بعد. أدخل عنوان خادم Backend الخاص بك.';
+    }
+  }
+
+  function saveConfig() {
+    const input = $('#apiBaseInput');
+    if (!input) return;
+    const val = input.value.trim();
+    if (val) {
+      API_BASE = val;
+      localStorage.setItem('apphub_api_base', val);
+      toast('تم حفظ عنوان الخادم', 'success');
+      checkAuth().then(ok => { if (ok) loadAll(); });
+    } else {
+      API_BASE = '';
+      localStorage.removeItem('apphub_api_base');
+      toast('تم مسح عنوان الخادم', 'info');
+    }
+  }
+
+  // Modal
   function openModal(title, fields, data = {}, onSubmit) {
     const tpl = $('#modalTpl');
     const backdrop = tpl.content.firstElementChild.cloneNode(true);
@@ -251,8 +302,8 @@
     });
   }
 
-  function appFields(categories) {
-    const catOpts = (categories||state.categories).map(c => ({ value: c.id, label: c.name }));
+  function appFields() {
+    const catOpts = state.categories.map(c => ({ value: c.id, label: c.name }));
     if (!catOpts.length) catOpts.push({ value: 'misc', label: 'تطبيقات متنوعة' });
     return [
       { name: 'name', label: 'اسم التطبيق', required: true },
@@ -260,12 +311,12 @@
       { name: 'shortDescription', label: 'وصف مختصر', full: true },
       { name: 'fullDescription', label: 'وصف كامل', type: 'textarea', rows: 4, full: true },
       { name: 'categoryId', label: 'القسم', type: 'select', options: catOpts },
-      { name: 'categoryName', label: 'اسم القسم (اختياري)', },
-      { name: 'versionName', label: 'رقم الإصدار (Version Name)', },
+      { name: 'categoryName', label: 'اسم القسم (اختياري)' },
+      { name: 'versionName', label: 'رقم الإصدار (Version Name)' },
       { name: 'versionCode', label: 'رمز الإصدار (Version Code)', type: 'number' },
       { name: 'sizeBytes', label: 'حجم APK (بايت)', type: 'number' },
-      { name: 'developer', label: 'المطور', },
-      { name: 'packageName', label: 'Package Name', },
+      { name: 'developer', label: 'المطور' },
+      { name: 'packageName', label: 'Package Name' },
       { name: 'apkUrl', label: 'رابط APK المباشر', full: true },
       { name: 'iconUrl', label: 'رابط الأيقونة', full: true },
       { name: 'sha256', label: 'SHA-256 (اختياري)', full: true },
@@ -282,7 +333,6 @@
     const isEdit = !!existing;
     const data = Object.assign({}, existing || {}, { keywords: (existing && existing.keywords || []).join(', ') });
     openModal(isEdit ? 'تعديل التطبيق' : 'إضافة تطبيق', appFields(), data, async (out) => {
-      // normalize
       if (out.categoryId) { const c = state.categories.find(x=>x.id===out.categoryId); if (c && !out.categoryName) out.categoryName = c.name; }
       if (isEdit) {
         await api('/api/admin/apps/' + encodeURIComponent(existing.id), { method: 'PUT', body: JSON.stringify(out) });
@@ -309,8 +359,8 @@
   function catFields() {
     return [
       { name: 'name', label: 'اسم القسم', required: true },
-      { name: 'id', label: 'المعرف (ID)', },
-      { name: 'icon', label: 'رابط/اسم الأيقونة', },
+      { name: 'id', label: 'المعرف (ID)' },
+      { name: 'icon', label: 'رابط/اسم الأيقونة' },
       { name: 'order', label: 'الترتيب', type: 'number', default: 0 },
       { name: 'published', label: 'منشور', type: 'checkbox', default: true },
     ];
@@ -348,7 +398,16 @@
       const p = $('#password').value;
       const errEl = $('#loginError');
       errEl.hidden = true;
-      try { await login(u, p); } catch (err) { errEl.textContent = err.message || 'فشل تسجيل الدخول'; errEl.hidden = false; }
+      try { await login(u, p); } catch (err) {
+        errEl.textContent = err.message || 'فشل تسجيل الدخول';
+        errEl.hidden = false;
+        if (err.message && err.message.includes('تعذر الاتصال')) {
+          errEl.innerHTML += '<br><a href="#" id="goConfigLink" style="color:var(--primary)">انتقل إلى إعدادات الخادم</a>';
+          setTimeout(() => {
+            $('#goConfigLink')?.addEventListener('click', (ev) => { ev.preventDefault(); showConfigScreen(); });
+          }, 0);
+        }
+      }
     });
     $('#logoutBtn')?.addEventListener('click', logout);
 
@@ -356,10 +415,16 @@
       e.preventDefault();
       const tab = a.dataset.tab;
       showView(tab + 'View');
-      if (tab === 'dashboard') { loadStats().then(()=>{renderDashboard();}); }
-      if (tab === 'stats') { loadStats().then(()=>{renderStats();}); }
+      if (tab === 'dashboard') { loadStats().then(renderDashboard); }
+      if (tab === 'stats') { loadStats().then(renderStats); }
       if (tab === 'versions') { loadVersions($('#versionAppFilter').value).then(renderVersions); }
     }));
+
+    // Config
+    $('#configForm')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      saveConfig();
+    });
 
     $('#addAppBtn')?.addEventListener('click', () => addOrEditApp(null));
     $('#addCategoryBtn')?.addEventListener('click', () => addOrEditCategory(null));
@@ -393,17 +458,23 @@
         renderSettings();
       } catch (err) { toast(err.message, 'error'); }
     });
+
+    // Open config from login error link
+    document.addEventListener('click', (e) => {
+      if (e.target.id === 'goConfigLink') { e.preventDefault(); showConfigScreen(); }
+    });
   }
 
   // Init
   async function init() {
     bindEvents();
-    // If opened from /admin/ path, API is same origin
+    if (!API_BASE) {
+      showConfigScreen();
+      return;
+    }
     if (await checkAuth()) {
       await loadAll();
       showView('dashboardView');
-    } else {
-      showView('loginView');
     }
   }
 

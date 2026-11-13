@@ -28,6 +28,27 @@
     </header>
 
     <main class="main" role="main">
+      <!-- Config View (API URL setup) -->
+      <section id="configView" class="view login-view" aria-hidden="true">
+        <div class="login-card">
+          <h1>إعداد الخادم</h1>
+          <p class="muted">أدخل عنوان خادم Backend لتشغيل لوحة التحكم</p>
+          <form id="configForm">
+            <div class="field">
+              <label for="apiBaseInput">عنوان الخادم (API URL)</label>
+              <input type="url" id="apiBaseInput" name="apiBase" placeholder="https://your-server.com" dir="ltr" style="text-align:left">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">حفظ ومتابعة</button>
+            <p id="configHint" class="muted" style="margin-top:0.75rem"></p>
+          </form>
+          <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
+            <p class="muted" style="font-size:0.8rem">
+              <strong>ملاحظة:</strong> GitHub Pages يستضيف ملفات ثابتة فقط. يجب توفير خادم Backend منفصل (Node.js/أي خادم) وتشغيله ليكون عنوان API.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <!-- Login View -->
       <section id="loginView" class="view login-view" aria-hidden="false">
         <div class="login-card">
