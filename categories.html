@@ -3,9 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>إدارة الأقسام — AppLand TV</title>
+  <title>إدارة الأقسام والفئات — AppLand TV</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="assets/lucide.min.js"></script>
+  <style>
+    .tabs-header {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .tab-item-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .tab-item-btn.active {
+      background: rgba(14, 165, 233, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+    .tab-item-btn:hover:not(.active) {
+      color: #fff;
+      background: rgba(255,255,255,0.05);
+    }
+  </style>
 </head>
 <body>
 
@@ -39,9 +72,9 @@
           <i data-lucide="tv"></i>
           <span>تطبيقات الشاشة</span>
         </a>
-        <a href="categories.html" class="nav-link" data-page="categories">
+        <a href="categories.html" class="nav-link active" data-page="categories">
           <i data-lucide="folder-tree"></i>
-          <span>الأقسام</span>
+          <span>الأقسام والفئات</span>
         </a>
         <a href="versions.html" class="nav-link" data-page="versions">
           <i data-lucide="tag"></i>
@@ -90,55 +123,112 @@
           <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="فتح القائمة">
             <i data-lucide="menu"></i>
           </button>
-          <h1>إدارة أقسام المتجر</h1>
+          <h1>إدارة الأقسام والفئات</h1>
         </div>
-        <div class="header-actions">
-          <button class="btn btn-primary btn-sm" id="openAddCategoryModalBtn">
+        <div class="header-actions" style="display:flex;gap:10px;">
+          <button class="btn btn-primary btn-sm" id="openAddSectionBtn">
+            <i data-lucide="folder-plus"></i>
+            <span>+ إضافة قسم رئيسي</span>
+          </button>
+          <button class="btn btn-ghost btn-sm" id="openAddCategoryBtn" style="border-color:var(--border-light);">
             <i data-lucide="plus"></i>
-            <span>إضافة قسم</span>
+            <span>+ إضافة فئة فرعية</span>
           </button>
         </div>
       </header>
 
       <main class="page-container">
-        <div class="toolbar-bar">
-          <div>
-            <h2 style="font-size:1.15rem;margin-bottom:0.25rem;">أقسام وتصنيفات التطبيقات</h2>
-            <p class="text-muted" style="font-size:0.85rem;">تنظيم التطبيقات في أقسام وتحديد ترتيب ظهورها في المتجر</p>
-          </div>
-          <button class="btn btn-ghost btn-icon" id="refreshBtn" title="تحديث الأقسام">
+        <!-- Tabs Header -->
+        <div class="tabs-header">
+          <button class="tab-item-btn active" id="tabSectionsBtn">
+            <i data-lucide="layers"></i>
+            <span>الأقسام الرئيسية (Sections)</span>
+            <span class="badge badge-neutral" id="sectionsCountBadge">0</span>
+          </button>
+          <button class="tab-item-btn" id="tabCategoriesBtn">
+            <i data-lucide="folder-tree"></i>
+            <span>الفئات الفرعية (Categories)</span>
+            <span class="badge badge-neutral" id="categoriesCountBadge">0</span>
+          </button>
+          <button class="btn btn-ghost btn-icon" id="refreshBtn" style="margin-right:auto;" title="تحديث البيانات">
             <i data-lucide="refresh-cw"></i>
           </button>
         </div>
 
-        <div class="card" style="padding:0;">
-          <div class="table-responsive">
-            <table>
-              <thead>
-                <tr>
-                  <th>اسم القسم</th>
-                  <th>المعرف (ID)</th>
-                  <th>ترتيب الظهور</th>
-                  <th>الحالة</th>
-                  <th style="text-align:left;">إجراءات</th>
-                </tr>
-              </thead>
-              <tbody id="categoriesTableBody">
-                <tr>
-                  <td colspan="5" class="empty-state">
-                    <div class="empty-icon"><i data-lucide="loader-2"></i></div>
-                    <p>جارٍ تحميل الأقسام...</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+        <!-- Section 1: Sections Table View -->
+        <div id="sectionsView">
+          <div class="toolbar-bar">
+            <div>
+              <h2 style="font-size:1.15rem;margin-bottom:0.25rem;">الأقسام الرئيسية لمتجر AppLand</h2>
+              <p class="text-muted" style="font-size:0.85rem;">تنظيم الأقسام الرئيسية المشتركة بين لوحة الإدارة وبوابة المطورين والمتجر</p>
+            </div>
+          </div>
+
+          <div class="card" style="padding:0;">
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>اسم القسم</th>
+                    <th>المعرف (ID)</th>
+                    <th>عدد الفئات</th>
+                    <th>الترتيب</th>
+                    <th>الحالة</th>
+                    <th style="text-align:left;">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="sectionsTableBody">
+                  <tr>
+                    <td colspan="6" class="empty-state">
+                      <div class="empty-icon"><i data-lucide="loader-2"></i></div>
+                      <p>جارٍ تحميل الأقسام...</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Categories Table View (Hidden by default) -->
+        <div id="categoriesView" style="display:none;">
+          <div class="toolbar-bar">
+            <div>
+              <h2 style="font-size:1.15rem;margin-bottom:0.25rem;">الفئات الفرعية وتصنيفاتها</h2>
+              <p class="text-muted" style="font-size:0.85rem;">كل فئة تنتمي لقسم رئيسي وتظهر للمطور تلقائياً عند اختياره للقسم</p>
+            </div>
+          </div>
+
+          <div class="card" style="padding:0;">
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>اسم الفئة</th>
+                    <th>القسم التابع له</th>
+                    <th>المعرف (ID)</th>
+                    <th>الترتيب</th>
+                    <th>الحالة</th>
+                    <th style="text-align:left;">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="categoriesTableBody">
+                  <tr>
+                    <td colspan="6" class="empty-state">
+                      <div class="empty-icon"><i data-lucide="loader-2"></i></div>
+                      <p>جارٍ تحميل الفئات...</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </main>
     </div>
   </div>
 
-  <!-- شريط التنقل السفلي للهواتف -->
+  <!-- Mobile Bottom Nav -->
   <nav class="mobile-bottom-nav">
     <a href="index.html" class="bottom-nav-item" data-page="dashboard">
       <i data-lucide="layout-dashboard"></i>
@@ -172,97 +262,126 @@
       const isAuthed = await Core.checkAuth();
       if (!isAuthed) return;
 
+      let allSections = [];
       let allCategories = [];
+      let activeTab = 'sections';
 
-      function getCategoryFormFields() {
-        return [
-          { name: 'name', label: 'اسم القسم', required: true, placeholder: 'مثال: تطبيقات ترفيهية' },
-          { name: 'id', label: 'المعرف الفريد (ID) — اختياري', placeholder: 'entertainment' },
-          { name: 'icon', label: 'اسم أو رابط الأيقونة', placeholder: 'tv أو https://...' },
-          { name: 'order', label: 'رقم ترتيب الظهور (الأصغر يظهر أولاً)', type: 'number', default: 0 },
-          { name: 'published', label: 'منشور (يظهر في التطبيق والمتجر)', type: 'checkbox', default: true }
-        ];
-      }
+      // Tab switcher
+      const tabSecBtn = document.getElementById('tabSectionsBtn');
+      const tabCatBtn = document.getElementById('tabCategoriesBtn');
+      const secView = document.getElementById('sectionsView');
+      const catView = document.getElementById('categoriesView');
 
-      async function loadCategories() {
+      tabSecBtn.addEventListener('click', () => {
+        activeTab = 'sections';
+        tabSecBtn.classList.add('active');
+        tabCatBtn.classList.remove('active');
+        secView.style.display = 'block';
+        catView.style.display = 'none';
+      });
+
+      tabCatBtn.addEventListener('click', () => {
+        activeTab = 'categories';
+        tabCatBtn.classList.add('active');
+        tabSecBtn.classList.remove('active');
+        secView.style.display = 'none';
+        catView.style.display = 'block';
+      });
+
+      // Load Sections & Categories
+      async function loadAllData() {
         try {
-          const res = await Core.api('/api/admin/categories');
-          allCategories = (res && res.items) || res || [];
+          const [secRes, catRes] = await Promise.all([
+            Core.api('/api/admin/sections').catch(() => ({ items: [] })),
+            Core.api('/api/admin/categories')
+          ]);
+
+          allSections = secRes.items || [];
+          allCategories = catRes.items || [];
+
+          document.getElementById('sectionsCountBadge').textContent = allSections.length;
+          document.getElementById('categoriesCountBadge').textContent = allCategories.length;
+
+          renderSectionsTable();
           renderCategoriesTable();
         } catch (e) {
-          Core.toast('فشل تحميل الأقسام: ' + e.message, 'error');
+          Core.toast('فشل تحميل البيانات: ' + e.message, 'error');
         }
       }
 
-      function renderCategoriesTable() {
-        const sorted = [...allCategories].sort((a,b) => (a.order || 0) - (b.order || 0));
-        const tbody = document.getElementById('categoriesTableBody');
+      // Render Sections Table
+      function renderSectionsTable() {
+        const sorted = [...allSections].sort((a,b) => (a.order || 0) - (b.order || 0));
+        const tbody = document.getElementById('sectionsTableBody');
 
         if (!sorted.length) {
           tbody.innerHTML = `
             <tr>
-              <td colspan="5" class="empty-state">
+              <td colspan="6" class="empty-state">
                 <div class="empty-icon"><i data-lucide="folder-plus"></i></div>
-                <p>لا توجد أي أقسام مضافة حالياً</p>
-                <button class="btn btn-primary btn-sm" id="emptyAddCatBtn">
+                <p>لا توجد أقسام رئيسية مضافة حالياً</p>
+                <button class="btn btn-primary btn-sm" id="emptyAddSecBtn">
                   <i data-lucide="plus"></i>
-                  <span>إضافة قسم الآن</span>
+                  <span>إضافة قسم رئيسي الآن</span>
                 </button>
               </td>
             </tr>
           `;
-          document.getElementById('emptyAddCatBtn')?.addEventListener('click', () => openCategoryEditor());
+          document.getElementById('emptyAddSecBtn')?.addEventListener('click', () => openSectionEditor());
           Core.initIcons();
           return;
         }
 
-        tbody.innerHTML = sorted.map(c => `
-          <tr>
-            <td>
-              <div style="display:flex;align-items:center;gap:0.65rem;">
-                <div style="width:34px;height:34px;background:rgba(139,92,246,0.15);color:#8b5cf6;border-radius:8px;display:flex;align-items:center;justify-content:center;">
-                  <i data-lucide="folder"></i>
+        tbody.innerHTML = sorted.map(s => {
+          const catCount = allCategories.filter(c => c.sectionId === s.id).length;
+          return `
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:0.65rem;">
+                  <div style="width:34px;height:34px;background:rgba(14,165,233,0.15);color:#38bdf8;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="layers"></i>
+                  </div>
+                  <strong style="font-size:0.95rem;">${Core.esc(s.name)}</strong>
                 </div>
-                <strong style="font-size:0.95rem;">${Core.esc(c.name)}</strong>
-              </div>
-            </td>
-            <td><code class="badge badge-neutral" style="direction:ltr;">${Core.esc(c.id)}</code></td>
-            <td><span class="badge badge-primary"><i data-lucide="sort-asc"></i> ${Core.esc(c.order ?? 0)}</span></td>
-            <td>
-              ${c.published !== false ? '<span class="badge badge-success"><i data-lucide="check"></i> منشور</span>' : '<span class="badge badge-danger"><i data-lucide="eye-off"></i> مخفي</span>'}
-            </td>
-            <td style="text-align:left;">
-              <div class="table-actions">
-                <button class="btn btn-ghost btn-icon btn-sm edit-cat-btn" data-id="${Core.esc(c.id)}" title="تعديل القسم">
-                  <i data-lucide="edit-3"></i>
-                </button>
-                <button class="btn btn-danger btn-icon btn-sm delete-cat-btn" data-id="${Core.esc(c.id)}" title="حذف القسم">
-                  <i data-lucide="trash-2"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        `).join('');
+              </td>
+              <td><code class="badge badge-neutral" style="direction:ltr;">${Core.esc(s.id)}</code></td>
+              <td><span class="badge badge-primary">${catCount} فئات</span></td>
+              <td><span class="badge badge-neutral">${Core.esc(s.order ?? 0)}</span></td>
+              <td>
+                ${s.published !== false ? '<span class="badge badge-success"><i data-lucide="check"></i> منشور</span>' : '<span class="badge badge-danger"><i data-lucide="eye-off"></i> مخفي</span>'}
+              </td>
+              <td style="text-align:left;">
+                <div class="table-actions">
+                  <button class="btn btn-ghost btn-icon btn-sm edit-sec-btn" data-id="${Core.esc(s.id)}" title="تعديل القسم">
+                    <i data-lucide="edit-3"></i>
+                  </button>
+                  <button class="btn btn-danger btn-icon btn-sm delete-sec-btn" data-id="${Core.esc(s.id)}" title="حذف القسم">
+                    <i data-lucide="trash-2"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
 
-        // Bind Edit & Delete
-        tbody.querySelectorAll('.edit-cat-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            const id = btn.getAttribute('data-id');
-            const targetCat = allCategories.find(x => x.id === id);
-            if (targetCat) openCategoryEditor(targetCat);
+        tbody.querySelectorAll('.edit-sec-btn').forEach(b => {
+          b.addEventListener('click', () => {
+            const id = b.dataset.id;
+            const target = allSections.find(x => x.id === id);
+            if (target) openSectionEditor(target);
           });
         });
 
-        tbody.querySelectorAll('.delete-cat-btn').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const id = btn.getAttribute('data-id');
-            const targetCat = allCategories.find(x => x.id === id);
-            const name = targetCat ? targetCat.name : id;
-            if (confirm(`هل أنت متأكد من حذف قسم "${name}"؟`)) {
+        tbody.querySelectorAll('.delete-sec-btn').forEach(b => {
+          b.addEventListener('click', async () => {
+            const id = b.dataset.id;
+            const target = allSections.find(x => x.id === id);
+            const name = target ? target.name : id;
+            if (confirm(`هل أنت متأكد من حذف القسم الرئيسي "${name}"؟`)) {
               try {
-                await Core.api('/api/admin/categories/' + encodeURIComponent(id), { method: 'DELETE' });
+                await Core.api('/api/admin/sections/' + encodeURIComponent(id), { method: 'DELETE' });
                 Core.toast('تم حذف القسم بنجاح', 'success');
-                await loadCategories();
+                await loadAllData();
               } catch (err) {
                 Core.toast('فشل حذف القسم: ' + err.message, 'error');
               }
@@ -273,12 +392,139 @@
         Core.initIcons();
       }
 
+      // Render Categories Table
+      function renderCategoriesTable() {
+        const sorted = [...allCategories].sort((a,b) => (a.order || 0) - (b.order || 0));
+        const tbody = document.getElementById('categoriesTableBody');
+
+        if (!sorted.length) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="empty-state">
+                <div class="empty-icon"><i data-lucide="folder-plus"></i></div>
+                <p>لا توجد فئات فرعية مضافة حالياً</p>
+                <button class="btn btn-primary btn-sm" id="emptyAddCatBtn">
+                  <i data-lucide="plus"></i>
+                  <span>إضافة فئة الآن</span>
+                </button>
+              </td>
+            </tr>
+          `;
+          document.getElementById('emptyAddCatBtn')?.addEventListener('click', () => openCategoryEditor());
+          Core.initIcons();
+          return;
+        }
+
+        tbody.innerHTML = sorted.map(c => {
+          const parentSec = allSections.find(s => s.id === c.sectionId);
+          const secName = parentSec ? parentSec.name : (c.sectionId || 'غير محدد');
+
+          return `
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:0.65rem;">
+                  <div style="width:34px;height:34px;background:rgba(99,102,241,0.15);color:#818cf8;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                    <i data-lucide="folder"></i>
+                  </div>
+                  <strong style="font-size:0.95rem;">${Core.esc(c.name)}</strong>
+                </div>
+              </td>
+              <td><span class="badge" style="background:rgba(14,165,233,0.12);color:#38bdf8;">${Core.esc(secName)}</span></td>
+              <td><code class="badge badge-neutral" style="direction:ltr;">${Core.esc(c.id)}</code></td>
+              <td><span class="badge badge-neutral">${Core.esc(c.order ?? 0)}</span></td>
+              <td>
+                ${c.published !== false ? '<span class="badge badge-success"><i data-lucide="check"></i> منشور</span>' : '<span class="badge badge-danger"><i data-lucide="eye-off"></i> مخفي</span>'}
+              </td>
+              <td style="text-align:left;">
+                <div class="table-actions">
+                  <button class="btn btn-ghost btn-icon btn-sm edit-cat-btn" data-id="${Core.esc(c.id)}" title="تعديل الفئة">
+                    <i data-lucide="edit-3"></i>
+                  </button>
+                  <button class="btn btn-danger btn-icon btn-sm delete-cat-btn" data-id="${Core.esc(c.id)}" title="حذف الفئة">
+                    <i data-lucide="trash-2"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        tbody.querySelectorAll('.edit-cat-btn').forEach(b => {
+          b.addEventListener('click', () => {
+            const id = b.dataset.id;
+            const target = allCategories.find(x => x.id === id);
+            if (target) openCategoryEditor(target);
+          });
+        });
+
+        tbody.querySelectorAll('.delete-cat-btn').forEach(b => {
+          b.addEventListener('click', async () => {
+            const id = b.dataset.id;
+            const target = allCategories.find(x => x.id === id);
+            const name = target ? target.name : id;
+            if (confirm(`هل أنت متأكد من حذف فئة "${name}"؟`)) {
+              try {
+                await Core.api('/api/admin/categories/' + encodeURIComponent(id), { method: 'DELETE' });
+                Core.toast('تم حذف الفئة بنجاح', 'success');
+                await loadAllData();
+              } catch (err) {
+                Core.toast('فشل حذف الفئة: ' + err.message, 'error');
+              }
+            }
+          });
+        });
+
+        Core.initIcons();
+      }
+
+      // Section Editor Modal
+      function openSectionEditor(existingSec = null) {
+        const isEdit = !!existingSec;
+        Core.openModal({
+          title: isEdit ? `تعديل القسم الرئيسي: ${existingSec.name}` : 'إضافة قسم رئيسي جديد',
+          fields: [
+            { name: 'name', label: 'اسم القسم الرئيسي *', required: true, placeholder: 'مثال: ألعاب التلفزيون أو تطبيقات إسلامية' },
+            { name: 'id', label: 'المعرف الفريد (ID) — اختياري', placeholder: 'مثال: games أو islamic' },
+            { name: 'icon', label: 'أيقونة القسم', placeholder: 'folder أو gamepad أو tv' },
+            { name: 'order', label: 'رقم الترتيب (الأصغر يظهر أولاً)', type: 'number', default: 0 },
+            { name: 'published', label: 'منشور في المتجر وبوابة المطورين', type: 'checkbox', default: true }
+          ],
+          initialData: existingSec || {},
+          onSubmit: async (out) => {
+            if (isEdit) {
+              await Core.api('/api/admin/sections/' + encodeURIComponent(existingSec.id), {
+                method: 'PUT',
+                body: JSON.stringify(out)
+              });
+              Core.toast('تم تحديث القسم بنجاح', 'success');
+            } else {
+              if (!out.id) delete out.id;
+              await Core.api('/api/admin/sections', {
+                method: 'POST',
+                body: JSON.stringify(out)
+              });
+              Core.toast('تمت إضافة القسم الرئيسي بنجاح', 'success');
+            }
+            await loadAllData();
+          }
+        });
+      }
+
+      // Category Editor Modal
       function openCategoryEditor(existingCat = null) {
         const isEdit = !!existingCat;
+        const secOptions = allSections.map(s => ({ value: s.id, label: s.name }));
+        if (!secOptions.length) secOptions.push({ value: 'apps', label: 'تطبيقات عامة' });
 
         Core.openModal({
-          title: isEdit ? `تعديل قسم: ${existingCat.name || ''}` : 'إضافة قسم جديد',
-          fields: getCategoryFormFields(),
+          title: isEdit ? `تعديل الفئة الفرعية: ${existingCat.name}` : 'إضافة فئة فرعية جديدة',
+          fields: [
+            { name: 'name', label: 'اسم الفئة *', required: true, placeholder: 'مثال: مشغلات الفيديو أو ألعاب سباق' },
+            { name: 'sectionId', label: 'القسم الرئيسي التابع له *', type: 'select', options: secOptions, default: secOptions[0].value },
+            { name: 'id', label: 'المعرف الفريد (ID) — اختياري', placeholder: 'مثال: video_players' },
+            { name: 'order', label: 'رقم الترتيب', type: 'number', default: 0 },
+            { name: 'published', label: 'منشورة في المتجر', type: 'checkbox', default: true }
+          ],
           initialData: existingCat || {},
           onSubmit: async (out) => {
             if (isEdit) {
@@ -286,27 +532,28 @@
                 method: 'PUT',
                 body: JSON.stringify(out)
               });
-              Core.toast('تم تحديث القسم بنجاح', 'success');
+              Core.toast('تم تحديث الفئة بنجاح', 'success');
             } else {
               if (!out.id) delete out.id;
               await Core.api('/api/admin/categories', {
                 method: 'POST',
                 body: JSON.stringify(out)
               });
-              Core.toast('تمت إضافة القسم بنجاح', 'success');
+              Core.toast('تمت إضافة الفئة بنجاح', 'success');
             }
-            await loadCategories();
+            await loadAllData();
           }
         });
       }
 
-      document.getElementById('openAddCategoryModalBtn').addEventListener('click', () => openCategoryEditor());
+      document.getElementById('openAddSectionBtn').addEventListener('click', () => openSectionEditor());
+      document.getElementById('openAddCategoryBtn').addEventListener('click', () => openCategoryEditor());
       document.getElementById('refreshBtn').addEventListener('click', () => {
-        Core.toast('جارٍ تحديث الأقسام...', 'info');
-        loadCategories();
+        Core.toast('جارٍ تحديث البيانات...', 'info');
+        loadAllData();
       });
 
-      loadCategories();
+      loadAllData();
     });
   </script>
 </body>

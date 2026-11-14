@@ -6,6 +6,48 @@
   <title>تفاصيل الطلب — AppLand Developers</title>
   <link rel="stylesheet" href="css/dev.css">
   <script src="assets/lucide.min.js"></script>
+  <style>
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(8px);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 85vh;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      object-fit: contain;
+    }
+    .screens-gallery {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      scrollbar-width: thin;
+    }
+    .screens-gallery img {
+      width: 200px;
+      height: 112px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: #0d1527;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      flex-shrink: 0;
+    }
+    .screens-gallery img:hover {
+      transform: scale(1.03);
+      border-color: var(--primary);
+    }
+  </style>
 </head>
 <body>
 
@@ -15,9 +57,9 @@
       <div class="brand-icon">
         <i data-lucide="tv-2" style="width:24px;height:24px;"></i>
       </div>
-      <div>
+      <div class="brand-text-wrap">
         <span class="brand-title">AppLand Developers</span>
-        <span class="brand-badge">بوابة المطورين</span>
+        <span class="brand-badge">بوابة المطورين الرسمية</span>
       </div>
     </div>
 
@@ -30,281 +72,513 @@
   </header>
 
   <!-- Container -->
-  <main class="dev-container" style="max-width:920px;">
-    <div class="page-head">
-      <div class="page-title">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
-          <h1 id="detAppName">تفاصيل الطلب</h1>
-          <span id="detStatusBadge"></span>
-        </div>
-        <p id="detReqNumber" style="font-family:monospace;color:var(--info);">REQ-—</p>
-      </div>
-
-      <div id="topActionWrap"></div>
+  <main class="dev-container" style="max-width:960px;">
+    <!-- Loading State -->
+    <div id="loadingBox" style="padding:60px 20px;text-align:center;color:var(--text-muted);">
+      <i data-lucide="loader" style="animation:spin 1s linear infinite;width:36px;height:36px;margin:0 auto 16px;display:block;color:var(--primary);"></i>
+      <span>جارٍ جلب تفاصيل الطلب من الخادم...</span>
     </div>
 
-    <!-- Alert / Notice Banners -->
-    <div id="changesBanner" class="alert alert-warning" style="display:none;">
-      <i data-lucide="alert-triangle" style="width:24px;height:24px;flex-shrink:0;"></i>
-      <div>
-        <strong>ملاحظات الإدارة للتعديل:</strong>
-        <p id="changesText" style="margin-top:4px;font-size:0.95rem;"></p>
-      </div>
-    </div>
-
-    <div id="rejectBanner" class="alert alert-danger" style="display:none;">
-      <i data-lucide="x-circle" style="width:24px;height:24px;flex-shrink:0;"></i>
-      <div>
-        <strong>سبب رفض الطلب:</strong>
-        <p id="rejectText" style="margin-top:4px;font-size:0.95rem;"></p>
-      </div>
-    </div>
-
-    <div id="approvedBanner" class="alert alert-success" style="display:none;">
-      <i data-lucide="check-circle" style="width:24px;height:24px;flex-shrink:0;"></i>
-      <div>
-        <strong>تمت الموافقة والنشر في المتجر!</strong>
-        <p id="approvedText" style="margin-top:4px;font-size:0.95rem;">تطبيقك منشور الآن في متجر AppLand لشاشات وأجهزة Android TV ومتاح لجميع المستخدمين للتنزيل المباشر.</p>
-      </div>
-    </div>
-
-    <!-- Details View Mode -->
-    <div id="detailsCard" class="form-card">
-      <div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:24px;">
-        <img id="detIcon" src="" alt="" style="width:100px;height:100px;border-radius:22px;object-fit:cover;background:var(--bg-card);border:1px solid var(--border);">
-        <div style="flex:1;min-width:260px;">
-          <h2 id="detTitle" style="font-size:1.5rem;font-weight:800;color:white;margin-bottom:4px;"></h2>
-          <div style="color:var(--text-muted);font-size:0.9rem;margin-bottom:12px;" id="detDevAndCat"></div>
-          <p id="detShortDesc" style="color:var(--text-main);font-size:1rem;line-height:1.5;"></p>
-        </div>
-      </div>
-
-      <!-- Key Specs Grid -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px;margin-bottom:24px;background:var(--bg-card);padding:18px;border-radius:var(--radius-md);border:1px solid var(--border);">
-        <div>
-          <span style="font-size:0.8rem;color:var(--text-dim);display:block;">الجهاز المستهدف</span>
-          <strong id="detTarget" style="color:white;font-size:0.95rem;"></strong>
-        </div>
-        <div>
-          <span style="font-size:0.8rem;color:var(--text-dim);display:block;">الإصدار الحالي</span>
-          <strong id="detVersion" style="color:white;font-size:0.95rem;"></strong>
-        </div>
-        <div>
-          <span style="font-size:0.8rem;color:var(--text-dim);display:block;">حجم الملف</span>
-          <strong id="detSize" style="color:white;font-size:0.95rem;"></strong>
-        </div>
-        <div>
-          <span style="font-size:0.8rem;color:var(--text-dim);display:block;">تاريخ الإرسال</span>
-          <strong id="detDate" style="color:white;font-size:0.95rem;"></strong>
-        </div>
-      </div>
-
-      <!-- APK Link -->
-      <div style="margin-bottom:24px;">
-        <span class="form-label">رابط APK المباشر</span>
-        <div style="display:flex;gap:10px;align-items:center;background:var(--bg-card);padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);word-break:break-all;">
-          <i data-lucide="link" style="color:var(--info);width:18px;height:18px;flex-shrink:0;"></i>
-          <span id="detApkUrl" style="flex:1;font-size:0.85rem;color:var(--text-muted);font-family:monospace;"></span>
-          <a id="testApkLink" href="#" target="_blank" class="btn btn-ghost btn-sm" style="flex-shrink:0;">
-            <i data-lucide="external-link"></i>
-            <span>فتح الرابط</span>
-          </a>
-        </div>
-      </div>
-
-      <!-- Full Description -->
-      <div style="margin-bottom:24px;">
-        <span class="form-label">الوصف الكامل والمميزات</span>
-        <div id="detFullDesc" style="background:var(--bg-card);padding:16px;border-radius:var(--radius-sm);border:1px solid var(--border);color:var(--text-main);white-space:pre-wrap;font-size:0.95rem;line-height:1.7;"></div>
-      </div>
-
-      <!-- Screenshots -->
-      <div>
-        <span class="form-label">لقطات الشاشة المرفقة</span>
-        <div class="screenshots-grid" id="detScreensGrid"></div>
-      </div>
-    </div>
-
-    <!-- Edit Form (Shown when in edit mode) -->
-    <div id="editCard" class="form-card" style="display:none;">
-      <h3 style="font-size:1.25rem;font-weight:700;color:white;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
-        <i data-lucide="edit-3" style="color:var(--warning);"></i>
-        <span>تعديل بيانات الطلب وإعادة الإرسال</span>
-      </h3>
-
-      <form id="editForm">
-        <div class="form-group">
-          <label class="form-label" for="editName">اسم التطبيق</label>
-          <input class="form-input" type="text" id="editName" required>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="editTarget">الجهاز المستهدف</label>
-            <select class="form-select" id="editTarget">
-              <option value="TV">Android TV</option>
-              <option value="BOTH">Both</option>
-              <option value="PHONE">Android Phone</option>
-            </select>
+    <div id="contentWrap" style="display:none;">
+      <!-- Page Header -->
+      <div class="page-head">
+        <div class="page-title">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+            <h1 id="detAppName" style="margin-bottom:0;">اسم التطبيق</h1>
+            <span id="detStatusBadge"></span>
           </div>
-
-          <div class="form-group">
-            <label class="form-label" for="editVersion">رقم الإصدار</label>
-            <input class="form-input" type="text" id="editVersion">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="req-pill" id="detReqNumber">REQ-—</span>
+            <span style="font-size:0.85rem;color:var(--text-dim);" id="detCreatedAt">تاريخ الإرسال: —</span>
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="editApkUrl">رابط تحميل APK المباشر (HTTPS)</label>
-          <input class="form-input" type="url" id="editApkUrl" required>
+        <div id="topActionWrap" style="display:flex;gap:10px;"></div>
+      </div>
+
+      <!-- Notice Banners -->
+      <div id="changesBanner" class="alert alert-warning" style="display:none;">
+        <i data-lucide="alert-triangle" style="width:24px;height:24px;flex-shrink:0;"></i>
+        <div style="flex:1;">
+          <strong>ملاحظات وتعديلات مطلوبة من الإدارة:</strong>
+          <p id="changesText" style="margin-top:4px;font-size:0.96rem;"></p>
+        </div>
+        <button class="btn btn-sm btn-primary" id="openEditBtn" style="background:#f59e0b;color:#000;">
+          <i data-lucide="edit-3"></i>
+          <span>تعديل الطلب الآن</span>
+        </button>
+      </div>
+
+      <div id="rejectBanner" class="alert alert-danger" style="display:none;">
+        <i data-lucide="x-circle" style="width:24px;height:24px;flex-shrink:0;"></i>
+        <div>
+          <strong>سبب رفض نشر التطبيق:</strong>
+          <p id="rejectText" style="margin-top:4px;font-size:0.96rem;"></p>
+        </div>
+      </div>
+
+      <div id="approvedBanner" class="alert alert-success" style="display:none;">
+        <i data-lucide="check-circle" style="width:24px;height:24px;flex-shrink:0;"></i>
+        <div>
+          <strong>تمت الموافقة ونشر التطبيق في المتجر!</strong>
+          <p style="margin-top:4px;font-size:0.95rem;">تطبيقك منشور الآن على متجر شاشات AppLand ومتاح لجميع المستخدمين للتنزيل المباشر.</p>
+        </div>
+      </div>
+
+      <!-- Details View Card -->
+      <div id="detailsCard" class="form-card">
+        <!-- App Meta Bar -->
+        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:24px;">
+          <img id="detIcon" src="" alt="أيقونة التطبيق" style="width:84px;height:84px;border-radius:20px;object-fit:cover;background:#0d1527;border:1px solid var(--border);flex-shrink:0;">
+          <div style="flex:1;min-width:260px;">
+            <h2 id="detTitle" style="font-size:1.45rem;font-weight:800;color:#ffffff;margin-bottom:4px;"></h2>
+            <div style="color:var(--text-muted);font-size:0.9rem;margin-bottom:10px;">
+              المطور: <strong id="detDev" style="color:#ffffff;"></strong> • القسم: <strong id="detSecCat" style="color:var(--info);"></strong>
+            </div>
+            <p id="detShortDesc" style="color:#e2e8f0;font-size:0.96rem;line-height:1.5;"></p>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="editShortDesc">نبذة مختصرة</label>
-          <input class="form-input" type="text" id="editShortDesc" required>
+        <!-- Specs Grid -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:16px;margin-bottom:24px;background:var(--bg-card-alt);padding:18px;border-radius:var(--radius-md);border:1px solid var(--border);">
+          <div>
+            <span style="font-size:0.78rem;color:var(--text-dim);display:block;margin-bottom:2px;">الجهاز المستهدف</span>
+            <strong id="detTarget" style="color:#ffffff;font-size:0.95rem;"></strong>
+          </div>
+          <div>
+            <span style="font-size:0.78rem;color:var(--text-dim);display:block;margin-bottom:2px;">الإصدار الحالي</span>
+            <strong id="detVersion" style="color:#ffffff;font-size:0.95rem;"></strong>
+          </div>
+          <div>
+            <span style="font-size:0.78rem;color:var(--text-dim);display:block;margin-bottom:2px;">حجم الملف</span>
+            <strong id="detSize" style="color:#ffffff;font-size:0.95rem;"></strong>
+          </div>
+          <div>
+            <span style="font-size:0.78rem;color:var(--text-dim);display:block;margin-bottom:2px;">Package Name</span>
+            <code id="detPackage" style="color:#a5b4fc;font-size:0.85rem;direction:ltr;display:inline-block;"></code>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="editFullDesc">الوصف الكامل</label>
-          <textarea class="form-textarea" id="editFullDesc" required></textarea>
+        <!-- APK Direct Link -->
+        <div style="margin-bottom:24px;">
+          <label class="form-label">رابط APK المباشر</label>
+          <div style="display:flex;gap:10px;align-items:center;background:var(--bg-card-alt);padding:12px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);word-break:break-all;">
+            <i data-lucide="link" style="color:var(--info);width:18px;height:18px;flex-shrink:0;"></i>
+            <span id="detApkUrl" style="flex:1;font-size:0.88rem;color:#e2e8f0;font-family:monospace;"></span>
+            <button class="btn btn-ghost btn-sm" id="copyApkBtn" style="flex-shrink:0;">
+              <i data-lucide="copy"></i>
+              <span>نسخ</span>
+            </button>
+            <a id="testApkLink" href="#" target="_blank" class="btn btn-ghost btn-sm" style="flex-shrink:0;">
+              <i data-lucide="external-link"></i>
+              <span>تحميل وتجربة</span>
+            </a>
+          </div>
         </div>
 
-        <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px;">
-          <button type="button" class="btn btn-ghost" id="cancelEditBtn">إلغاء</button>
-          <button type="submit" class="btn btn-primary btn-lg" id="saveEditBtn">
-            <i data-lucide="send"></i>
-            <span>حفظ التعديلات وإعادة الإرسال</span>
-          </button>
+        <!-- Full Description -->
+        <div style="margin-bottom:24px;">
+          <label class="form-label">الوصف الكامل والمميزات</label>
+          <div id="detFullDesc" style="background:var(--bg-card-alt);padding:18px;border-radius:var(--radius-sm);border:1px solid var(--border);color:#e2e8f0;white-space:pre-wrap;font-size:0.95rem;line-height:1.7;"></div>
         </div>
-      </form>
+
+        <!-- Screenshots Gallery -->
+        <div>
+          <label class="form-label">لقطات الشاشة المرفقة (<span id="detScreensCount">0</span> صور — انقر لتكبير الصورة)</label>
+          <div class="screens-gallery" id="detScreensGallery"></div>
+        </div>
+      </div>
+
+      <!-- Edit Form (Shown when in edit mode) -->
+      <div id="editCard" class="form-card" style="display:none;">
+        <div class="section-title">
+          <i data-lucide="edit-3" style="color:var(--warning);"></i>
+          <span>تعديل بيانات التطبيق وإعادة الإرسال للمراجعة</span>
+        </div>
+
+        <form id="editForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="editName"><span class="req">*</span> اسم التطبيق</label>
+              <input class="form-input" type="text" id="editName" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editDeveloper"><span class="req">*</span> اسم المطور</label>
+              <input class="form-input" type="text" id="editDeveloper" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="editSection"><span class="req">*</span> القسم الرئيسي</label>
+              <select class="form-select" id="editSection" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editCategory"><span class="req">*</span> الفئة الفرعية</label>
+              <select class="form-select" id="editCategory" required></select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="editTarget"><span class="req">*</span> الجهاز المستهدف</label>
+              <select class="form-select" id="editTarget" required>
+                <option value="TV">Android TV</option>
+                <option value="BOTH">Both</option>
+                <option value="PHONE">Android Phone</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editVersion">رقم الإصدار</label>
+              <input class="form-input" type="text" id="editVersion" value="1.0.0">
+            </div>
+          </div>
+
+          <!-- Icon URL in Edit Mode -->
+          <div class="form-group" style="margin-bottom:20px;">
+            <label class="form-label" for="editIconUrl"><span class="req">*</span> رابط صورة أيقونة التطبيق</label>
+            <input class="form-input" type="url" id="editIconUrl" required>
+            <div id="editIconPreviewCard" class="image-preview-card" style="display:none;margin-top:10px;">
+              <div class="preview-thumb-box"><img id="editIconPreviewImg" src="" alt="الأيقونة"></div>
+              <div class="preview-info">
+                <div id="editIconStatus" class="preview-status-text">معاينة</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Screenshots in Edit Mode -->
+          <div class="form-group" style="margin-bottom:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <label class="form-label" style="margin-bottom:0;"><span class="req">*</span> روابط لقطات الشاشة (من 1 إلى 5 صور)</label>
+              <button type="button" class="btn btn-ghost btn-sm" id="editAddScreenBtn">+ إضافة لقطة</button>
+            </div>
+            <div id="editScreensContainer" class="screenshots-builder"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editApkUrl"><span class="req">*</span> رابط تحميل APK المباشر (HTTPS)</label>
+            <input class="form-input" type="url" id="editApkUrl" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editShortDesc"><span class="req">*</span> نبذة مختصرة</label>
+            <input class="form-input" type="text" id="editShortDesc" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editFullDesc"><span class="req">*</span> الوصف الكامل</label>
+            <textarea class="form-textarea" id="editFullDesc" required></textarea>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px;">
+            <button type="button" class="btn btn-ghost" id="cancelEditBtn">إلغاء التعديل</button>
+            <button type="submit" class="btn btn-primary btn-lg" id="saveEditBtn">
+              <i data-lucide="send"></i>
+              <span>حفظ التعديلات وإعادة الإرسال</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </main>
 
+  <!-- Standalone Footer (NO links to admin panel) -->
+  <footer class="dev-footer">
+    <div style="margin-bottom:6px;">منصة مطوري AppLand — بوابة نشر وتوزيع التطبيقات على شاشات وأجهزة Android TV الذكية</div>
+    <div style="color:var(--text-dim);font-size:0.8rem;">نظام تقديم مستقل وآمن • جميع الحقوق محفوظة © 2026 AppLand</div>
+  </footer>
+
   <script src="js/dev.js"></script>
   <script>
-    if (window.lucide) lucide.createIcons();
+    function initIcons() {
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
 
     const urlParams = new URLSearchParams(window.location.search);
     const subId = urlParams.get('id');
     const startInEdit = urlParams.get('edit') === 'true';
 
     if (!subId) {
-      window.location.href = 'dashboard.html';
+      window.location.replace('dashboard.html');
     }
 
     let currentSubmission = null;
+    let serverSections = [];
+    let serverCategories = [];
+    let editScreensList = [];
 
+    // Load Data
     async function loadDetails() {
       try {
-        currentSubmission = await Dev.api(`/api/dev/submissions/${encodeURIComponent(subId)}`);
+        const [sub, opts] = await Promise.all([
+          Dev.api(`/api/dev/submissions/${encodeURIComponent(subId)}`),
+          Dev.fetchOptions()
+        ]);
+
+        currentSubmission = sub;
+        serverSections = opts.sections || [];
+        serverCategories = opts.categories || [];
+
         renderDetails();
+        if (startInEdit && (sub.status === 'changes_requested' || sub.status === 'pending')) {
+          showEditMode();
+        }
       } catch (err) {
-        Dev.toast('تعذر جلب تفاصيل الطلب: ' + err.message, 'danger');
-        setTimeout(() => window.location.href = 'dashboard.html', 2000);
+        document.getElementById('loadingBox').innerHTML = `
+          <div class="alert alert-danger" style="display:inline-flex;text-align:right;">
+            <i data-lucide="alert-circle" style="width:24px;height:24px;"></i>
+            <div>
+              <strong>فشل تحميل تفاصيل الطلب:</strong> ${Dev.esc(err.message)}
+              <div style="margin-top:10px;">
+                <a href="dashboard.html" class="btn btn-sm btn-ghost">العودة للوحة التحكم</a>
+              </div>
+            </div>
+          </div>
+        `;
+        initIcons();
       }
     }
 
+    // Render View Mode
     function renderDetails() {
       const sub = currentSubmission;
+      document.getElementById('loadingBox').style.display = 'none';
+      document.getElementById('contentWrap').style.display = 'block';
+
       document.getElementById('detAppName').textContent = sub.name;
-      document.getElementById('detStatusBadge').innerHTML = Dev.statusBadge(sub.status);
-      document.getElementById('detReqNumber').textContent = `رقم الطلب: ${sub.reqNumber || '—'}`;
-      document.getElementById('detIcon').src = sub.iconUrl || '';
       document.getElementById('detTitle').textContent = sub.name;
-      document.getElementById('detDevAndCat').textContent = `الناشر: ${sub.developer || sub.devName} • القسم: ${sub.categoryName || 'متنوع'}`;
-      document.getElementById('detShortDesc').textContent = sub.shortDescription || '';
-      document.getElementById('detTarget').textContent = sub.targetType === 'TV' ? 'شاشات TV' : (sub.targetType === 'PHONE' ? 'هواتف' : 'شاشات وهواتف');
-      document.getElementById('detVersion').textContent = `${sub.versionName || '1.0.0'} (${sub.versionCode || 1})`;
+      document.getElementById('detStatusBadge').innerHTML = Dev.statusBadge(sub.status);
+      document.getElementById('detReqNumber').textContent = sub.reqNumber || sub.id;
+      document.getElementById('detCreatedAt').textContent = 'تاريخ الإرسال: ' + Dev.fmtDate(sub.createdAt);
+      document.getElementById('detDev').textContent = sub.developer || sub.devName || 'مطور AppLand';
+      
+      const secCatText = [sub.sectionName, sub.categoryName].filter(Boolean).join(' › ') || 'متنوع';
+      document.getElementById('detSecCat').textContent = secCatText;
+
+      document.getElementById('detIcon').src = sub.iconUrl || 'assets/logo.png';
+      document.getElementById('detShortDesc').textContent = sub.shortDescription || 'لا توجد نبذة مختصرة';
+      document.getElementById('detFullDesc').textContent = sub.fullDescription || sub.shortDescription || '—';
+
+      const deviceLabel = sub.targetType === 'TV' ? 'شاشات TV' : (sub.targetType === 'PHONE' ? 'هواتف' : 'شاشات وهواتف');
+      document.getElementById('detTarget').textContent = deviceLabel;
+      document.getElementById('detVersion').textContent = sub.versionName || '1.0.0';
       document.getElementById('detSize').textContent = Dev.fmtBytes(sub.sizeBytes);
-      document.getElementById('detDate').textContent = Dev.fmtDate(sub.createdAt);
-      document.getElementById('detApkUrl').textContent = sub.apkUrl;
-      document.getElementById('testApkLink').href = sub.apkUrl;
-      document.getElementById('detFullDesc').textContent = sub.fullDescription || sub.shortDescription || '';
+      document.getElementById('detPackage').textContent = sub.packageName || 'com.example.app';
 
-      // Screenshots
-      const grid = document.getElementById('detScreensGrid');
-      grid.innerHTML = '';
-      (sub.screenshots || []).forEach(src => {
-        const div = document.createElement('div');
-        div.className = 'screenshot-thumb';
-        div.innerHTML = `<img src="${Dev.esc(src)}" alt="">`;
-        grid.appendChild(div);
-      });
+      // APK links
+      document.getElementById('detApkUrl').textContent = sub.apkUrl || '—';
+      document.getElementById('testApkLink').href = sub.apkUrl || '#';
 
-      // Banners
+      // Status Banners
+      document.getElementById('changesBanner').style.display = sub.status === 'changes_requested' ? 'flex' : 'none';
       if (sub.status === 'changes_requested') {
-        document.getElementById('changesBanner').style.display = 'flex';
-        document.getElementById('changesText').textContent = sub.adminNotes || 'يرجى مراجعة بيانات التطبيق وتعديلها وفقاً لطلب الإدارة.';
-        document.getElementById('topActionWrap').innerHTML = `
-          <button id="toggleEditBtn" class="btn btn-primary" style="background:#f59e0b;color:black;">
-            <i data-lucide="edit-3"></i>
-            <span>تعديل الطلب الآن</span>
-          </button>
-        `;
-        document.getElementById('toggleEditBtn').addEventListener('click', showEditForm);
-      } else if (sub.status === 'rejected') {
-        document.getElementById('rejectBanner').style.display = 'flex';
-        document.getElementById('rejectText').textContent = sub.rejectionReason || 'لم يتم تحديد سبب إضافي.';
-      } else if (sub.status === 'approved') {
-        document.getElementById('approvedBanner').style.display = 'flex';
+        document.getElementById('changesText').textContent = sub.adminNotes || 'يرجى مراجعة وتحديث بيانات التطبيق.';
       }
 
-      if (startInEdit && sub.status === 'changes_requested') {
-        showEditForm();
+      document.getElementById('rejectBanner').style.display = sub.status === 'rejected' ? 'flex' : 'none';
+      if (sub.status === 'rejected') {
+        document.getElementById('rejectText').textContent = sub.rejectionReason || 'تم رفض الطلب.';
       }
 
-      if (window.lucide) lucide.createIcons();
+      document.getElementById('approvedBanner').style.display = sub.status === 'approved' ? 'flex' : 'none';
+
+      // Render Screenshots Gallery
+      const gallery = document.getElementById('detScreensGallery');
+      gallery.innerHTML = '';
+      const screens = Array.isArray(sub.screenshots) ? sub.screenshots : [];
+      document.getElementById('detScreensCount').textContent = screens.length;
+
+      if (screens.length === 0) {
+        gallery.innerHTML = '<span style="color:var(--text-dim);font-size:0.85rem;">لا توجد لقطات شاشة مرفقة</span>';
+      } else {
+        screens.forEach(url => {
+          const img = document.createElement('img');
+          img.src = url;
+          img.alt = 'لقطة شاشة';
+          img.title = 'انقر للتكبير';
+          img.addEventListener('click', () => openLightbox(url));
+          gallery.appendChild(img);
+        });
+      }
+
+      initIcons();
     }
 
-    function showEditForm() {
+    // Lightbox modal for screenshots
+    function openLightbox(src) {
+      const box = document.createElement('div');
+      box.className = 'lightbox-overlay';
+      box.innerHTML = `<img src="${Dev.esc(src)}" class="lightbox-img">`;
+      box.addEventListener('click', () => box.remove());
+      document.body.appendChild(box);
+    }
+
+    // Copy APK URL
+    document.getElementById('copyApkBtn').addEventListener('click', () => {
+      const url = currentSubmission && currentSubmission.apkUrl;
+      if (url) {
+        navigator.clipboard.writeText(url).then(() => {
+          Dev.toast('تم نسخ رابط APK إلى الحافظة', 'success');
+        });
+      }
+    });
+
+    // Switch to Edit Mode
+    function showEditMode() {
       const sub = currentSubmission;
-      document.getElementById('editName').value = sub.name;
+      document.getElementById('detailsCard').style.display = 'none';
+      document.getElementById('editCard').style.display = 'block';
+
+      document.getElementById('editName').value = sub.name || '';
+      document.getElementById('editDeveloper').value = sub.developer || sub.devName || '';
       document.getElementById('editTarget').value = sub.targetType || 'TV';
       document.getElementById('editVersion').value = sub.versionName || '1.0.0';
-      document.getElementById('editApkUrl').value = sub.apkUrl;
+      document.getElementById('editIconUrl').value = sub.iconUrl || '';
+      document.getElementById('editApkUrl').value = sub.apkUrl || '';
       document.getElementById('editShortDesc').value = sub.shortDescription || '';
       document.getElementById('editFullDesc').value = sub.fullDescription || '';
 
-      document.getElementById('detailsCard').style.display = 'none';
-      document.getElementById('editCard').style.display = 'block';
+      // Populate Sections
+      const secSel = document.getElementById('editSection');
+      secSel.innerHTML = serverSections.map(s => `
+        <option value="${Dev.esc(s.id)}" ${s.id === sub.sectionId ? 'selected' : ''}>${Dev.esc(s.name)}</option>
+      `).join('');
+
+      updateEditCategories(sub.sectionId || (serverSections[0] && serverSections[0].id), sub.categoryId);
+
+      secSel.addEventListener('change', (e) => {
+        updateEditCategories(e.target.value);
+      });
+
+      // Screenshots
+      editScreensList = (Array.isArray(sub.screenshots) && sub.screenshots.length) ? [...sub.screenshots] : [''];
+      renderEditScreens();
+
+      initIcons();
     }
 
+    function updateEditCategories(sectionId, selectedCatId = null) {
+      const catSel = document.getElementById('editCategory');
+      const filtered = serverCategories.filter(c => c.sectionId === sectionId);
+      if (!filtered.length) {
+        catSel.innerHTML = '<option value="misc">عام</option>';
+      } else {
+        catSel.innerHTML = filtered.map(c => `
+          <option value="${Dev.esc(c.id)}" ${c.id === selectedCatId ? 'selected' : ''}>${Dev.esc(c.name)}</option>
+        `).join('');
+      }
+    }
+
+    function renderEditScreens() {
+      const container = document.getElementById('editScreensContainer');
+      container.innerHTML = '';
+      editScreensList.forEach((url, i) => {
+        const row = document.createElement('div');
+        row.className = 'screenshot-row';
+        row.innerHTML = `
+          <div class="screenshot-input-line">
+            <span class="screenshot-index">${i + 1}</span>
+            <input class="form-input edit-screen-input" type="url" value="${Dev.esc(url)}" data-index="${i}" placeholder="https://example.com/screen.png">
+            ${editScreensList.length > 1 ? `
+              <button type="button" class="btn btn-danger btn-sm edit-del-screen" data-index="${i}">
+                <i data-lucide="trash-2"></i>
+              </button>
+            ` : ''}
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      container.querySelectorAll('.edit-screen-input').forEach(inp => {
+        inp.addEventListener('input', (e) => {
+          editScreensList[parseInt(e.target.dataset.index, 10)] = e.target.value.trim();
+        });
+      });
+
+      container.querySelectorAll('.edit-del-screen').forEach(btn => {
+        btn.addEventListener('click', () => {
+          editScreensList.splice(parseInt(btn.dataset.index, 10), 1);
+          renderEditScreens();
+        });
+      });
+
+      initIcons();
+    }
+
+    document.getElementById('editAddScreenBtn').addEventListener('click', () => {
+      if (editScreensList.length < 5) {
+        editScreensList.push('');
+        renderEditScreens();
+      }
+    });
+
+    document.getElementById('openEditBtn')?.addEventListener('click', showEditMode);
     document.getElementById('cancelEditBtn').addEventListener('click', () => {
       document.getElementById('editCard').style.display = 'none';
       document.getElementById('detailsCard').style.display = 'block';
     });
 
+    // Save Edit Form
     document.getElementById('editForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      const name = document.getElementById('editName').value.trim();
+      const devName = document.getElementById('editDeveloper').value.trim();
+      const sectionId = document.getElementById('editSection').value;
+      const categoryId = document.getElementById('editCategory').value;
+      const targetType = document.getElementById('editTarget').value;
+      const versionName = document.getElementById('editVersion').value.trim();
+      const iconUrl = document.getElementById('editIconUrl').value.trim();
+      const apkUrl = document.getElementById('editApkUrl').value.trim();
+      const shortDescription = document.getElementById('editShortDesc').value.trim();
+      const fullDescription = document.getElementById('editFullDesc').value.trim();
+
+      const cleanScreens = editScreensList.map(s => s.trim()).filter(Boolean);
+
+      if (!name || !devName || !iconUrl || !apkUrl || cleanScreens.length === 0) {
+        return Dev.toast('يرجى ملء جميع الحقول المطلوبة والصور', 'warning');
+      }
+
       const saveBtn = document.getElementById('saveEditBtn');
       saveBtn.disabled = true;
-      saveBtn.textContent = 'جارٍ الحفظ...';
+      saveBtn.innerHTML = '<span>جارٍ حفظ التعديلات...</span>';
 
       try {
-        const updated = await Dev.api(`/api/dev/submissions/${encodeURIComponent(subId)}`, {
+        await Dev.api(`/api/dev/submissions/${encodeURIComponent(subId)}`, {
           method: 'PUT',
           body: {
-            name: document.getElementById('editName').value.trim(),
-            targetType: document.getElementById('editTarget').value,
-            versionName: document.getElementById('editVersion').value.trim(),
-            apkUrl: document.getElementById('editApkUrl').value.trim(),
-            shortDescription: document.getElementById('editShortDesc').value.trim(),
-            fullDescription: document.getElementById('editFullDesc').value.trim()
+            name,
+            developerName: devName,
+            devName,
+            sectionId,
+            categoryId,
+            targetType,
+            versionName,
+            iconUrl,
+            screenshots: cleanScreens,
+            apkUrl,
+            shortDescription,
+            fullDescription
           }
         });
-        currentSubmission = updated;
-        Dev.toast('تم حفظ التعديلات وإعادة الطلب للمراجعة بنجاح!', 'success');
+
+        Dev.toast('تم إرسال تعديلاتك بنجاح للمراجعة!', 'success');
         document.getElementById('editCard').style.display = 'none';
-        document.getElementById('detailsCard').style.display = 'block';
-        renderDetails();
+        await loadDetails();
       } catch (err) {
-        Dev.toast(err.message, 'danger');
+        Dev.toast(err.message || 'فشل حفظ التعديلات', 'danger');
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<i data-lucide="send"></i><span>حفظ التعديلات وإعادة الإرسال</span>';
+        initIcons();
       }
     });
 
-    loadDetails();
+    document.addEventListener('DOMContentLoaded', () => {
+      initIcons();
+      loadDetails();
+    });
   </script>
 </body>
 </html>

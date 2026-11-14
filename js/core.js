@@ -10,7 +10,7 @@
     DEFAULT_API_BASE,
 
     getApiBase() {
-      let b = localStorage.getItem('apphub_api_base');
+      let b = localStorage.getItem('apphub_api_base') || localStorage.getItem('appland_api_base');
       if (!b) return DEFAULT_API_BASE;
       return b.replace(/\/$/, '');
     },
@@ -18,8 +18,11 @@
     setApiBase(url) {
       if (!url) {
         localStorage.removeItem('apphub_api_base');
+        localStorage.removeItem('appland_api_base');
       } else {
-        localStorage.setItem('apphub_api_base', url.trim().replace(/\/$/, ''));
+        const clean = url.trim().replace(/\/$/, '');
+        localStorage.setItem('apphub_api_base', clean);
+        localStorage.setItem('appland_api_base', clean);
       }
     },
 

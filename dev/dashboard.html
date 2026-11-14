@@ -6,53 +6,6 @@
   <title>بوابة المطورين — AppLand Developers</title>
   <link rel="stylesheet" href="css/dev.css">
   <script src="assets/lucide.min.js"></script>
-  <style>
-    .name-badge-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(14, 165, 233, 0.12);
-      border: 1px solid rgba(14, 165, 233, 0.35);
-      color: #38bdf8;
-      padding: 6px 14px;
-      border-radius: 999px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .name-badge-btn:hover {
-      background: rgba(14, 165, 233, 0.22);
-      border-color: #38bdf8;
-    }
-    .onboarding-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .onboarding-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-focus);
-      border-radius: var(--radius-lg);
-      padding: 32px 28px;
-      max-width: 460px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-      animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    @keyframes popIn {
-      from { transform: scale(0.92); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  </style>
 </head>
 <body>
 
@@ -62,57 +15,69 @@
       <div class="brand-icon">
         <i data-lucide="tv-2" style="width:24px;height:24px;"></i>
       </div>
-      <div>
-        <div style="display:flex;align-items:center;">
-          <span class="brand-title">AppLand Developers</span>
-          <span class="brand-badge">بوابة المطورين</span>
-        </div>
+      <div class="brand-text-wrap">
+        <span class="brand-title">AppLand Developers</span>
+        <span class="brand-badge">بوابة المطورين الرسمية</span>
       </div>
     </div>
 
     <div class="nav-actions">
-      <!-- Developer Name / Change Name -->
-      <button id="changeNameNavBtn" class="name-badge-btn" title="انقر لتعديل اسم المطور">
+      <!-- Developer Name Badge -->
+      <button id="changeNameNavBtn" class="dev-profile-chip" title="تعديل اسم المطور">
         <i data-lucide="user" style="width:16px;height:16px;"></i>
         <span>المطور: <strong id="devNameNav">مطور جديد</strong></span>
-        <i data-lucide="edit-2" style="width:14px;height:14px;opacity:0.8;"></i>
+        <i data-lucide="edit-3" style="width:13px;height:13px;opacity:0.75;"></i>
       </button>
 
-      <!-- Submit App Quick Button -->
+      <!-- Submit App Quick Action -->
       <a href="submit.html" class="btn btn-primary btn-sm">
         <i data-lucide="plus-circle"></i>
-        <span>تقديم تطبيق</span>
+        <span>تقديم تطبيق جديد</span>
       </a>
     </div>
   </header>
 
-  <!-- Main Content -->
+  <!-- Container -->
   <main class="dev-container">
-    <!-- Page Head -->
+    <!-- Page Header -->
     <div class="page-head">
       <div class="page-title">
         <h1>لوحة تحكم المطور</h1>
-        <p>متابعة حالة طلباتك وإرسال تطبيقات جديدة لمتجر شاشات Android TV الذكية</p>
+        <p>متابعة حالة طلبات التطبيقات ونشرها على متجر شاشات Android TV الذكية</p>
       </div>
 
       <div style="display:flex;gap:10px;">
-        <a href="submit.html" class="btn btn-primary btn-lg">
+        <button id="refreshBtn" class="btn btn-ghost" title="تحديث البيانات">
+          <i data-lucide="refresh-cw"></i>
+          <span>تحديث</span>
+        </button>
+        <a href="submit.html" class="btn btn-primary">
           <i data-lucide="plus-circle"></i>
           <span>تقديم تطبيق جديد</span>
         </a>
       </div>
     </div>
 
-    <!-- Alert banner if any changes requested -->
+    <!-- Changes Requested Alert Banner -->
     <div id="changesAlert" class="alert alert-warning" style="display:none;">
-      <i data-lucide="alert-triangle" style="width:22px;height:22px;flex-shrink:0;"></i>
+      <i data-lucide="alert-triangle" style="width:24px;height:24px;flex-shrink:0;"></i>
       <div>
-        <strong>تنبيه: لديك طلبات تحتاج إلى تعديل!</strong>
-        <p id="changesAlertText">راجع قسم "تحتاج إلى تعديل" للاطلاع على ملاحظات الإدارة وتحديث طلبك.</p>
+        <strong>تنبيه: لديك طلبات بانتظار تعديلاتك!</strong>
+        <p id="changesAlertText" style="margin-top:2px;">يرجى مراجعة ملاحظات الإدارة وتعديل بيانات التطبيق لإعادة فحصها والموافقة عليها.</p>
       </div>
     </div>
 
-    <!-- Metrics -->
+    <!-- Error Banner -->
+    <div id="errorBanner" class="alert alert-danger" style="display:none;">
+      <i data-lucide="wifi-off" style="width:24px;height:24px;flex-shrink:0;"></i>
+      <div style="flex:1;">
+        <strong>تعذر الاتصال بالخادم</strong>
+        <p id="errorBannerText" style="margin-top:2px;">حدث خطأ أثناء جلب البيانات من الخادم.</p>
+      </div>
+      <button class="btn btn-sm btn-ghost" id="retryErrorBtn">إعادة المحاولة</button>
+    </div>
+
+    <!-- Stats Grid -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon blue"><i data-lucide="layers"></i></div>
@@ -123,7 +88,7 @@
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon yellow"><i data-lucide="clock"></i></div>
+        <div class="stat-icon blue"><i data-lucide="clock"></i></div>
         <div>
           <div class="stat-val" id="statPending">0</div>
           <div class="stat-lbl">قيد المراجعة</div>
@@ -131,7 +96,7 @@
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon yellow" style="background:rgba(245,158,11,0.2);color:#fbbf24;"><i data-lucide="edit-3"></i></div>
+        <div class="stat-icon yellow"><i data-lucide="alert-circle"></i></div>
         <div>
           <div class="stat-val" id="statChanges">0</div>
           <div class="stat-lbl">تحتاج إلى تعديل</div>
@@ -155,56 +120,71 @@
       </div>
     </div>
 
-    <!-- Filter Tabs -->
-    <div class="tabs-wrap">
-      <button class="tab-btn active" data-status="all">
-        <i data-lucide="layout-grid"></i>
-        <span>جميع الطلبات</span>
-      </button>
-      <button class="tab-btn" data-status="pending">
-        <i data-lucide="clock"></i>
-        <span>قيد المراجعة</span>
-      </button>
-      <button class="tab-btn" data-status="changes_requested">
-        <i data-lucide="alert-circle"></i>
-        <span>تحتاج إلى تعديل</span>
-      </button>
-      <button class="tab-btn" data-status="approved">
-        <i data-lucide="check-check"></i>
-        <span>المنشورة في المتجر</span>
-      </button>
-      <button class="tab-btn" data-status="rejected">
-        <i data-lucide="ban"></i>
-        <span>المرفوضة</span>
-      </button>
+    <!-- Toolbar: Tabs & Search -->
+    <div class="toolbar-wrap">
+      <div class="tabs-pills">
+        <button class="tab-pill active" data-status="all">
+          <i data-lucide="layout-grid" style="width:15px;height:15px;"></i>
+          <span>جميع الطلبات</span>
+        </button>
+        <button class="tab-pill" data-status="pending">
+          <i data-lucide="clock" style="width:15px;height:15px;"></i>
+          <span>قيد المراجعة</span>
+        </button>
+        <button class="tab-pill" data-status="changes_requested">
+          <i data-lucide="alert-triangle" style="width:15px;height:15px;"></i>
+          <span>تحتاج إلى تعديل</span>
+        </button>
+        <button class="tab-pill" data-status="approved">
+          <i data-lucide="check-check" style="width:15px;height:15px;"></i>
+          <span>المنشورة في المتجر</span>
+        </button>
+        <button class="tab-pill" data-status="rejected">
+          <i data-lucide="ban" style="width:15px;height:15px;"></i>
+          <span>المرفوضة</span>
+        </button>
+      </div>
+
+      <div class="search-input-wrap">
+        <i data-lucide="search" style="width:16px;height:16px;"></i>
+        <input type="text" id="searchInput" class="search-input" placeholder="بحث باسم التطبيق أو رقم الطلب...">
+      </div>
     </div>
 
     <!-- Submissions Table Card -->
-    <div class="card-table-wrap">
-      <div id="loadingState" style="padding:48px;text-align:center;color:var(--text-muted);">
-        <i data-lucide="loader" style="animation:spin 1s linear infinite;width:32px;height:32px;margin:0 auto 12px;display:block;"></i>
-        <span>جارٍ تحميل طلباتك...</span>
+    <div class="submissions-table-wrap">
+      <!-- Loading State -->
+      <div id="loadingState" style="padding:56px 20px;text-align:center;color:var(--text-muted);">
+        <i data-lucide="loader" style="animation:spin 1s linear infinite;width:34px;height:34px;margin:0 auto 14px;display:block;color:var(--primary);"></i>
+        <span style="font-weight:600;">جارٍ تحميل طلبات المطور من الخادم...</span>
       </div>
 
-      <div id="emptyState" style="display:none;padding:56px 20px;text-align:center;">
-        <i data-lucide="inbox" style="width:48px;height:48px;color:var(--text-dim);margin:0 auto 16px;display:block;"></i>
-        <h3 style="font-size:1.15rem;color:white;margin-bottom:6px;">لا توجد طلبات في هذا القسم</h3>
-        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:20px;">يمكنك البدء بتقديم تطبيقك لنشره في متجر شاشات AppLand</p>
+      <!-- Empty State -->
+      <div id="emptyState" style="display:none;padding:64px 20px;text-align:center;">
+        <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--text-dim);">
+          <i data-lucide="inbox" style="width:32px;height:32px;"></i>
+        </div>
+        <h3 style="font-size:1.2rem;color:#ffffff;margin-bottom:6px;">لا توجد أي طلبات هنا</h3>
+        <p style="color:var(--text-muted);font-size:0.92rem;margin-bottom:24px;max-width:420px;margin-inline:auto;">
+          لم تقدم أي تطبيقات في هذا التصنيف بعد. يمكنك البدء بتقديم تطبيقك الآن لينشر في متجر AppLand.
+        </p>
         <a href="submit.html" class="btn btn-primary">
-          <i data-lucide="plus"></i>
-          <span>تقديم تطبيق جديد</span>
+          <i data-lucide="plus-circle"></i>
+          <span>تقديم تطبيقك الأول</span>
         </a>
       </div>
 
+      <!-- Submissions Table -->
       <table class="submissions-table" id="subsTable" style="display:none;">
         <thead>
           <tr>
-            <th>التطبيق</th>
+            <th>التطبيق والإصدار</th>
             <th>رقم الطلب</th>
-            <th>القسم والجهاز</th>
+            <th>القسم والفئة</th>
+            <th>الجهاز المستهدف</th>
             <th>تاريخ التقديم</th>
-            <th>حالة الطلب</th>
-            <th>الإجراءات</th>
+            <th>الحالة</th>
+            <th style="text-align:left;">الإجراء</th>
           </tr>
         </thead>
         <tbody id="subsTbody"></tbody>
@@ -213,26 +193,26 @@
   </main>
 
   <!-- Onboarding Modal (Shown if developer has no saved name) -->
-  <div class="onboarding-overlay" id="onboardingModal" style="display:none;">
-    <div class="onboarding-card">
-      <div style="width:58px;height:58px;border-radius:16px;background:rgba(14, 165, 233, 0.15);color:#38bdf8;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+  <div class="modal-overlay" id="onboardingModal">
+    <div class="modal-card" style="text-align:center;">
+      <div style="width:60px;height:60px;border-radius:18px;background:rgba(14, 165, 233, 0.15);color:#38bdf8;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">
         <i data-lucide="code-2" style="width:32px;height:32px;"></i>
       </div>
-      <h2 style="font-size:1.4rem;font-weight:800;color:white;margin-bottom:8px;">مرحباً بك في بوابة مطوري AppLand</h2>
-      <p style="color:var(--text-muted);font-size:0.92rem;margin-bottom:22px;line-height:1.5;">
-        لا تحتاج لإنشاء حساب أو كلمة مرور. فقط أدخل اسمك أو اسم فريقك للبدء في تقديم ومتابعة تطبيقاتك.
+      <h2 style="font-size:1.45rem;font-weight:800;color:#ffffff;margin-bottom:8px;">مرحباً بك في بوابة مطوري AppLand</h2>
+      <p style="color:var(--text-muted);font-size:0.92rem;margin-bottom:24px;line-height:1.6;">
+        لا تحتاج لإنشاء حساب أو كلمة مرور. أدخل اسمك أو اسم الاستوديو الخاص بك للبدء في تقديم ومتابعة تطبيقاتك.
       </p>
 
-      <form id="onboardingForm">
-        <div class="form-group" style="text-align:right;margin-bottom:20px;">
+      <form id="onboardingForm" style="text-align:right;">
+        <div class="form-group" style="margin-bottom:22px;">
           <label class="form-label" for="onboardInput"><span class="req">*</span> اسم المطور أو الاستوديو</label>
-          <input class="form-input" type="text" id="onboardInput" placeholder="مثال: أحمد العراقي أو DevStudio" required autofocus>
-          <div class="form-hint">يُحفظ هذا الاسم على جهازك ويظهر تلقائياً في طلباتك ولدى الإدارة.</div>
+          <input class="form-input" type="text" id="onboardInput" placeholder="مثال: استوديو النور أو أحمد العراقي" required autofocus>
+          <div class="form-hint">يُحفظ هذا الاسم محلياً ويُرسل مع كل طلب لربط تطبيقاتك بك.</div>
         </div>
 
         <button type="submit" class="btn btn-primary btn-block btn-lg">
-          <i data-lucide="arrow-left"></i>
-          <span>ابدأ الآن</span>
+          <i data-lucide="check"></i>
+          <span>حفظ والبدء في اللوحة</span>
         </button>
       </form>
     </div>
@@ -253,39 +233,56 @@
           <div class="form-hint">سيتم حفظ الاسم محلياً واستخدامه في جميع طلباتك القادمة.</div>
         </div>
 
-        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:22px;">
           <button type="button" class="btn btn-ghost" id="cancelChangeNameBtn">إلغاء</button>
-          <button type="submit" class="btn btn-primary">حفظ الاسم</button>
+          <button type="submit" class="btn btn-primary">حفظ التعديل</button>
         </div>
       </form>
     </div>
   </div>
+
+  <!-- Standalone Footer (NO links to admin panel) -->
+  <footer class="dev-footer">
+    <div style="margin-bottom:6px;">منصة مطوري AppLand — بوابة نشر وتوزيع التطبيقات على شاشات وأجهزة Android TV الذكية</div>
+    <div style="color:var(--text-dim);font-size:0.8rem;">نظام تقديم مستقل وآمن • جميع الحقوق محفوظة © 2026 AppLand</div>
+  </footer>
+
+  <style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
 
   <script src="js/dev.js"></script>
   <script>
     let allSubmissions = [];
     let currentFilter = 'all';
 
+    function initIcons() {
+      if (window.lucide && typeof lucide.createIcons === 'function') {
+        lucide.createIcons();
+      }
+    }
+
     function checkOnboarding() {
       const devName = Dev.getDevName();
       if (!devName) {
-        document.getElementById('onboardingModal').style.display = 'flex';
-        if (window.lucide) lucide.createIcons();
+        document.getElementById('onboardingModal').classList.add('open');
+        initIcons();
         return false;
       }
       document.getElementById('devNameNav').textContent = devName;
-      document.getElementById('onboardingModal').style.display = 'none';
+      document.getElementById('onboardingModal').classList.remove('open');
       return true;
     }
 
+    // Onboarding Form Submit
     document.getElementById('onboardingForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const val = document.getElementById('onboardInput').value.trim();
       if (!val) return;
       Dev.setDevName(val);
       document.getElementById('devNameNav').textContent = val;
-      document.getElementById('onboardingModal').style.display = 'none';
-      Dev.toast('أهلاً بك يا ' + val + ' في بوابة المطورين!', 'success');
+      document.getElementById('onboardingModal').classList.remove('open');
+      Dev.toast('مرحباً بك يا ' + val + ' في بوابة المطورين!', 'success');
       loadDashboard();
     });
 
@@ -315,9 +312,35 @@
       loadDashboard();
     });
 
-    // Load Data
+    // Refresh & Retry
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+      Dev.toast('جارٍ تحديث البيانات...', 'info');
+      loadDashboard();
+    });
+
+    document.getElementById('retryErrorBtn').addEventListener('click', loadDashboard);
+
+    // Search Input
+    document.getElementById('searchInput').addEventListener('input', renderTable);
+
+    // Filter Tabs
+    document.querySelectorAll('.tab-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.status;
+        renderTable();
+      });
+    });
+
+    // Load Data from Backend
     async function loadDashboard() {
       if (!checkOnboarding()) return;
+
+      document.getElementById('loadingState').style.display = 'block';
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('subsTable').style.display = 'none';
+      document.getElementById('errorBanner').style.display = 'none';
 
       const devId = Dev.getDevId();
       const mySubs = Dev.getMySubmissions();
@@ -335,7 +358,7 @@
         const subsRes = await Dev.api('/api/dev/submissions' + query);
         allSubmissions = subsRes.items || [];
 
-        // Stats
+        // Compute Stats
         const total = allSubmissions.length;
         const pending = allSubmissions.filter(s => s.status === 'pending' || s.status === 'in_review').length;
         const changes = allSubmissions.filter(s => s.status === 'changes_requested').length;
@@ -350,27 +373,39 @@
 
         if (changes > 0) {
           document.getElementById('changesAlert').style.display = 'flex';
-          document.getElementById('changesAlertText').textContent = `لديك (${changes}) طلب/طلبات بحاجة إلى تعديل ملاحظات الإدارة قبل الموافقة والنشر.`;
+          document.getElementById('changesAlertText').textContent = `لديك (${changes}) طلب بحاجة إلى تعديل ملاحظات الإدارة قبل الموافقة والنشر.`;
         } else {
           document.getElementById('changesAlert').style.display = 'none';
         }
 
         renderTable();
       } catch (err) {
-        Dev.toast('تعذر جلب البيانات: ' + err.message, 'danger');
+        document.getElementById('errorBanner').style.display = 'flex';
+        document.getElementById('errorBannerText').textContent = err.message || 'تعذر الاتصال بالخادم لجلب الطلبات.';
+        Dev.toast(err.message || 'حدث خطأ أثناء جلب البيانات', 'danger');
       } finally {
         document.getElementById('loadingState').style.display = 'none';
+        initIcons();
       }
     }
 
+    // Render Submissions Table
     function renderTable() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      let filtered = [...allSubmissions];
+
+      if (currentFilter !== 'all') {
+        filtered = filtered.filter(s => s.status === currentFilter);
+      }
+
+      if (q) {
+        filtered = filtered.filter(s => [
+          s.name, s.reqNumber, s.sectionName, s.categoryName, s.versionName
+        ].filter(Boolean).join(' ').toLowerCase().includes(q));
+      }
+
       const tbody = document.getElementById('subsTbody');
       tbody.innerHTML = '';
-
-      let filtered = allSubmissions;
-      if (currentFilter !== 'all') {
-        filtered = allSubmissions.filter(s => s.status === currentFilter);
-      }
 
       if (filtered.length === 0) {
         document.getElementById('emptyState').style.display = 'block';
@@ -383,10 +418,13 @@
 
       filtered.forEach(sub => {
         const tr = document.createElement('tr');
-        const iconSrc = sub.iconUrl || 'https://placehold.co/80x80/1e293b/ffffff?text=App';
+        const iconSrc = sub.iconUrl || 'assets/logo.png';
+
+        const deviceLabel = sub.targetType === 'TV' ? 'شاشات TV' : (sub.targetType === 'PHONE' ? 'هواتف' : 'شاشات وهواتف');
+        const secCatText = [sub.sectionName, sub.categoryName].filter(Boolean).join(' › ') || 'متنوع';
 
         let actionBtn = `
-          <a href="details.html?id=${sub.id}" class="btn btn-ghost btn-sm">
+          <a href="details.html?id=${encodeURIComponent(sub.id)}" class="btn btn-ghost btn-sm">
             <i data-lucide="eye"></i>
             <span>التفاصيل</span>
           </a>
@@ -394,7 +432,7 @@
 
         if (sub.status === 'changes_requested') {
           actionBtn = `
-            <a href="details.html?id=${sub.id}&edit=true" class="btn btn-primary btn-sm" style="background:#f59e0b;color:black;">
+            <a href="details.html?id=${encodeURIComponent(sub.id)}&edit=true" class="btn btn-primary btn-sm" style="background:#f59e0b;color:#000;">
               <i data-lucide="edit-3"></i>
               <span>تعديل الطلب</span>
             </a>
@@ -404,48 +442,38 @@
         tr.innerHTML = `
           <td>
             <div class="app-meta-cell">
-              <img class="app-meta-icon" src="${Dev.esc(iconSrc)}" alt="" onerror="this.src='https://placehold.co/80x80/1e293b/ffffff?text=App'">
+              <img class="app-meta-icon" src="${Dev.esc(iconSrc)}" alt="" onerror="this.src='https://placehold.co/80x80/0f172a/38bdf8?text=App'">
               <div>
-                <div style="font-weight:700;color:white;font-size:0.95rem;">${Dev.esc(sub.name)}</div>
-                <div style="color:var(--text-dim);font-size:0.8rem;">الإصدار: ${Dev.esc(sub.versionName || '1.0.0')} (${sub.versionCode || 1})</div>
+                <strong style="color:#ffffff;display:block;font-size:0.96rem;">${Dev.esc(sub.name)}</strong>
+                <span style="font-size:0.78rem;color:var(--text-dim);">إصدار ${Dev.esc(sub.versionName || '1.0.0')} • ${Dev.fmtBytes(sub.sizeBytes)}</span>
               </div>
             </div>
           </td>
+          <td><span class="req-pill">${Dev.esc(sub.reqNumber || '—')}</span></td>
           <td>
-            <code style="background:var(--bg-card);padding:3px 8px;border-radius:4px;font-size:0.82rem;color:var(--info);">${Dev.esc(sub.reqNumber || '—')}</code>
-          </td>
-          <td>
-            <div style="font-size:0.85rem;color:var(--text-main);">${Dev.esc(sub.categoryName || 'متنوع')}</div>
-            <div style="font-size:0.75rem;color:var(--text-dim);">الجهاز: ${sub.targetType === 'TV' ? 'شاشات TV' : (sub.targetType === 'PHONE' ? 'هواتف' : 'شاشات وهواتف')}</div>
-          </td>
-          <td style="color:var(--text-muted);font-size:0.85rem;">
-            ${Dev.fmtDate(sub.createdAt)}
+            <div style="font-weight:600;color:#e2e8f0;font-size:0.88rem;">${Dev.esc(secCatText)}</div>
+            <div style="font-size:0.75rem;color:var(--text-dim);">${Dev.esc(sub.sectionId || '')} / ${Dev.esc(sub.categoryId || '')}</div>
           </td>
           <td>
-            ${Dev.statusBadge(sub.status)}
+            <span class="badge" style="background:rgba(99,102,241,0.12);color:#a5b4fc;border:1px solid rgba(99,102,241,0.3);">
+              ${Dev.esc(deviceLabel)}
+            </span>
           </td>
-          <td>
-            ${actionBtn}
-          </td>
+          <td style="color:var(--text-muted);font-size:0.85rem;">${Dev.fmtDate(sub.createdAt)}</td>
+          <td>${Dev.statusBadge(sub.status)}</td>
+          <td style="text-align:left;">${actionBtn}</td>
         `;
+
         tbody.appendChild(tr);
       });
 
-      if (window.lucide) lucide.createIcons();
+      initIcons();
     }
 
-    // Tabs filter
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilter = btn.dataset.status;
-        renderTable();
-      });
+    document.addEventListener('DOMContentLoaded', () => {
+      initIcons();
+      loadDashboard();
     });
-
-    if (window.lucide) lucide.createIcons();
-    loadDashboard();
   </script>
 </body>
 </html>

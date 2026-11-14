@@ -193,10 +193,14 @@
       if (!isAuthed) return;
 
       let allApps = [];
+      let allSections = [];
       let allCategories = [];
 
       function getAppFormFields() {
-        const catOpts = allCategories.map(c => ({ value: c.id, label: c.name }));
+        const secOpts = allSections.map(s => ({ value: s.id, label: s.name }));
+        if (!secOpts.length) secOpts.push({ value: 'apps', label: 'تطبيقات عامة' });
+
+        const catOpts = allCategories.map(c => ({ value: c.id, label: `${c.name} (${c.sectionId || 'apps'})` }));
         if (!catOpts.length) catOpts.push({ value: 'misc', label: 'تطبيقات عامة' });
 
         return [
@@ -207,7 +211,8 @@
           { name: 'screenshots', label: 'روابط لقطات الشاشة (URLs) — يُسمح بلقطة شاشة واحدة (1) على الأقل', type: 'textarea', rows: 3, full: true, placeholder: 'https://example.com/screen1.png\nhttps://example.com/screen2.png', hint: 'ضع رابط لقطة شاشة واحدة على الأقل أو عدة روابط (رابط لكل سطر أو مفصولة بفواصل) عبر روابط مباشرة' },
           { name: 'packageName', label: 'اسم الحزمة (Package Name)', full: true, placeholder: 'مثال: com.google.android.youtube.tv', hint: 'مهم جداً للتحقق من التثبيت وتفعيل أزرار فتح التطبيق وإزالته' },
           { name: 'apkUrl', label: 'رابط تحميل ملف APK المباشر', full: true, placeholder: 'https://github.com/.../releases/download/.../app.apk' },
-          { name: 'categoryId', label: 'القسم', type: 'select', options: catOpts },
+          { name: 'sectionId', label: 'القسم الرئيسي', type: 'select', options: secOpts },
+          { name: 'categoryId', label: 'الفئة الفرعية', type: 'select', options: catOpts },
           { name: 'developer', label: 'المطور أو الاستوديو', placeholder: 'مثال: Google LLC' },
           { name: 'versionName', label: 'رقم الإصدار (Version Name)', placeholder: '1.0.0', default: '1.0.0' },
           { name: 'versionCode', label: 'رمز الإصدار (Version Code)', type: 'number', placeholder: '1', default: 1 },
@@ -225,12 +230,14 @@
 
       async function loadData() {
         try {
-          const [appsRes, catsRes] = await Promise.all([
+          const [appsRes, secsRes, catsRes] = await Promise.all([
             Core.api('/api/admin/apps'),
+            Core.api('/api/admin/sections').catch(() => ({ items: [] })),
             Core.api('/api/admin/categories')
           ]);
 
           allApps = (appsRes && appsRes.items) || appsRes || [];
+          allSections = (secsRes && secsRes.items) || [];
           allCategories = (catsRes && catsRes.items) || catsRes || [];
 
           populateCategoryFilter();
@@ -296,7 +303,7 @@
                 </div>
               </div>
             </td>
-            <td><span class="badge badge-neutral">${Core.esc(a.categoryName || a.categoryId || '—')}</span></td>
+            <td><span class="badge badge-neutral">${Core.esc([a.sectionName, a.categoryName || a.categoryId].filter(Boolean).join(' › ') || '—')}</span></td>
             <td><span class="badge badge-primary">${Core.esc(a.versionName || '1.0')}</span></td>
             <td><span class="text-muted">${Core.fmtSize(a.sizeBytes)}</span></td>
             <td><strong>${(a.downloadCount ?? 0).toLocaleString()}</strong></td>
@@ -363,7 +370,14 @@
           onSubmit: async (out) => {
             if (out.categoryId) {
               const c = allCategories.find(x => x.id === out.categoryId);
-              if (c && !out.categoryName) out.categoryName = c.name;
+              if (c) {
+                if (!out.categoryName) out.categoryName = c.name;
+                if (!out.sectionId && c.sectionId) out.sectionId = c.sectionId;
+              }
+            }
+            if (out.sectionId) {
+              const s = allSections.find(x => x.id === out.sectionId);
+              if (s && !out.sectionName) out.sectionName = s.name;
             }
 
             if (isEdit) {

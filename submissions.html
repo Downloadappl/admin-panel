@@ -368,7 +368,7 @@
             <div style="font-size:0.75rem;color:var(--text-muted);">${Core.esc(sub.devEmail || '')}</div>
           </td>
           <td>
-            <div>${Core.esc(sub.categoryName || 'متنوع')}</div>
+            <div><strong>${Core.esc(sub.sectionName || 'القسم العام')}</strong> › ${Core.esc(sub.categoryName || 'متنوع')}</div>
             <span style="font-size:0.75rem;color:var(--info);">${sub.targetType === 'TV' ? 'شاشات TV' : (sub.targetType === 'PHONE' ? 'هواتف' : 'شاشات وهواتف')}</span>
           </td>
           <td style="color:var(--text-muted);">${Core.fmtDate(sub.createdAt)}</td>
@@ -418,7 +418,7 @@
               المطور: <strong style="color:white;">${Core.esc(sub.developer || sub.devName || 'مطور AppLand')}</strong>${sub.devEmail ? ` (${Core.esc(sub.devEmail)})` : ''}
             </div>
             <div style="font-size:0.85rem;color:var(--text-dim);">
-              القسم: <span style="color:var(--primary);">${Core.esc(sub.categoryName)}</span> • الجهاز: <strong>${sub.targetType}</strong> • الحجم: ${Core.fmtSize(sub.sizeBytes)}
+              القسم: <strong style="color:white;">${Core.esc(sub.sectionName || 'عام')}</strong> • الفئة: <span style="color:var(--primary);">${Core.esc(sub.categoryName || 'متنوع')}</span> • الجهاز: <strong>${sub.targetType}</strong> • الحجم: ${Core.fmtSize(sub.sizeBytes)}
             </div>
           </div>
         </div>
