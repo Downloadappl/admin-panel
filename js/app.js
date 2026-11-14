@@ -3,7 +3,12 @@
 
   // ===== Configuration =====
   const DEFAULT_API_BASE = 'https://apphub.khhjmwmmy.workers.dev';
-  let API_BASE = (localStorage.getItem('apphub_api_base') || DEFAULT_API_BASE).replace(/\/$/, '');
+  let storedBase = localStorage.getItem('apphub_api_base');
+  if (storedBase && storedBase.includes('github.io')) {
+    localStorage.removeItem('apphub_api_base');
+    storedBase = null;
+  }
+  let API_BASE = (storedBase || DEFAULT_API_BASE).replace(/\/$/, '');
 
   const state = {
     token: localStorage.getItem('apphub_admin_token') || '',

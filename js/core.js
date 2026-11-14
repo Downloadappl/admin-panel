@@ -11,6 +11,11 @@
 
     getApiBase() {
       let b = localStorage.getItem('apphub_api_base') || localStorage.getItem('appland_api_base');
+      if (b && b.includes('github.io')) {
+        localStorage.removeItem('apphub_api_base');
+        localStorage.removeItem('appland_api_base');
+        b = null;
+      }
       if (!b) return DEFAULT_API_BASE;
       return b.replace(/\/$/, '');
     },

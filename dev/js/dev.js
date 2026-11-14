@@ -16,21 +16,20 @@
     // Backend Base URL resolver
     getBaseUrl() {
       // 1. Check synced local storage keys
-      const stored = localStorage.getItem('apphub_api_base') || localStorage.getItem('appland_api_base');
+      let stored = localStorage.getItem('apphub_api_base') || localStorage.getItem('appland_api_base');
+      if (stored && stored.includes('github.io')) {
+        localStorage.removeItem('apphub_api_base');
+        localStorage.removeItem('appland_api_base');
+        stored = null;
+      }
       if (stored && stored.trim()) {
         return stored.trim().replace(/\/$/, '');
       }
 
-      // 2. If hosted directly on Cloudflare Workers / production domain (not local dev)
+      // 2. If hosted directly on Cloudflare Workers (workers.dev)
       if (window.location && window.location.origin) {
         const origin = window.location.origin;
-        const isLocal = origin.includes('localhost') ||
-                        origin.includes('127.0.0.1') ||
-                        origin.includes('file:') ||
-                        origin.includes(':8080') ||
-                        origin.includes(':5500') ||
-                        origin.includes(':3000');
-        if (!isLocal && origin.includes('workers.dev')) {
+        if (origin.includes('workers.dev')) {
           return origin;
         }
       }
