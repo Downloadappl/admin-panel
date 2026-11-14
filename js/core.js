@@ -215,6 +215,7 @@
             serverLabelEl.textContent = apiBase;
           }
         }
+        Core.updateSubmissionsBadge();
         return true;
       } catch (err) {
         console.warn('Auth check failed:', err);
@@ -222,6 +223,21 @@
         window.location.href = 'login.html';
         return false;
       }
+    },
+
+    async updateSubmissionsBadge() {
+      try {
+        const stats = await Core.api('/api/admin/submissions/stats');
+        const badge = document.getElementById('submissionsPendingBadge');
+        if (badge) {
+          if (stats && stats.pending > 0) {
+            badge.textContent = stats.pending;
+            badge.style.display = 'inline-block';
+          } else {
+            badge.style.display = 'none';
+          }
+        }
+      } catch (_) {}
     },
 
     openModal({ title, fields, initialData = {}, onSubmit }) {

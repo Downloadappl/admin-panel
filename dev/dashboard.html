@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة المطور — AppLand Developers</title>
+  <link rel="stylesheet" href="css/dev.css">
+  <script src="../assets/lucide.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="dev-header">
+    <div class="brand-wrap">
+      <div class="brand-icon">
+        <i data-lucide="tv-2" style="width:24px;height:24px;"></i>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;">
+          <span class="brand-title">AppLand Developers</span>
+          <span class="brand-badge">بوابة المطورين</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <!-- Notification Bell -->
+      <button id="notifBellBtn" class="btn btn-ghost btn-sm" style="position:relative;" title="الإشعارات">
+        <i data-lucide="bell"></i>
+        <span id="notifBadge" style="display:none;position:absolute;top:4px;right:4px;width:9px;height:9px;background:var(--danger);border-radius:50%;"></span>
+      </button>
+
+      <!-- Profile -->
+      <button id="profileBtn" class="btn btn-ghost btn-sm">
+        <i data-lucide="user"></i>
+        <span id="devNameNav">المطور</span>
+      </button>
+
+      <!-- Logout -->
+      <button id="logoutBtn" class="btn btn-danger btn-sm" title="تسجيل الخروج">
+        <i data-lucide="log-out"></i>
+        <span>خروج</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="dev-container">
+    <!-- Page Head -->
+    <div class="page-head">
+      <div class="page-title">
+        <h1>لوحة تحكم المطور</h1>
+        <p>متابعة حالة طلبات التطبيقات وإرسال تطبيقات جديدة لمتجر شاشات Android TV</p>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <a href="submit.html" class="btn btn-primary btn-lg">
+          <i data-lucide="plus-circle"></i>
+          <span>تقديم تطبيق جديد</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Alert banner if any changes requested -->
+    <div id="changesAlert" class="alert alert-warning" style="display:none;">
+      <i data-lucide="alert-triangle" style="width:22px;height:22px;flex-shrink:0;"></i>
+      <div>
+        <strong>تنبيه: لديك طلبات تحتاج إلى تعديل!</strong>
+        <p id="changesAlertText">راجع قسم "تحتاج إلى تعديل" للاطلاع على ملاحظات الإدارة وإعادة إرسال طلبك.</p>
+      </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue"><i data-lucide="layers"></i></div>
+        <div>
+          <div class="stat-val" id="statTotal">0</div>
+          <div class="stat-lbl">إجمالي طلباتي</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon yellow"><i data-lucide="clock"></i></div>
+        <div>
+          <div class="stat-val" id="statPending">0</div>
+          <div class="stat-lbl">قيد المراجعة</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon yellow" style="background:rgba(245,158,11,0.2);color:#fbbf24;"><i data-lucide="edit-3"></i></div>
+        <div>
+          <div class="stat-val" id="statChanges">0</div>
+          <div class="stat-lbl">تحتاج إلى تعديل</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon green"><i data-lucide="check-circle-2"></i></div>
+        <div>
+          <div class="stat-val" id="statApproved">0</div>
+          <div class="stat-lbl">المقبولة والمنشورة</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon red"><i data-lucide="x-circle"></i></div>
+        <div>
+          <div class="stat-val" id="statRejected">0</div>
+          <div class="stat-lbl">المرفوضة</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="tabs-wrap">
+      <button class="tab-btn active" data-status="all">
+        <i data-lucide="layout-grid"></i>
+        <span>جميع الطلبات</span>
+      </button>
+      <button class="tab-btn" data-status="pending">
+        <i data-lucide="clock"></i>
+        <span>قيد المراجعة</span>
+      </button>
+      <button class="tab-btn" data-status="changes_requested">
+        <i data-lucide="alert-circle"></i>
+        <span>تحتاج إلى تعديل</span>
+      </button>
+      <button class="tab-btn" data-status="approved">
+        <i data-lucide="check-check"></i>
+        <span>المنشورة في المتجر</span>
+      </button>
+      <button class="tab-btn" data-status="rejected">
+        <i data-lucide="ban"></i>
+        <span>المرفوضة</span>
+      </button>
+    </div>
+
+    <!-- Submissions Table Card -->
+    <div class="card-table-wrap">
+      <div id="loadingState" style="padding:48px;text-align:center;color:var(--text-muted);">
+        <i data-lucide="loader" style="animation:spin 1s linear infinite;width:32px;height:32px;margin:0 auto 12px;display:block;"></i>
+        <span>جارٍ تحميل طلباتك...</span>
+      </div>
+
+      <div id="emptyState" style="display:none;padding:56px 20px;text-align:center;">
+        <i data-lucide="inbox" style="width:48px;height:48px;color:var(--text-dim);margin:0 auto 16px;display:block;"></i>
+        <h3 style="font-size:1.15rem;color:white;margin-bottom:6px;">لا توجد طلبات في هذا القسم</h3>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:20px;">يمكنك البدء بتقديم تطبيقك الأول لنشره في متجر شاشات AppLand</p>
+        <a href="submit.html" class="btn btn-primary">
+          <i data-lucide="plus"></i>
+          <span>تقديم تطبيق جديد</span>
+        </a>
+      </div>
+
+      <table class="submissions-table" id="subsTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>التطبيق</th>
+            <th>رقم الطلب</th>
+            <th>القسم والجهاز</th>
+            <th>تاريخ التقديم</th>
+            <th>حالة الطلب</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="subsTbody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Notifications Modal -->
+  <div class="modal-overlay" id="notifModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 class="modal-title" style="display:flex;align-items:center;gap:10px;">
+          <i data-lucide="bell" style="width:20px;height:20px;"></i>
+          <span>مركز إشعارات المطور</span>
+        </h3>
+        <button class="modal-close" id="closeNotifModal">&times;</button>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+        <button id="markReadBtn" class="btn btn-ghost btn-sm">
+          <i data-lucide="check"></i>
+          <span>تحديد الكل كمقروء</span>
+        </button>
+      </div>
+
+      <div id="notifList" style="display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div class="modal-overlay" id="profileModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3 class="modal-title">الملف الشخصي للمطور</h3>
+        <button class="modal-close" id="closeProfileModal">&times;</button>
+      </div>
+
+      <form id="profileForm">
+        <div class="form-group">
+          <label class="form-label" for="profName">الاسم الكامل</label>
+          <input class="form-input" type="text" id="profName" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="profEmail">البريد الإلكتروني</label>
+          <input class="form-input" type="email" id="profEmail" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="profNewPass">تغيير كلمة المرور (اختياري)</label>
+          <input class="form-input" type="password" id="profNewPass" placeholder="اتركه فارغاً إذا لم ترغب بالتغيير">
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+          <button type="button" class="btn btn-ghost" id="cancelProfBtn">إلغاء</button>
+          <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
+
+  <script src="js/dev.js"></script>
+  <script>
+    if (!Dev.requireAuth()) throw new Error('Auth required');
+    if (window.lucide) lucide.createIcons();
+
+    let allSubmissions = [];
+    let currentFilter = 'all';
+
+    const user = Dev.getUser() || {};
+    document.getElementById('devNameNav').textContent = user.fullName || user.username || 'المطور';
+
+    document.getElementById('logoutBtn').addEventListener('click', () => Dev.logout());
+
+    // Load Data
+    async function loadDashboard() {
+      try {
+        const subsRes = await Dev.api('/api/dev/submissions');
+        allSubmissions = subsRes.items || [];
+
+        // Stats
+        const total = allSubmissions.length;
+        const pending = allSubmissions.filter(s => s.status === 'pending' || s.status === 'in_review').length;
+        const changes = allSubmissions.filter(s => s.status === 'changes_requested').length;
+        const approved = allSubmissions.filter(s => s.status === 'approved').length;
+        const rejected = allSubmissions.filter(s => s.status === 'rejected').length;
+
+        document.getElementById('statTotal').textContent = total;
+        document.getElementById('statPending').textContent = pending;
+        document.getElementById('statChanges').textContent = changes;
+        document.getElementById('statApproved').textContent = approved;
+        document.getElementById('statRejected').textContent = rejected;
+
+        if (changes > 0) {
+          document.getElementById('changesAlert').style.display = 'flex';
+          document.getElementById('changesAlertText').textContent = `لديك (${changes}) طلب/طلبات بحاجة إلى تعديل ملاحظات الإدارة قبل الموافقة والنشر.`;
+        } else {
+          document.getElementById('changesAlert').style.display = 'none';
+        }
+
+        renderTable();
+        loadNotifications();
+      } catch (err) {
+        Dev.toast('تعذر جلب البيانات: ' + err.message, 'danger');
+      } finally {
+        document.getElementById('loadingState').style.display = 'none';
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('subsTbody');
+      tbody.innerHTML = '';
+
+      let filtered = allSubmissions;
+      if (currentFilter !== 'all') {
+        filtered = allSubmissions.filter(s => s.status === currentFilter);
+      }
+
+      if (filtered.length === 0) {
+        document.getElementById('emptyState').style.display = 'block';
+        document.getElementById('subsTable').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('subsTable').style.display = 'table';
+
+      filtered.forEach(sub => {
+        const tr = document.createElement('tr');
+        const iconSrc = sub.iconUrl || 'https://placehold.co/80x80/1e293b/ffffff?text=App';
+
+        let actionBtn = `
+          <a href="details.html?id=${sub.id}" class="btn btn-ghost btn-sm">
+            <i data-lucide="eye"></i>
+            <span>التفاصيل</span>
+          </a>
+        `;
+
+        if (sub.status === 'changes_requested') {
+          actionBtn = `
+            <a href="details.html?id=${sub.id}&edit=true" class="btn btn-primary btn-sm" style="background:#f59e0b;color:black;">
+              <i data-lucide="edit-3"></i>
+              <span>تعديل الطلب</span>
+            </a>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td>
+            <div class="app-meta-cell">
+              <img class="app-meta-icon" src="${Dev.esc(iconSrc)}" alt="" onerror="this.src='https://placehold.co/80x80/1e293b/ffffff?text=App'">
+              <div>
+                <div style="font-weight:700;color:white;font-size:0.95rem;">${Dev.esc(sub.name)}</div>
+                <div style="color:var(--text-dim);font-size:0.8rem;">الإصدار: ${Dev.esc(sub.versionName || '1.0.0')} (${sub.versionCode || 1})</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <code style="background:var(--bg-card);padding:3px 8px;border-radius:4px;font-size:0.82rem;color:var(--info);">${Dev.esc(sub.reqNumber || '—')}</code>
+          </td>
+          <td>
+            <div style="font-size:0.85rem;color:var(--text-main);">${Dev.esc(sub.categoryName || 'متنوع')}</div>
+            <div style="font-size:0.75rem;color:var(--text-dim);">الجهاز: ${sub.targetType === 'TV' ? 'شاشات TV' : (sub.targetType === 'PHONE' ? 'هواتف' : 'شاشات وهواتف')}</div>
+          </td>
+          <td style="color:var(--text-muted);font-size:0.85rem;">
+            ${Dev.fmtDate(sub.createdAt)}
+          </td>
+          <td>
+            ${Dev.statusBadge(sub.status)}
+          </td>
+          <td>
+            ${actionBtn}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Tabs filter
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.status;
+        renderTable();
+      });
+    });
+
+    // Notifications
+    async function loadNotifications() {
+      try {
+        const res = await Dev.api('/api/dev/notifications');
+        const notifs = res.items || [];
+        const unread = notifs.filter(n => !n.read).length;
+        const badge = document.getElementById('notifBadge');
+        if (unread > 0) badge.style.display = 'block';
+        else badge.style.display = 'none';
+
+        const list = document.getElementById('notifList');
+        if (notifs.length === 0) {
+          list.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:24px;">لا توجد إشعارات حتى الآن</div>';
+          return;
+        }
+
+        list.innerHTML = notifs.map(n => `
+          <div style="background:var(--bg-card);padding:14px;border-radius:var(--radius-sm);border:1px solid ${n.read ? 'var(--border)' : 'var(--primary)'};">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <span style="font-weight:700;color:white;font-size:0.9rem;">${Dev.esc(n.title)}</span>
+              <span style="font-size:0.75rem;color:var(--text-dim);">${Dev.fmtDate(n.createdAt)}</span>
+            </div>
+            <p style="font-size:0.85rem;color:var(--text-muted);">${Dev.esc(n.message)}</p>
+          </div>
+        `).join('');
+      } catch (_) {}
+    }
+
+    document.getElementById('notifBellBtn').addEventListener('click', () => {
+      document.getElementById('notifModal').classList.add('open');
+    });
+    document.getElementById('closeNotifModal').addEventListener('click', () => {
+      document.getElementById('notifModal').classList.remove('open');
+    });
+    document.getElementById('markReadBtn').addEventListener('click', async () => {
+      await Dev.api('/api/dev/notifications/read', { method: 'POST' });
+      document.getElementById('notifBadge').style.display = 'none';
+      loadNotifications();
+    });
+
+    // Profile modal
+    document.getElementById('profileBtn').addEventListener('click', async () => {
+      try {
+        const me = await Dev.api('/api/dev/me');
+        document.getElementById('profName').value = me.fullName || '';
+        document.getElementById('profEmail').value = me.email || '';
+        document.getElementById('profileModal').classList.add('open');
+      } catch (err) {
+        Dev.toast(err.message, 'danger');
+      }
+    });
+
+    document.getElementById('closeProfileModal').addEventListener('click', () => {
+      document.getElementById('profileModal').classList.remove('open');
+    });
+    document.getElementById('cancelProfBtn').addEventListener('click', () => {
+      document.getElementById('profileModal').classList.remove('open');
+    });
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fullName = document.getElementById('profName').value.trim();
+      const email = document.getElementById('profEmail').value.trim();
+      const newPassword = document.getElementById('profNewPass').value;
+
+      try {
+        const res = await Dev.api('/api/dev/profile', {
+          method: 'PUT',
+          body: { fullName, email, newPassword: newPassword || undefined }
+        });
+        Dev.setUser(res.developer);
+        document.getElementById('devNameNav').textContent = res.developer.fullName;
+        Dev.toast('تم تحديث الملف الشخصي بنجاح', 'success');
+        document.getElementById('profileModal').classList.remove('open');
+      } catch (err) {
+        Dev.toast(err.message, 'danger');
+      }
+    });
+
+    loadDashboard();
+  </script>
+</body>
+</html>

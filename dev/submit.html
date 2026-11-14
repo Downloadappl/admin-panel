@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تقديم تطبيق جديد — AppLand Developers</title>
+  <link rel="stylesheet" href="css/dev.css">
+  <script src="../assets/lucide.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="dev-header">
+    <div class="brand-wrap">
+      <div class="brand-icon">
+        <i data-lucide="tv-2" style="width:24px;height:24px;"></i>
+      </div>
+      <div>
+        <span class="brand-title">AppLand Developers</span>
+        <span class="brand-badge">بوابة المطورين</span>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <a href="dashboard.html" class="btn btn-ghost btn-sm">
+        <i data-lucide="arrow-right"></i>
+        <span>العودة للوحة التحكم</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Container -->
+  <main class="dev-container" style="max-width:880px;">
+    <div class="page-head">
+      <div class="page-title">
+        <h1>تقديم تطبيق جديد لمتجر AppLand</h1>
+        <p>أدخل بيانات التطبيق ورابط APK المباشر والصور ليتم مراجعتها ونشرها على شاشات التلفزيون الذكية.</p>
+      </div>
+    </div>
+
+    <!-- Success Screen (Hidden by default) -->
+    <div id="successCard" class="form-card" style="display:none;text-align:center;padding:48px 24px;">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--success-bg);color:var(--success);margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:36px;border:2px solid var(--success);">
+        <i data-lucide="check-circle" style="width:40px;height:40px;"></i>
+      </div>
+      <h2 style="font-size:1.6rem;font-weight:800;color:white;margin-bottom:8px;">تم إرسال طلبك بنجاح!</h2>
+      <p style="color:var(--text-muted);font-size:1rem;margin-bottom:18px;">تم تسجيل طلبك برقم الطلب الرسمي التالي:</p>
+
+      <div style="display:inline-block;background:var(--bg-card);border:1px solid var(--border-focus);padding:10px 24px;border-radius:999px;font-size:1.25rem;font-weight:800;color:var(--info);letter-spacing:1px;margin-bottom:24px;" id="successReqNumber">
+        REQ-2026-0001
+      </div>
+
+      <div class="alert alert-info" style="text-align:right;max-width:560px;margin:0 auto 28px;">
+        <i data-lucide="info" style="width:24px;height:24px;flex-shrink:0;"></i>
+        <div>
+          <strong>ملاحظة هامة جداً:</strong>
+          <p>لن يظهر التطبيق في متجر AppLand للشاشات مباشرة، بل يمر بمرحلة فحص ومراجعة سريعة من الإدارة للتأكد من توافق الريموت ورابط التحميل. ستصلك إشعارات فورية بكل مرحلة.</p>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:center;gap:12px;">
+        <a href="dashboard.html" class="btn btn-primary btn-lg">
+          <i data-lucide="layout-dashboard"></i>
+          <span>الذهاب إلى لوحة المطور</span>
+        </a>
+        <button id="submitAnotherBtn" class="btn btn-ghost btn-lg">
+          <i data-lucide="plus"></i>
+          <span>تقديم تطبيق آخر</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Form -->
+    <form id="submissionForm">
+      <!-- Section 1: Basic App Info -->
+      <div class="form-card">
+        <h3 style="font-size:1.15rem;font-weight:700;color:white;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+          <i data-lucide="info" style="color:var(--info);"></i>
+          <span>1. معلومات التطبيق الأساسية</span>
+        </h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="appName"><span class="req">*</span> اسم التطبيق</label>
+            <input class="form-input" type="text" id="appName" required placeholder="مثال: نور ميديا بلاير TV">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="appDeveloper"><span class="req">*</span> اسم المطور أو الاستوديو</label>
+            <input class="form-input" type="text" id="appDeveloper" required placeholder="اسم الناشر أو فريق العمل">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="appTargetType"><span class="req">*</span> نوع التطبيق والجهاز المستهدف</label>
+            <select class="form-select" id="appTargetType" required>
+              <option value="TV">Android TV (مخصص للشاشات وأجهزة التلفزيون)</option>
+              <option value="BOTH">Both (متوافق مع الشاشات والهواتف)</option>
+              <option value="PHONE">Android Phone (هواتف فقط)</option>
+            </select>
+            <div class="form-hint">اختر Android TV لضمان ظهوره في الواجهة الرئيسية لمتجر التلفزيون.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="appCategory"><span class="req">*</span> القسم والتصنيف</label>
+            <select class="form-select" id="appCategory" required>
+              <option value="">جارٍ تحميل الأقسام من المتجر...</option>
+            </select>
+            <div class="form-hint">يتم جلب الأقسام تلقائياً من قاعدة بيانات متجر AppLand الحالية.</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="appVersionName">رقم الإصدار (Version Name)</label>
+            <input class="form-input" type="text" id="appVersionName" placeholder="مثال: 1.0.0" value="1.0.0">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="appSizeMb">حجم التطبيق التقريبي (ميجابايت MB)</label>
+            <input class="form-input" type="number" id="appSizeMb" placeholder="مثال: 25" min="1" step="0.1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="appShortDesc"><span class="req">*</span> نبذة مختصرة عن التطبيق (سطر واحد جذاب)</label>
+          <input class="form-input" type="text" id="appShortDesc" required placeholder="مثال: مشغل وسائط فائق السرعة لدقة 4K مع تحكم كامل بالريموت">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="appFullDesc"><span class="req">*</span> الوصف الكامل والميزات</label>
+          <textarea class="form-textarea" id="appFullDesc" required placeholder="اشرح خصائص التطبيق، طريقة التشغيل، والأجهزة المدعومة..."></textarea>
+        </div>
+      </div>
+
+      <!-- Section 2: Media (Icon & Screenshots) -->
+      <div class="form-card">
+        <h3 style="font-size:1.15rem;font-weight:700;color:white;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+          <i data-lucide="image" style="color:var(--info);"></i>
+          <span>2. صور وأيقونة التطبيق</span>
+        </h3>
+
+        <!-- Icon Upload -->
+        <div class="form-group">
+          <label class="form-label"><span class="req">*</span> أيقونة التطبيق (مربعة 1:1 - PNG, JPG, WebP)</label>
+          <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+            <div style="width:96px;height:96px;border-radius:20px;background:var(--bg-card);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;" id="iconPreviewBox">
+              <i data-lucide="image" style="color:var(--text-dim);width:32px;height:32px;"></i>
+            </div>
+            <div style="flex:1;min-width:220px;">
+              <input type="file" id="iconFileInput" accept="image/png,image/jpeg,image/webp" style="display:none;">
+              <button type="button" class="btn btn-ghost" id="selectIconBtn">
+                <i data-lucide="upload"></i>
+                <span>رفع صورة الأيقونة</span>
+              </button>
+              <div class="form-hint">يُفضل مقاس 512×512 بكسل بخلفية واضحة لتظهر بشكل رائع على الشاشات الكبيرة.</div>
+            </div>
+          </div>
+          <input type="hidden" id="appIconUrl" required>
+        </div>
+
+        <!-- Screenshots Upload -->
+        <div class="form-group" style="margin-top:28px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <label class="form-label" style="margin-bottom:0;"><span class="req">*</span> لقطات الشاشة (من 1 إلى 5 صور كحد أقصى)</label>
+            <span id="screensCountLabel" style="font-size:0.8rem;color:var(--text-dim);">0 / 5</span>
+          </div>
+          <div class="upload-box" id="screensUploadBox">
+            <i data-lucide="plus-circle" style="width:36px;height:36px;color:var(--text-dim);margin:0 auto 8px;display:block;"></i>
+            <div style="font-weight:600;color:white;">انقر هنا لاختيار لقطات الشاشة للشاشات أو التلفاز</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;">صيغ PNG, JPG, WebP (بحد أقصى 5 صور)</div>
+            <input type="file" id="screensFileInput" accept="image/png,image/jpeg,image/webp" multiple style="display:none;">
+          </div>
+          <div class="screenshots-grid" id="screenshotsPreviewGrid"></div>
+        </div>
+      </div>
+
+      <!-- Section 3: APK Direct Download Link -->
+      <div class="form-card">
+        <h3 style="font-size:1.15rem;font-weight:700;color:white;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+          <i data-lucide="download-cloud" style="color:var(--info);"></i>
+          <span>3. رابط تحميل ملف APK المباشر</span>
+        </h3>
+
+        <div class="form-group">
+          <label class="form-label" for="apkUrlInput"><span class="req">*</span> رابط تحميل ملف APK المباشر (HTTPS)</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <input class="form-input" style="flex:1;min-width:260px;" type="url" id="apkUrlInput" required placeholder="https://example.com/download/app.apk">
+            <button type="button" class="btn btn-ghost" id="verifyApkBtn">
+              <i data-lucide="shield-check"></i>
+              <span>فحص الرابط الآن</span>
+            </button>
+          </div>
+          <div class="form-hint">يجب أن يبدأ الرابط بـ HTTPS وأن يؤدي مباشرة إلى ملف APK دون صفحات تسجيل دخول أو إعلانات مزعجة.</div>
+        </div>
+
+        <!-- Verification Result Box -->
+        <div id="apkVerifyBox" style="display:none;margin-top:14px;" class="alert">
+          <i id="apkVerifyIcon" data-lucide="info" style="width:20px;height:20px;flex-shrink:0;"></i>
+          <span id="apkVerifyMsg">جارٍ الفحص...</span>
+        </div>
+      </div>
+
+      <!-- Submit Section -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:48px;">
+        <a href="dashboard.html" class="btn btn-ghost btn-lg">إلغاء والعودة</a>
+        <button type="submit" class="btn btn-primary btn-lg" id="submitFormBtn">
+          <i data-lucide="send"></i>
+          <span>إرسال التطبيق للمراجعة والنشر</span>
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <script src="js/dev.js"></script>
+  <script>
+    if (!Dev.requireAuth()) throw new Error('Auth required');
+    if (window.lucide) lucide.createIcons();
+
+    const user = Dev.getUser() || {};
+    if (user.fullName) document.getElementById('appDeveloper').value = user.fullName;
+
+    let iconDataUrl = '';
+    let screenshotsList = [];
+    let apkVerified = false;
+
+    // Load Real Categories from Store
+    async function loadCategories() {
+      const select = document.getElementById('appCategory');
+      try {
+        const res = await Dev.api('/api/categories');
+        const items = res.items || [];
+        if (items.length === 0) {
+          select.innerHTML = '<option value="misc">تطبيقات متنوعة</option>';
+          return;
+        }
+        select.innerHTML = items
+          .filter(c => c.id !== 'all')
+          .map(c => `<option value="${Dev.esc(c.id)}">${Dev.esc(c.name)}</option>`)
+          .join('');
+      } catch (err) {
+        select.innerHTML = '<option value="misc">تطبيقات متنوعة</option>';
+      }
+    }
+    loadCategories();
+
+    // Icon Upload Handler
+    const selectIconBtn = document.getElementById('selectIconBtn');
+    const iconFileInput = document.getElementById('iconFileInput');
+    const iconPreviewBox = document.getElementById('iconPreviewBox');
+
+    selectIconBtn.addEventListener('click', () => iconFileInput.click());
+
+    iconFileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        return Dev.toast('يرجى اختيار صورة بصيغة PNG أو JPG أو WebP', 'danger');
+      }
+      try {
+        iconDataUrl = await Dev.compressImage(file, 512, 0.9);
+        document.getElementById('appIconUrl').value = iconDataUrl;
+        iconPreviewBox.innerHTML = `<img src="${iconDataUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+        Dev.toast('تم تحميل الأيقونة بنجاح', 'success');
+      } catch (err) {
+        Dev.toast('فشل تجهيز الصورة: ' + err.message, 'danger');
+      }
+    });
+
+    // Screenshots Upload Handler
+    const screensUploadBox = document.getElementById('screensUploadBox');
+    const screensFileInput = document.getElementById('screensFileInput');
+    const screensGrid = document.getElementById('screenshotsPreviewGrid');
+    const screensCountLabel = document.getElementById('screensCountLabel');
+
+    screensUploadBox.addEventListener('click', () => screensFileInput.click());
+
+    screensFileInput.addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+
+      for (const file of files) {
+        if (screenshotsList.length >= 5) {
+          Dev.toast('الحد الأقصى هو 5 لقطات شاشة فقط', 'warning');
+          break;
+        }
+        if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) continue;
+        try {
+          const dataUrl = await Dev.compressImage(file, 1280, 0.85);
+          screenshotsList.push(dataUrl);
+        } catch (_) {}
+      }
+      renderScreenshots();
+    });
+
+    function renderScreenshots() {
+      screensGrid.innerHTML = '';
+      screensCountLabel.textContent = `${screenshotsList.length} / 5`;
+
+      screenshotsList.forEach((src, idx) => {
+        const div = document.createElement('div');
+        div.className = 'screenshot-thumb';
+        div.innerHTML = `
+          <img src="${src}" alt="Screenshot ${idx + 1}">
+          <button type="button" class="btn-del" title="حذف">&times;</button>
+        `;
+        div.querySelector('.btn-del').addEventListener('click', (e) => {
+          e.stopPropagation();
+          screenshotsList.splice(idx, 1);
+          renderScreenshots();
+        });
+        screensGrid.appendChild(div);
+      });
+    }
+
+    // Live APK Link Verifier
+    const verifyApkBtn = document.getElementById('verifyApkBtn');
+    const apkUrlInput = document.getElementById('apkUrlInput');
+    const apkVerifyBox = document.getElementById('apkVerifyBox');
+    const apkVerifyMsg = document.getElementById('apkVerifyMsg');
+
+    verifyApkBtn.addEventListener('click', async () => {
+      const url = apkUrlInput.value.trim();
+      if (!url) {
+        Dev.toast('يرجى كتابة رابط APK أولاً', 'warning');
+        return;
+      }
+      apkVerifyBox.style.display = 'flex';
+      apkVerifyBox.className = 'alert alert-info';
+      apkVerifyMsg.textContent = 'جارٍ فحص الرابط والتأكد من أمانه وصلاحية ملف APK...';
+
+      try {
+        const res = await Dev.api('/api/dev/verify-apk', {
+          method: 'POST',
+          body: { apkUrl: url }
+        });
+        if (res.valid) {
+          apkVerified = true;
+          apkVerifyBox.className = 'alert alert-success';
+          let details = 'رابط صالح وملف APK سليم وجاهز للتنزيل.';
+          if (res.sizeBytes) {
+            const mb = (res.sizeBytes / (1024 * 1024)).toFixed(1);
+            details += ` (الحجم المكتشف: ${mb} MB)`;
+            if (!document.getElementById('appSizeMb').value) {
+              document.getElementById('appSizeMb').value = mb;
+            }
+          }
+          apkVerifyMsg.textContent = details;
+        } else {
+          apkVerified = false;
+          apkVerifyBox.className = 'alert alert-danger';
+          apkVerifyMsg.textContent = 'فشل الفحص: ' + res.error;
+        }
+      } catch (err) {
+        apkVerified = false;
+        apkVerifyBox.className = 'alert alert-danger';
+        apkVerifyMsg.textContent = 'تعذر فحص الرابط: ' + err.message;
+      }
+    });
+
+    // Form Submit
+    const form = document.getElementById('submissionForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('appName').value.trim();
+      const developer = document.getElementById('appDeveloper').value.trim();
+      const targetType = document.getElementById('appTargetType').value;
+      const categoryId = document.getElementById('appCategory').value;
+      const versionName = document.getElementById('appVersionName').value.trim() || '1.0.0';
+      const sizeMb = Number(document.getElementById('appSizeMb').value || 0);
+      const shortDesc = document.getElementById('appShortDesc').value.trim();
+      const fullDesc = document.getElementById('appFullDesc').value.trim();
+      const apkUrl = apkUrlInput.value.trim();
+
+      if (!iconDataUrl) {
+        return Dev.toast('يرجى رفع صورة أيقونة التطبيق', 'danger');
+      }
+      if (screenshotsList.length === 0) {
+        return Dev.toast('يرجى رفع لقطة شاشة واحدة على الأقل للتطبيق', 'danger');
+      }
+
+      const submitBtn = document.getElementById('submitFormBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جارٍ إرسال وفحص التطبيق...';
+
+      try {
+        const res = await Dev.api('/api/dev/submissions', {
+          method: 'POST',
+          body: {
+            name,
+            developer,
+            targetType,
+            categoryId,
+            versionName,
+            sizeBytes: sizeMb ? Math.round(sizeMb * 1024 * 1024) : undefined,
+            shortDescription: shortDesc,
+            fullDescription: fullDesc,
+            iconUrl: iconDataUrl,
+            screenshots: screenshotsList,
+            apkUrl
+          }
+        });
+
+        document.getElementById('successReqNumber').textContent = res.reqNumber;
+        form.style.display = 'none';
+        document.getElementById('successCard').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        Dev.toast('تم إرسال الطلب بنجاح برقم: ' + res.reqNumber, 'success');
+      } catch (err) {
+        Dev.toast(err.message, 'danger');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i data-lucide="send"></i><span>إرسال التطبيق للمراجعة والنشر</span>';
+        if (window.lucide) lucide.createIcons();
+      }
+    });
+
+    document.getElementById('submitAnotherBtn').addEventListener('click', () => {
+      window.location.reload();
+    });
+  </script>
+</body>
+</html>

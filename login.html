@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تسجيل الدخول — AppHub TV</title>
+  <title>تسجيل الدخول — AppLand TV</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="assets/lucide.min.js"></script>
 </head>
@@ -14,7 +14,7 @@
       <div class="auth-header">
         <div class="auth-logo" style="background:linear-gradient(135deg, #06b6d4, #6366f1);color:#000;font-weight:900;">TV</div>
         <h1>تسجيل الدخول</h1>
-        <p>لوحة التحكم الإدارية لمتجر AppHub TV للشاشات</p>
+        <p>لوحة التحكم الإدارية لمتجر AppLand TV للشاشات</p>
         <div class="server-status-pill" id="currentServerBadge">
           <span class="server-dot"></span>
           <span id="serverHostDisplay">جارٍ التحقق من الخادم...</span>
@@ -49,10 +49,14 @@
         </button>
       </form>
 
-      <div class="auth-footer">
+      <div class="auth-footer" style="display:flex;justify-content:space-between;align-items:center;">
         <a href="server.html" class="btn btn-ghost btn-sm">
           <i data-lucide="server"></i>
           <span>إعداد رابط الخادم (API)</span>
+        </a>
+        <a href="dev/login.html" class="btn btn-ghost btn-sm" style="color:var(--primary);">
+          <i data-lucide="code"></i>
+          <span>بوابة المطورين</span>
         </a>
       </div>
     </div>

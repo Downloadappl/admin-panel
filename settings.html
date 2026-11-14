@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>الإعدادات — AppHub TV</title>
+  <title>الإعدادات — AppLand TV</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="assets/lucide.min.js"></script>
 </head>
@@ -18,7 +18,7 @@
         <div class="brand-badge">
           <div class="brand-logo" style="background:linear-gradient(135deg, #06b6d4, #6366f1);color:#000;font-weight:900;">TV</div>
           <div class="brand-info">
-            <h2>AppHub TV</h2>
+            <h2>AppLand TV</h2>
             <span>متجر الشاشات والتلفاز</span>
           </div>
         </div>
@@ -29,6 +29,11 @@
         <a href="index.html" class="nav-link" data-page="dashboard">
           <i data-lucide="layout-dashboard"></i>
           <span>لوحة التحكم</span>
+        </a>
+        <a href="submissions.html" class="nav-link" data-page="submissions">
+          <i data-lucide="inbox"></i>
+          <span>طلبات المطورين</span>
+          <span class="badge badge-warning" id="submissionsPendingBadge" style="display:none;margin-right:auto;">0</span>
         </a>
         <a href="apps.html" class="nav-link" data-page="apps">
           <i data-lucide="tv"></i>
@@ -175,6 +180,67 @@
               </div>
             </form>
           </div>
+
+          <!-- إعدادات إشعارات تيليجرام -->
+          <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-header">
+              <div class="card-title">
+                <i data-lucide="bell"></i>
+                <h2>إشعارات تيليجرام للإدارة (Telegram Bot)</h2>
+              </div>
+            </div>
+
+            <form id="telegramSettingsForm">
+              <p class="text-muted" style="margin-bottom:1rem;font-size:0.9rem;">
+                استقبل إشعارات فورية على تيليجرام فور إرسال أي مطور لتطبيق جديد للمراجعة أو تحديث طلب معلق.
+              </p>
+
+              <div class="field" style="margin-bottom:1rem;">
+                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+                  <input type="checkbox" id="telegramEnabled" name="telegramEnabled" style="width:1.2rem;height:1.2rem;accent-color:var(--primary);">
+                  <span style="font-weight:600;">تفعيل إشعارات تيليجرام التلقائية</span>
+                </label>
+              </div>
+
+              <div class="two-col-grid" style="gap:1rem;margin-bottom:1rem;">
+                <div class="field">
+                  <label for="telegramBotToken">رمز بوت تيليجرام (Bot Token)</label>
+                  <div class="input-with-icon">
+                    <input type="text" id="telegramBotToken" name="telegramBotToken" dir="ltr" placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz">
+                    <span class="input-icon"><i data-lucide="key"></i></span>
+                  </div>
+                  <small>احصل عليه من @BotFather عبر تيليجرام.</small>
+                </div>
+
+                <div class="field">
+                  <label for="telegramChatId">معرّف المحادثة أو القناة (Chat ID)</label>
+                  <div class="input-with-icon">
+                    <input type="text" id="telegramChatId" name="telegramChatId" dir="ltr" placeholder="مثال: 987654321 أو -100123456789">
+                    <span class="input-icon"><i data-lucide="hash"></i></span>
+                  </div>
+                  <small>معرف حسابك أو مجموعتك الإدارية.</small>
+                </div>
+              </div>
+
+              <div id="tgStatusBox" style="display:none;margin-bottom:1rem;">
+                <div id="tgStatusBadge" class="badge" style="width:100%;padding:0.65rem 0.85rem;justify-content:flex-start;">
+                  <span id="tgStatusText"></span>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <button type="submit" class="btn btn-primary" id="saveTgBtn">
+                  <i data-lucide="save"></i>
+                  <span>حفظ إعدادات تيليجرام</span>
+                </button>
+
+                <button type="button" class="btn btn-secondary" id="testTgBtn">
+                  <i data-lucide="send"></i>
+                  <span>إرسال رسالة تجريبية</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </main>
     </div>
@@ -223,11 +289,17 @@
 
       async function loadSettings() {
         try {
-          const res = await Core.api('/api/settings');
-          const settings = res || {};
+          const settings = await Core.api('/api/admin/settings');
           if (storeNameInput) storeNameInput.value = settings.storeName || '';
           if (welcomeInput) welcomeInput.value = settings.welcomeMessage || '';
           if (descInput) descInput.value = settings.storeDescription || '';
+
+          const tgEnabled = document.getElementById('telegramEnabled');
+          const tgToken = document.getElementById('telegramBotToken');
+          const tgChat = document.getElementById('telegramChatId');
+          if (tgEnabled) tgEnabled.checked = !!settings.telegramEnabled;
+          if (tgToken) tgToken.value = settings.telegramBotToken || '';
+          if (tgChat) tgChat.value = settings.telegramChatId || '';
         } catch (e) {
           console.warn('Could not load settings:', e);
         }
@@ -309,6 +381,72 @@
           Core.initIcons();
         }
       });
+
+      // Save Telegram Form
+      const tgForm = document.getElementById('telegramSettingsForm');
+      if (tgForm) {
+        tgForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById('saveTgBtn');
+          btn.disabled = true;
+          btn.innerHTML = `<span>جارٍ الحفظ...</span>`;
+
+          try {
+            const payload = {
+              telegramEnabled: document.getElementById('telegramEnabled').checked,
+              telegramBotToken: document.getElementById('telegramBotToken').value.trim(),
+              telegramChatId: document.getElementById('telegramChatId').value.trim()
+            };
+            await Core.api('/api/admin/settings', {
+              method: 'PUT',
+              body: JSON.stringify(payload)
+            });
+            Core.toast('تم حفظ إعدادات تيليجرام بنجاح', 'success');
+          } catch (err) {
+            Core.toast('فشل حفظ الإعدادات: ' + err.message, 'error');
+          } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<i data-lucide="save"></i><span>حفظ إعدادات تيليجرام</span>`;
+            Core.initIcons();
+          }
+        });
+      }
+
+      // Test Telegram Button
+      const testTgBtn = document.getElementById('testTgBtn');
+      if (testTgBtn) {
+        testTgBtn.addEventListener('click', async () => {
+          const box = document.getElementById('tgStatusBox');
+          const badge = document.getElementById('tgStatusBadge');
+          const text = document.getElementById('tgStatusText');
+
+          testTgBtn.disabled = true;
+          testTgBtn.innerHTML = `<span>جارٍ الإرسال...</span>`;
+          if (box) box.style.display = 'block';
+          if (badge) badge.className = 'badge badge-neutral';
+          if (text) text.textContent = 'جارٍ إرسال رسالة الاختبار عبر البوت...';
+
+          try {
+            const res = await Core.api('/api/admin/telegram/test', { method: 'POST' });
+            if (res && res.ok) {
+              if (badge) badge.className = 'badge badge-success';
+              if (text) text.textContent = 'تم إرسال رسالة الاختبار بنجاح! راجع محادثة تيليجرام.';
+              Core.toast('تم إرسال رسالة الاختبار بنجاح', 'success');
+            } else {
+              if (badge) badge.className = 'badge badge-danger';
+              if (text) text.textContent = res?.error || 'فشل إرسال رسالة الاختبار';
+            }
+          } catch (err) {
+            if (badge) badge.className = 'badge badge-danger';
+            if (text) text.textContent = 'فشل الإرسال: ' + err.message;
+            Core.toast(err.message, 'error');
+          } finally {
+            testTgBtn.disabled = false;
+            testTgBtn.innerHTML = `<i data-lucide="send"></i><span>إرسال رسالة تجريبية</span>`;
+            Core.initIcons();
+          }
+        });
+      }
 
       loadSettings();
     });

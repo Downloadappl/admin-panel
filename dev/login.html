@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بوابة المطورين — تسجيل الدخول | AppLand</title>
+  <link rel="stylesheet" href="css/dev.css">
+  <script src="../assets/lucide.min.js"></script>
+</head>
+<body style="display:flex;align-items:center;justify-content:center;padding:20px;">
+
+  <div style="max-width:460px;width:100%;">
+    <!-- Branding -->
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg, #0284c7, #6366f1);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(2,132,199,0.35);">
+        <i data-lucide="code-2" style="width:30px;height:30px;color:white;"></i>
+      </div>
+      <h1 style="font-size:1.6rem;font-weight:800;color:white;margin-bottom:6px;">AppLand Developers</h1>
+      <p style="color:var(--text-muted);font-size:0.92rem;">بوابة مطوري تطبيقات الشاشات وأجهزة Android TV</p>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="form-card" style="padding:28px;">
+      <!-- Tabs -->
+      <div style="display:flex;background:var(--bg-card);padding:4px;border-radius:var(--radius-sm);margin-bottom:24px;border:1px solid var(--border);">
+        <button id="tabLoginBtn" type="button" style="flex:1;padding:8px;border:none;background:var(--primary);color:white;font-weight:700;border-radius:6px;cursor:pointer;transition:all 0.2s;">تسجيل الدخول</button>
+        <button id="tabRegisterBtn" type="button" style="flex:1;padding:8px;border:none;background:transparent;color:var(--text-muted);font-weight:600;border-radius:6px;cursor:pointer;transition:all 0.2s;">حساب جديد</button>
+      </div>
+
+      <div id="authAlert" class="alert alert-danger" style="display:none;"></div>
+
+      <!-- Login Form -->
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="loginUser">اسم المستخدم أو البريد الإلكتروني</label>
+          <input class="form-input" type="text" id="loginUser" required placeholder="مثال: ahmed_dev">
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <label class="form-label" for="loginPass" style="margin-bottom:0;">كلمة المرور</label>
+            <a href="#" id="forgotPassLink" style="font-size:0.8rem;color:var(--info);">نسيت كلمة المرور؟</a>
+          </div>
+          <input class="form-input" type="password" id="loginPass" required placeholder="••••••••">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:10px;">
+          <i data-lucide="log-in"></i>
+          <span>دخول إلى لوحة المطور</span>
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerForm" style="display:none;">
+        <div class="form-group">
+          <label class="form-label" for="regFullName"><span class="req">*</span> الاسم الكامل أو اسم الفريق</label>
+          <input class="form-input" type="text" id="regFullName" required placeholder="مثال: أحمد المحمدي">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regUsername"><span class="req">*</span> اسم المستخدم (بالإنجليزية)</label>
+          <input class="form-input" type="text" id="regUsername" required placeholder="مثال: ahmed_dev" pattern="[a-zA-Z0-9_\-]+" title="أحرف إنجليزية وأرقام فقط">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regEmail"><span class="req">*</span> البريد الإلكتروني</label>
+          <input class="form-input" type="email" id="regEmail" required placeholder="dev@example.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPass"><span class="req">*</span> كلمة المرور</label>
+          <input class="form-input" type="password" id="regPass" required minlength="6" placeholder="لا تقل عن 6 خانات">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPassConfirm"><span class="req">*</span> تأكيد كلمة المرور</label>
+          <input class="form-input" type="password" id="regPassConfirm" required minlength="6" placeholder="أعد إدخال كلمة المرور">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:10px;">
+          <i data-lucide="user-plus"></i>
+          <span>إنشاء حساب مطور</span>
+        </button>
+      </form>
+
+      <!-- Reset Password View -->
+      <div id="resetPassSection" style="display:none;">
+        <h3 style="font-size:1.1rem;color:white;margin-bottom:8px;">استعادة كلمة المرور</h3>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:18px;">أدخل بريدك الإلكتروني المسجل وسنرسل لك تعليمات الاستعادة.</p>
+        <div class="form-group">
+          <label class="form-label" for="resetEmail">البريد الإلكتروني</label>
+          <input class="form-input" type="email" id="resetEmail" placeholder="your@email.com">
+        </div>
+        <button id="sendResetBtn" class="btn btn-primary" style="width:100%;">إرسال التعليمات</button>
+        <button id="backToLoginBtn" class="btn btn-ghost" style="width:100%;margin-top:10px;">العودة لتسجيل الدخول</button>
+      </div>
+
+    </div>
+
+    <!-- Footer Links -->
+    <div style="text-align:center;font-size:0.85rem;color:var(--text-dim);">
+      <span>العودة إلى </span>
+      <a href="../index.html" style="color:var(--info);font-weight:600;">لوحة الإدارة الرئيسية</a>
+      <span style="margin:0 8px;">•</span>
+      <a href="../server.html" style="color:var(--text-muted);">إعداد الخادم</a>
+    </div>
+  </div>
+
+  <script src="js/dev.js"></script>
+  <script>
+    if (window.lucide) lucide.createIcons();
+
+    // If already logged in, redirect to dashboard
+    if (Dev.getToken()) {
+      window.location.href = 'dashboard.html';
+    }
+
+    const tabLogin = document.getElementById('tabLoginBtn');
+    const tabReg = document.getElementById('tabRegisterBtn');
+    const loginForm = document.getElementById('loginForm');
+    const regForm = document.getElementById('registerForm');
+    const resetSection = document.getElementById('resetPassSection');
+    const alertBox = document.getElementById('authAlert');
+
+    function showAlert(msg, isError = true) {
+      alertBox.textContent = msg;
+      alertBox.className = `alert ${isError ? 'alert-danger' : 'alert-success'}`;
+      alertBox.style.display = 'block';
+    }
+
+    function clearAlert() {
+      alertBox.style.display = 'none';
+    }
+
+    tabLogin.addEventListener('click', () => {
+      clearAlert();
+      resetSection.style.display = 'none';
+      loginForm.style.display = 'block';
+      regForm.style.display = 'none';
+      tabLogin.style.background = 'var(--primary)';
+      tabLogin.style.color = 'white';
+      tabReg.style.background = 'transparent';
+      tabReg.style.color = 'var(--text-muted)';
+    });
+
+    tabReg.addEventListener('click', () => {
+      clearAlert();
+      resetSection.style.display = 'none';
+      loginForm.style.display = 'none';
+      regForm.style.display = 'block';
+      tabReg.style.background = 'var(--primary)';
+      tabReg.style.color = 'white';
+      tabLogin.style.background = 'transparent';
+      tabLogin.style.color = 'var(--text-muted)';
+    });
+
+    document.getElementById('forgotPassLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      clearAlert();
+      loginForm.style.display = 'none';
+      regForm.style.display = 'none';
+      resetSection.style.display = 'block';
+    });
+
+    document.getElementById('backToLoginBtn').addEventListener('click', () => {
+      resetSection.style.display = 'none';
+      loginForm.style.display = 'block';
+    });
+
+    document.getElementById('sendResetBtn').addEventListener('click', async () => {
+      const email = document.getElementById('resetEmail').value.trim();
+      if (!email) return showAlert('يرجى كتابة البريد الإلكتروني');
+      try {
+        const res = await Dev.api('/api/dev/reset-password', {
+          method: 'POST',
+          body: { email }
+        });
+        showAlert(res.message || 'تم استلام طلبك بنجاح', false);
+      } catch (err) {
+        showAlert(err.message);
+      }
+    });
+
+    // Login submit
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearAlert();
+      const username = document.getElementById('loginUser').value.trim();
+      const password = document.getElementById('loginPass').value;
+      const submitBtn = loginForm.querySelector('button[type="submit"]');
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جارٍ الدخول...';
+
+      try {
+        const res = await Dev.api('/api/dev/login', {
+          method: 'POST',
+          body: { username, password }
+        });
+        Dev.setToken(res.token);
+        Dev.setUser(res.developer);
+        Dev.toast('تم تسجيل الدخول بنجاح!', 'success');
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showAlert(err.message || 'تعذر تسجيل الدخول');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i data-lucide="log-in"></i><span>دخول إلى لوحة المطور</span>';
+        if (window.lucide) lucide.createIcons();
+      }
+    });
+
+    // Register submit
+    regForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearAlert();
+      const fullName = document.getElementById('regFullName').value.trim();
+      const username = document.getElementById('regUsername').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPass').value;
+      const confirmPassword = document.getElementById('regPassConfirm').value;
+
+      if (password !== confirmPassword) {
+        return showAlert('كلمة المرور وتأكيدها غير متطابقين');
+      }
+
+      const submitBtn = regForm.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'جارٍ إنشاء الحساب...';
+
+      try {
+        const res = await Dev.api('/api/dev/register', {
+          method: 'POST',
+          body: { fullName, username, email, password, confirmPassword }
+        });
+        Dev.setToken(res.token);
+        Dev.setUser(res.developer);
+        Dev.toast('تم إنشاء حساب المطور بنجاح!', 'success');
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showAlert(err.message || 'تعذر إنشاء الحساب');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i data-lucide="user-plus"></i><span>إنشاء حساب مطور</span>';
+        if (window.lucide) lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>
