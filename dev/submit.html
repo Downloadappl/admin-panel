@@ -236,15 +236,15 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="apkUrlInput"><span class="req">*</span> رابط تحميل ملف APK المباشر (HTTPS)</label>
+          <label class="form-label" for="apkUrlInput"><span class="req">*</span> رابط تحميل ملف APK المباشر (HTTP / HTTPS)</label>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <input class="form-input" style="flex:1;min-width:260px;" type="url" id="apkUrlInput" required placeholder="https://github.com/.../app-release.apk">
+            <input class="form-input" style="flex:1;min-width:260px;" type="url" id="apkUrlInput" required placeholder="https://... أو http://... (.apk)">
             <button type="button" class="btn btn-ghost" id="verifyApkBtn">
               <i data-lucide="shield-check"></i>
               <span>فحص الرابط الآن</span>
             </button>
           </div>
-          <div class="form-hint">يجب أن يبدأ الرابط بـ HTTPS وأن يؤدي مباشرة إلى ملف APK دون صفحات إعلانات أو تسجيل دخول.</div>
+          <div class="form-hint">يجب أن يبدأ الرابط بـ http:// أو https:// وأن يؤدي مباشرة إلى ملف APK دون صفحات إعلانات أو تسجيل دخول.</div>
         </div>
 
         <!-- APK Verification Box -->
