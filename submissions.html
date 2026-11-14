@@ -7,37 +7,267 @@
   <link rel="stylesheet" href="css/style.css">
   <script src="assets/lucide.min.js"></script>
   <style>
-    .badge-pending { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
-    .badge-in_review { background: rgba(129, 140, 248, 0.15); color: #a5b4fc; border: 1px solid rgba(129, 140, 248, 0.3); }
-    .badge-changes_requested { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .badge-approved { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .badge-rejected { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-
-    .req-code {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-family: monospace;
-      color: var(--primary);
+    /* ===== Specific Submissions Styling ===== */
+    .stat-box.clickable {
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+    }
+    .stat-box.clickable:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+    .stat-box.clickable.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary-glow), 0 8px 24px rgba(6, 182, 212, 0.25);
     }
 
+    .badge-pending {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+    }
+    .badge-in_review {
+      background: rgba(139, 92, 246, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(139, 92, 246, 0.35);
+    }
+    .badge-changes_requested {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+    .badge-approved {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .badge-rejected {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+
+    .req-code-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-family: 'Plus Jakarta Sans', monospace;
+      font-weight: 600;
+      color: var(--primary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .req-code-pill:hover {
+      border-color: var(--primary);
+      background: rgba(6, 182, 212, 0.1);
+    }
+
+    .filter-pills-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      margin-bottom: 16px;
+    }
+    .filter-pill {
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .filter-pill:hover {
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .filter-pill.active {
+      background: var(--primary-gradient);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 2px 10px rgba(6, 182, 212, 0.35);
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+      box-shadow: 0 0 10px #10b981;
+      animation: pulseLive 2s infinite ease-in-out;
+    }
+    @keyframes pulseLive {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Screenshot Gallery */
+    .screenshots-gallery {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 6px 2px 14px;
+      scroll-snap-type: x mandatory;
+    }
+    .screenshot-thumb-wrap {
+      flex: 0 0 auto;
+      width: 200px;
+      height: 112px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      background: #000;
+      position: relative;
+      cursor: pointer;
+      scroll-snap-align: start;
+      transition: all var(--transition-normal);
+    }
+    .screenshot-thumb-wrap:hover {
+      transform: translateY(-2px) scale(1.02);
+      border-color: var(--primary);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    }
+    .screenshot-thumb-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .screenshot-thumb-wrap .zoom-badge {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Lightbox */
     .lightbox-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.88);
-      z-index: 2000;
+      background: rgba(3, 7, 18, 0.92);
+      backdrop-filter: blur(8px);
+      z-index: 2500;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 24px;
+      opacity: 0;
+      transition: opacity 200ms ease;
+    }
+    .lightbox-overlay.open {
+      opacity: 1;
     }
     .lightbox-img {
-      max-width: 90vw;
-      max-height: 85vh;
-      border-radius: 12px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      max-width: 92vw;
+      max-height: 86vh;
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transform: scale(0.96);
+      transition: transform 200ms ease;
+    }
+    .lightbox-overlay.open .lightbox-img {
+      transform: scale(1);
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.12);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: background 150ms ease;
+    }
+    .lightbox-close:hover {
+      background: rgba(239, 68, 68, 0.8);
+    }
+
+    /* Modal Action Panels */
+    .inline-action-panel {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 16px;
+      animation: fadeIn 200ms ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .preset-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 8px 0 12px;
+    }
+    .preset-chip {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: all 120ms ease;
+    }
+    .preset-chip:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: rgba(6, 182, 212, 0.08);
+    }
+
+    .spec-item {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+    }
+    .spec-label {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .spec-value {
+      font-size: 0.92rem;
+      color: var(--text-main);
+      font-weight: 700;
+      word-break: break-all;
     }
   </style>
 </head>
@@ -46,11 +276,11 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <div class="app-layout">
-    <!-- ===== Sidebar ===== -->
+    <!-- ===== القائمة الجانبية (Sidebar) ===== -->
     <aside class="sidebar" id="appSidebar">
       <div class="sidebar-header">
         <div class="brand-badge">
-          <div class="brand-logo" style="background:linear-gradient(135deg, #0284c7, #6366f1);color:#fff;font-weight:900;">TV</div>
+          <div class="brand-logo" style="background:linear-gradient(135deg, #06b6d4, #6366f1);color:#000;font-weight:900;">TV</div>
           <div class="brand-info">
             <h2>AppLand TV</h2>
             <span>متجر الشاشات والتلفاز</span>
@@ -64,14 +294,14 @@
           <i data-lucide="layout-dashboard"></i>
           <span>لوحة التحكم</span>
         </a>
-        <a href="apps.html" class="nav-link" data-page="apps">
-          <i data-lucide="tv"></i>
-          <span>تطبيقات الشاشة</span>
-        </a>
         <a href="submissions.html" class="nav-link active" data-page="submissions">
           <i data-lucide="inbox"></i>
           <span>طلبات المطورين</span>
           <span class="badge badge-warning" id="submissionsPendingBadge" style="display:none;margin-right:auto;">0</span>
+        </a>
+        <a href="apps.html" class="nav-link" data-page="apps">
+          <i data-lucide="tv"></i>
+          <span>تطبيقات الشاشة</span>
         </a>
         <a href="categories.html" class="nav-link" data-page="categories">
           <i data-lucide="folder-tree"></i>
@@ -117,21 +347,30 @@
       </div>
     </aside>
 
-    <!-- ===== Main Content ===== -->
+    <!-- ===== المحتوى الرئيسي (Main Content) ===== -->
     <div class="main-wrapper">
       <header class="top-header">
         <div class="header-title-wrap">
           <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="فتح القائمة">
             <i data-lucide="menu"></i>
           </button>
-          <h1>طلبات تقديم تطبيقات المطورين</h1>
+          <div>
+            <h1>مراجعة طلبات المطورين</h1>
+            <p style="font-size:0.84rem;color:var(--text-muted);margin-top:2px;">
+              تدقيق وفحص التطبيقات المقدمة ونشرها المباشر في متجر AppLand TV
+            </p>
+          </div>
         </div>
         <div class="header-actions">
-          <button class="btn btn-ghost btn-sm" id="refreshBtn">
-            <i data-lucide="refresh-cw"></i>
+          <div style="display:flex;align-items:center;gap:8px;background:var(--bg-surface);border:1px solid var(--border-subtle);padding:6px 12px;border-radius:var(--radius-pill);font-size:0.8rem;color:var(--text-muted);">
+            <span class="live-dot" id="liveDot"></span>
+            <span id="liveStatusText">مزامنة فورية</span>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="refreshBtn" title="تحديث البيانات">
+            <i data-lucide="refresh-cw" id="refreshIcon"></i>
             <span>تحديث</span>
           </button>
-          <a href="dev/dashboard.html" target="_blank" class="btn btn-primary btn-sm">
+          <a href="dev/dashboard.html" target="_blank" class="btn btn-primary btn-sm" title="فتح بوابة المطورين">
             <i data-lucide="external-link"></i>
             <span>بوابة المطورين</span>
           </a>
@@ -139,74 +378,145 @@
       </header>
 
       <main class="page-content">
-        <!-- Submissions Stats Grid -->
-        <div class="stats-cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
-          <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(56,189,248,0.15);color:#38bdf8;"><i data-lucide="inbox"></i></div>
-            <div class="stat-data">
-              <span class="stat-value" id="countPending">0</span>
+        <!-- Error Notice Banner (Hidden by default) -->
+        <div id="errorBanner" class="alert alert-danger" style="display:none;margin-bottom:20px;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <i data-lucide="alert-triangle"></i>
+            <span id="errorMessage">حدث خطأ في جلب البيانات</span>
+          </div>
+          <button class="btn btn-sm btn-secondary" id="retryBtn">إعادة المحاولة</button>
+        </div>
+
+        <!-- ===== بطاقات الإحصاءات التفاعلية (Interactive KPI Boxes) ===== -->
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-box clickable" data-status="pending" id="statCardPending" title="انقر لتصفية الطلبات المعلقة">
+            <div class="stat-info">
+              <span class="stat-number" id="countPending" style="color:#38bdf8;">0</span>
               <span class="stat-label">بانتظار المراجعة</span>
             </div>
+            <div class="stat-icon-wrap cyan">
+              <i data-lucide="inbox"></i>
+            </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:#fbbf24;"><i data-lucide="edit-3"></i></div>
-            <div class="stat-data">
-              <span class="stat-value" id="countChanges">0</span>
+
+          <div class="stat-box clickable" data-status="changes_requested" id="statCardChanges" title="انقر لتصفية طلبات التعديل">
+            <div class="stat-info">
+              <span class="stat-number" id="countChanges" style="color:#fbbf24;">0</span>
               <span class="stat-label">تحتاج تعديل المطور</span>
             </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:#34d399;"><i data-lucide="check-circle-2"></i></div>
-            <div class="stat-data">
-              <span class="stat-value" id="countApproved">0</span>
-              <span class="stat-label">المقبولة والمنشورة</span>
+            <div class="stat-icon-wrap amber" style="background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.25);">
+              <i data-lucide="edit-3"></i>
             </div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon" style="background:rgba(239,68,68,0.15);color:#f87171;"><i data-lucide="x-circle"></i></div>
-            <div class="stat-data">
-              <span class="stat-value" id="countRejected">0</span>
-              <span class="stat-label">المرفوضة</span>
+
+          <div class="stat-box clickable" data-status="approved" id="statCardApproved" title="انقر لتصفية الطلبات المقبولة">
+            <div class="stat-info">
+              <span class="stat-number" id="countApproved" style="color:#34d399;">0</span>
+              <span class="stat-label">مقبولة ومنشورة بالمتجر</span>
+            </div>
+            <div class="stat-icon-wrap emerald">
+              <i data-lucide="check-circle-2"></i>
+            </div>
+          </div>
+
+          <div class="stat-box clickable" data-status="rejected" id="statCardRejected" title="انقر لتصفية الطلبات المرفوضة">
+            <div class="stat-info">
+              <span class="stat-number" id="countRejected" style="color:#f87171;">0</span>
+              <span class="stat-label">طلبات مرفوضة</span>
+            </div>
+            <div class="stat-icon-wrap rose" style="background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.25);">
+              <i data-lucide="x-circle"></i>
+            </div>
+          </div>
+
+          <div class="stat-box clickable active" data-status="all" id="statCardAll" title="انقر لعرض جميع الطلبات">
+            <div class="stat-info">
+              <span class="stat-number" id="countTotal">0</span>
+              <span class="stat-label">إجمالي الطلبات المستلمة</span>
+            </div>
+            <div class="stat-icon-wrap purple">
+              <i data-lucide="layers"></i>
             </div>
           </div>
         </div>
 
-        <!-- Filter & Search Toolbar -->
-        <div class="section-card" style="margin-top:20px;">
-          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:18px;">
-            <div style="display:flex;gap:10px;flex:1;min-width:280px;">
-              <input type="text" id="searchFilter" class="form-control" placeholder="بحث باسم التطبيق، اسم المطور، أو رقم الطلب...">
+        <!-- ===== بطاقة جدول الطلبات مع شريط التصفية والبحث ===== -->
+        <div class="card">
+          <!-- شريط الأزرار والتصفية السريعة -->
+          <div class="filter-pills-bar" id="filterPillsBar">
+            <button class="filter-pill active" data-status="all">
+              <i data-lucide="layers" style="width:14px;height:14px;"></i>
+              <span>الكل (<span id="pillCountAll">0</span>)</span>
+            </button>
+            <button class="filter-pill" data-status="pending">
+              <i data-lucide="clock" style="width:14px;height:14px;"></i>
+              <span>بانتظار المراجعة (<span id="pillCountPending">0</span>)</span>
+            </button>
+            <button class="filter-pill" data-status="changes_requested">
+              <i data-lucide="alert-circle" style="width:14px;height:14px;"></i>
+              <span>تحتاج تعديل (<span id="pillCountChanges">0</span>)</span>
+            </button>
+            <button class="filter-pill" data-status="approved">
+              <i data-lucide="check" style="width:14px;height:14px;"></i>
+              <span>مقبولة ومنشورة (<span id="pillCountApproved">0</span>)</span>
+            </button>
+            <button class="filter-pill" data-status="rejected">
+              <i data-lucide="x" style="width:14px;height:14px;"></i>
+              <span>مرفوضة (<span id="pillCountRejected">0</span>)</span>
+            </button>
+          </div>
+
+          <!-- شريط البحث والفرز -->
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+            <div style="display:flex;gap:10px;flex:1;min-width:280px;position:relative;">
+              <input type="text" id="searchFilter" class="form-control" placeholder="بحث باسم التطبيق، اسم المطور، البريد، أو رقم الطلب (REQ-...)">
             </div>
-            <div style="display:flex;gap:10px;align-items:center;">
-              <select id="statusFilter" class="form-control" style="width:auto;">
-                <option value="all">جميع الحالات</option>
-                <option value="pending" selected>بانتظار المراجعة</option>
-                <option value="in_review">قيد الفحص</option>
-                <option value="changes_requested">تحتاج تعديل</option>
-                <option value="approved">مقبولة ومنشورة</option>
-                <option value="rejected">مرفوضة</option>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <select id="deviceFilter" class="form-control" style="width:auto;min-width:140px;">
+                <option value="all">جميع الأجهزة</option>
+                <option value="TV">شاشات Android TV</option>
+                <option value="PHONE">هواتف</option>
+                <option value="ALL">شامل (TV وهواتف)</option>
               </select>
-              <select id="sortFilter" class="form-control" style="width:auto;">
+              <select id="sortFilter" class="form-control" style="width:auto;min-width:140px;">
                 <option value="newest">الأحدث أولاً</option>
                 <option value="oldest">الأقدم أولاً</option>
+                <option value="name">الاسم أبجدياً</option>
               </select>
             </div>
           </div>
 
-          <!-- Table Container -->
+          <!-- حاوية الجدول -->
           <div class="table-responsive">
-            <div id="loadingSubs" style="text-align:center;padding:40px;color:var(--text-muted);">
-              <i data-lucide="loader" style="animation:spin 1s linear infinite;width:32px;height:32px;margin:0 auto 10px;display:block;"></i>
-              <span>جارٍ تحميل طلبات المطورين...</span>
+            <!-- حالة التحميل -->
+            <div id="loadingSubs" style="text-align:center;padding:50px 20px;">
+              <i data-lucide="loader-2" class="spin" style="width:40px;height:40px;color:var(--primary);margin:0 auto 12px;display:block;animation:spin 1s linear infinite;"></i>
+              <span style="color:var(--text-muted);font-weight:600;font-size:0.95rem;">جارٍ تحميل طلبات المطورين من الخادم...</span>
             </div>
 
-            <div id="emptySubs" style="display:none;text-align:center;padding:48px 20px;">
-              <i data-lucide="folder-check" style="width:48px;height:48px;color:var(--text-muted);margin:0 auto 12px;display:block;"></i>
-              <h3 style="font-size:1.1rem;color:white;margin-bottom:4px;">لا توجد طلبات مطابقة</h3>
-              <p style="color:var(--text-muted);font-size:0.88rem;">لا توجد طلبات جديدة في هذا التصنيف حالياً.</p>
+            <!-- الحالة الفارغة -->
+            <div id="emptySubs" style="display:none;text-align:center;padding:50px 20px;">
+              <div class="stat-icon-wrap" style="width:64px;height:64px;margin:0 auto 16px;background:rgba(255,255,255,0.05);color:var(--text-muted);">
+                <i data-lucide="inbox" style="width:32px;height:32px;"></i>
+              </div>
+              <h3 style="font-size:1.15rem;color:white;margin-bottom:6px;">لا توجد طلبات مطابقة حالياً</h3>
+              <p style="color:var(--text-muted);font-size:0.88rem;max-width:420px;margin:0 auto 18px;">
+                لم يتم العثور على أي طلبات في هذه الحالة. يمكنك تجربة تغيير شروط التصفية أو إرسال طلب جديد من بوابة المطورين.
+              </p>
+              <div style="display:flex;gap:10px;justify-content:center;">
+                <button class="btn btn-secondary btn-sm" id="resetFiltersBtn">
+                  <i data-lucide="filter-x"></i>
+                  <span>إعادة ضبط التصفية</span>
+                </button>
+                <a href="dev/submit.html" target="_blank" class="btn btn-primary btn-sm">
+                  <i data-lucide="plus-circle"></i>
+                  <span>تقديم تطبيق تجريبي</span>
+                </a>
+              </div>
             </div>
 
-            <table class="data-table" id="subsTable" style="display:none;">
+            <!-- جدول الطلبات -->
+            <table id="subsTable" style="display:none;">
               <thead>
                 <tr>
                   <th>التطبيق</th>
@@ -215,7 +525,7 @@
                   <th>القسم والجهاز</th>
                   <th>تاريخ التقديم</th>
                   <th>الحالة</th>
-                  <th>الإجراء</th>
+                  <th style="text-align:left;">الإجراء</th>
                 </tr>
               </thead>
               <tbody id="subsTbody"></tbody>
@@ -226,104 +536,275 @@
     </div>
   </div>
 
-  <!-- Review Modal -->
-  <div id="reviewModalBackdrop" class="modal-backdrop" style="display:none;">
-    <div class="modal" style="max-width:860px;width:100%;">
+  <!-- شريط التنقل السفلي للهواتف -->
+  <nav class="mobile-bottom-nav">
+    <a href="index.html" class="bottom-nav-item" data-page="dashboard">
+      <i data-lucide="layout-dashboard"></i>
+      <span>الرئيسية</span>
+    </a>
+    <a href="submissions.html" class="bottom-nav-item active" data-page="submissions">
+      <i data-lucide="inbox"></i>
+      <span>الطلبات</span>
+    </a>
+    <a href="apps.html" class="bottom-nav-item" data-page="apps">
+      <i data-lucide="tv"></i>
+      <span>التطبيقات</span>
+    </a>
+    <a href="categories.html" class="bottom-nav-item" data-page="categories">
+      <i data-lucide="folder-tree"></i>
+      <span>الأقسام</span>
+    </a>
+    <a href="settings.html" class="bottom-nav-item" data-page="settings">
+      <i data-lucide="settings"></i>
+      <span>الإعدادات</span>
+    </a>
+  </nav>
+
+  <!-- ===== نافذة مراجعة طلب التطبيق (Ultra-Luxury Review Modal) ===== -->
+  <div id="reviewModalBackdrop" class="modal-backdrop">
+    <div class="modal-container" style="max-width:880px;">
       <div class="modal-header">
-        <h3 id="modalTitle">مراجعة طلب تطبيق المطور</h3>
-        <button class="modal-close" id="closeReviewModal">&times;</button>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="stat-icon-wrap cyan" style="width:38px;height:38px;">
+            <i data-lucide="file-search"></i>
+          </div>
+          <div>
+            <h2 id="modalTitle" style="font-size:1.15rem;margin:0;">مراجعة وتدقيق تطبيق المطور</h2>
+            <span style="font-size:0.78rem;color:var(--text-muted);" id="modalSubtitle">فحص المتطلبات والتأكد من ملاءمتها لمتجر الشاشات</span>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-icon btn-sm" id="closeReviewModal" aria-label="إغلاق">
+          <i data-lucide="x"></i>
+        </button>
       </div>
 
-      <div class="modal-body" style="max-height:78vh;overflow-y:auto;" id="reviewModalBody"></div>
+      <div class="modal-body" id="reviewModalBody">
+        <!-- Content will be injected dynamically -->
+      </div>
+
+      <div class="modal-footer" id="modalFooterActions" style="justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <!-- Action buttons injected dynamically -->
+      </div>
     </div>
   </div>
 
+  <!-- ===== شاشة تكبير لقطات الشاشة (Lightbox) ===== -->
+  <div id="lightboxOverlay" class="lightbox-overlay" style="display:none;">
+    <button class="lightbox-close" id="lightboxClose" aria-label="إغلاق">&times;</button>
+    <img id="lightboxImage" class="lightbox-img" src="" alt="معاينة الشاشة">
+  </div>
+
   <style>
-    @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   </style>
 
   <script src="js/core.js"></script>
   <script>
     let submissions = [];
     let categoriesList = [];
+    let activeStatusFilter = 'all';
+    let autoRefreshTimer = null;
+    let currentViewingSub = null;
 
     async function init() {
-      const ok = await Core.checkAuth();
-      if (!ok) return;
-      Core.initCommon();
-      Core.updateSubmissionsBadge();
-
-      // Load Categories
       try {
-        const catRes = await Core.api('/api/categories');
-        categoriesList = catRes.items || [];
-      } catch (_) {}
+        const ok = await Core.checkAuth();
+        if (!ok) return;
 
-      await loadSubmissions();
+        // Ensure layout and active navigation are ready
+        if (typeof Core.setupLayout === 'function') {
+          Core.setupLayout('submissions');
+        } else if (typeof Core.initCommon === 'function') {
+          Core.initCommon('submissions');
+        }
 
-      document.getElementById('refreshBtn').addEventListener('click', loadSubmissions);
-      document.getElementById('searchFilter').addEventListener('input', renderTable);
-      document.getElementById('statusFilter').addEventListener('change', renderTable);
-      document.getElementById('sortFilter').addEventListener('change', renderTable);
+        // Update sidebar pending badge
+        Core.updateSubmissionsBadge();
 
-      document.getElementById('closeReviewModal').addEventListener('click', () => {
-        document.getElementById('reviewModalBackdrop').style.display = 'none';
-      });
+        // Load Categories
+        try {
+          const catRes = await Core.api('/api/categories');
+          categoriesList = catRes.items || [];
+        } catch (_) {}
+
+        // Bind Events
+        document.getElementById('refreshBtn').addEventListener('click', () => loadSubmissions(true));
+        document.getElementById('retryBtn').addEventListener('click', () => loadSubmissions(true));
+        document.getElementById('searchFilter').addEventListener('input', renderTable);
+        document.getElementById('deviceFilter').addEventListener('change', renderTable);
+        document.getElementById('sortFilter').addEventListener('change', renderTable);
+
+        // Reset Filters Button
+        document.getElementById('resetFiltersBtn').addEventListener('click', () => {
+          document.getElementById('searchFilter').value = '';
+          document.getElementById('deviceFilter').value = 'all';
+          document.getElementById('sortFilter').value = 'newest';
+          setStatusFilter('all');
+        });
+
+        // Filter Pills Click Events
+        document.querySelectorAll('.filter-pill').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const status = btn.getAttribute('data-status');
+            setStatusFilter(status);
+          });
+        });
+
+        // Stat Cards Click Events (Acts as filter shortcuts)
+        document.querySelectorAll('.stat-box.clickable').forEach(card => {
+          card.addEventListener('click', () => {
+            const status = card.getAttribute('data-status');
+            setStatusFilter(status);
+          });
+        });
+
+        // Modal Close Events
+        document.getElementById('closeReviewModal').addEventListener('click', closeReviewModal);
+        document.getElementById('reviewModalBackdrop').addEventListener('click', (e) => {
+          if (e.target.id === 'reviewModalBackdrop') closeReviewModal();
+        });
+
+        // Lightbox Close
+        const lbOverlay = document.getElementById('lightboxOverlay');
+        const lbClose = document.getElementById('lightboxClose');
+        const closeLb = () => {
+          lbOverlay.classList.remove('open');
+          setTimeout(() => { lbOverlay.style.display = 'none'; }, 200);
+        };
+        lbClose.addEventListener('click', closeLb);
+        lbOverlay.addEventListener('click', (e) => {
+          if (e.target.id === 'lightboxOverlay') closeLb();
+        });
+
+        // Load Data
+        await loadSubmissions();
+
+        // Setup 30s background auto-sync
+        setupAutoSync();
+
+      } catch (err) {
+        console.error('Submissions page initialization error:', err);
+        showError('فشل تهيئة الصفحة: ' + (err.message || 'خطأ غير متوقع'));
+      }
     }
 
-    async function loadSubmissions() {
-      document.getElementById('loadingSubs').style.display = 'block';
-      document.getElementById('emptySubs').style.display = 'none';
-      document.getElementById('subsTable').style.display = 'none';
+    function setStatusFilter(status) {
+      activeStatusFilter = status || 'all';
+
+      // Update pills
+      document.querySelectorAll('.filter-pill').forEach(p => {
+        p.classList.toggle('active', p.getAttribute('data-status') === activeStatusFilter);
+      });
+
+      // Update stat cards
+      document.querySelectorAll('.stat-box.clickable').forEach(c => {
+        c.classList.toggle('active', c.getAttribute('data-status') === activeStatusFilter);
+      });
+
+      renderTable();
+    }
+
+    async function loadSubmissions(manual = false) {
+      const refreshIcon = document.getElementById('refreshIcon');
+      if (refreshIcon) refreshIcon.classList.add('spin');
+
+      if (!submissions.length) {
+        document.getElementById('loadingSubs').style.display = 'block';
+        document.getElementById('emptySubs').style.display = 'none';
+        document.getElementById('subsTable').style.display = 'none';
+      }
+      hideError();
 
       try {
-        // Load stats
-        const stats = await Core.api('/api/admin/submissions/stats');
-        document.getElementById('countPending').textContent = stats.pending || 0;
-        document.getElementById('countChanges').textContent = stats.changes_requested || 0;
-        document.getElementById('countApproved').textContent = stats.approved || 0;
-        document.getElementById('countRejected').textContent = stats.rejected || 0;
+        // Parallel fetch for stats and submissions
+        const [stats, res] = await Promise.all([
+          Core.api('/api/admin/submissions/stats').catch(() => null),
+          Core.api('/api/admin/submissions')
+        ]);
 
-        const badge = document.getElementById('submissionsPendingBadge');
-        if (badge) {
-          if (stats.pending > 0) {
-            badge.textContent = stats.pending;
-            badge.style.display = 'inline-block';
+        submissions = (res && res.items) || [];
+
+        // Update Statistics Counters
+        const pendingCount = (stats && stats.pending !== undefined) ? stats.pending : submissions.filter(s => s.status === 'pending').length;
+        const changesCount = (stats && stats.changes_requested !== undefined) ? stats.changes_requested : submissions.filter(s => s.status === 'changes_requested').length;
+        const approvedCount = (stats && stats.approved !== undefined) ? stats.approved : submissions.filter(s => s.status === 'approved').length;
+        const rejectedCount = (stats && stats.rejected !== undefined) ? stats.rejected : submissions.filter(s => s.status === 'rejected').length;
+        const totalCount = (stats && stats.total !== undefined) ? stats.total : submissions.length;
+
+        document.getElementById('countPending').textContent = pendingCount;
+        document.getElementById('countChanges').textContent = changesCount;
+        document.getElementById('countApproved').textContent = approvedCount;
+        document.getElementById('countRejected').textContent = rejectedCount;
+        document.getElementById('countTotal').textContent = totalCount;
+
+        // Update Pill Badges
+        document.getElementById('pillCountAll').textContent = totalCount;
+        document.getElementById('pillCountPending').textContent = pendingCount;
+        document.getElementById('pillCountChanges').textContent = changesCount;
+        document.getElementById('pillCountApproved').textContent = approvedCount;
+        document.getElementById('pillCountRejected').textContent = rejectedCount;
+
+        // Update Sidebar Badge
+        const sbBadge = document.getElementById('submissionsPendingBadge');
+        if (sbBadge) {
+          if (pendingCount > 0) {
+            sbBadge.textContent = pendingCount;
+            sbBadge.style.display = 'inline-block';
           } else {
-            badge.style.display = 'none';
+            sbBadge.style.display = 'none';
           }
         }
 
-        // Load all submissions
-        const res = await Core.api('/api/admin/submissions');
-        submissions = res.items || [];
         renderTable();
+
+        if (manual) {
+          Core.toast('تم تحديث قائمة الطلبات بنجاح', 'success');
+        }
       } catch (err) {
-        Core.toast('تعذر جلب الطلبات: ' + err.message, 'danger');
+        console.error('Failed to load submissions:', err);
+        showError('تعذر جلب طلبات المطورين: ' + (err.message || 'خطأ في الاتصال بالخادم'));
       } finally {
         document.getElementById('loadingSubs').style.display = 'none';
+        if (refreshIcon) refreshIcon.classList.remove('spin');
       }
     }
 
     function renderTable() {
-      const q = document.getElementById('searchFilter').value.toLowerCase().trim();
-      const status = document.getElementById('statusFilter').value;
+      const q = (document.getElementById('searchFilter').value || '').toLowerCase().trim();
+      const device = document.getElementById('deviceFilter').value;
       const sort = document.getElementById('sortFilter').value;
 
       let filtered = [...submissions];
 
-      if (status !== 'all') {
-        filtered = filtered.filter(s => s.status === status);
+      // Filter by Status
+      if (activeStatusFilter !== 'all') {
+        filtered = filtered.filter(s => s.status === activeStatusFilter);
       }
 
+      // Filter by Device
+      if (device !== 'all') {
+        filtered = filtered.filter(s => (s.targetType || 'TV').toUpperCase() === device.toUpperCase());
+      }
+
+      // Filter by Search query
       if (q) {
         filtered = filtered.filter(s => [
-          s.name, s.devName, s.devEmail, s.reqNumber, s.categoryName
+          s.name,
+          s.devName,
+          s.developer,
+          s.devEmail,
+          s.reqNumber,
+          s.packageName,
+          s.sectionName,
+          s.categoryName
         ].filter(Boolean).join(' ').toLowerCase().includes(q));
       }
 
+      // Sort
       if (sort === 'oldest') {
         filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      } else if (sort === 'name') {
+        filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       } else {
         filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       }
@@ -334,251 +815,588 @@
       if (filtered.length === 0) {
         document.getElementById('emptySubs').style.display = 'block';
         document.getElementById('subsTable').style.display = 'none';
+        if (window.lucide) lucide.createIcons();
         return;
       }
 
       document.getElementById('emptySubs').style.display = 'none';
       document.getElementById('subsTable').style.display = 'table';
 
+      const badgeMap = {
+        'pending': '<span class="badge badge-pending"><i data-lucide="clock" style="width:12px;height:12px;"></i> بانتظار المراجعة</span>',
+        'in_review': '<span class="badge badge-in_review"><i data-lucide="eye" style="width:12px;height:12px;"></i> قيد الفحص</span>',
+        'changes_requested': '<span class="badge badge-changes_requested"><i data-lucide="alert-circle" style="width:12px;height:12px;"></i> تحتاج تعديل</span>',
+        'approved': '<span class="badge badge-approved"><i data-lucide="check-check" style="width:12px;height:12px;"></i> معتمد ومنشور</span>',
+        'rejected': '<span class="badge badge-rejected"><i data-lucide="x-circle" style="width:12px;height:12px;"></i> مرفوض</span>'
+      };
+
       filtered.forEach(sub => {
         const tr = document.createElement('tr');
-        const iconSrc = sub.iconUrl || 'assets/logo.png';
+        const iconSrc = sub.iconUrl || 'app.png';
 
-        const badgeMap = {
-          'pending': '<span class="badge badge-pending">بانتظار المراجعة</span>',
-          'in_review': '<span class="badge badge-in_review">قيد الفحص</span>',
-          'changes_requested': '<span class="badge badge-changes_requested">تحتاج تعديل</span>',
-          'approved': '<span class="badge badge-approved">مقبول ومنشور</span>',
-          'rejected': '<span class="badge badge-rejected">مرفوض</span>'
-        };
+        const targetLabel = (sub.targetType === 'PHONE') ? 'هاتف' : (sub.targetType === 'ALL' ? 'شاشات وهواتف' : 'شاشات TV');
+        const targetColor = (sub.targetType === 'PHONE') ? '#a855f7' : '#06b6d4';
 
         tr.innerHTML = `
           <td>
             <div style="display:flex;align-items:center;gap:12px;">
-              <img src="${Core.esc(iconSrc)}" style="width:40px;height:40px;border-radius:10px;object-fit:cover;background:#1e293b;" onerror="this.src='assets/logo.png'">
+              <img src="${Core.esc(iconSrc)}" style="width:44px;height:44px;border-radius:12px;object-fit:cover;background:#162034;border:1px solid var(--border-subtle);flex-shrink:0;" onerror="this.src='app.png'">
               <div>
-                <strong style="color:white;display:block;">${Core.esc(sub.name)}</strong>
-                <span style="font-size:0.75rem;color:var(--text-muted);">${Core.esc(sub.versionName || '1.0.0')}</span>
+                <strong style="color:var(--text-main);font-size:0.95rem;display:block;">${Core.esc(sub.name)}</strong>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:2px;font-size:0.75rem;color:var(--text-dim);">
+                  <span style="background:rgba(255,255,255,0.06);padding:1px 6px;border-radius:4px;color:var(--text-muted);">${Core.esc(sub.versionName || '1.0.0')}</span>
+                  <span>${Core.esc(sub.packageName || 'com.appland.app')}</span>
+                </div>
               </div>
             </div>
           </td>
-          <td><span class="req-code">${Core.esc(sub.reqNumber || '—')}</span></td>
           <td>
-            <div style="color:white;font-weight:600;">${Core.esc(sub.devName || '—')}</div>
-            <div style="font-size:0.75rem;color:var(--text-muted);">${Core.esc(sub.devEmail || '')}</div>
+            <button class="req-code-pill" title="انقر لنسخ رقم الطلب" data-copy="${Core.esc(sub.reqNumber || sub.id)}">
+              <span>${Core.esc(sub.reqNumber || 'REQ-—')}</span>
+              <i data-lucide="copy" style="width:12px;height:12px;"></i>
+            </button>
           </td>
           <td>
-            <div><strong>${Core.esc(sub.sectionName || 'القسم العام')}</strong> › ${Core.esc(sub.categoryName || 'متنوع')}</div>
-            <span style="font-size:0.75rem;color:var(--info);">${sub.targetType === 'TV' ? 'شاشات TV' : (sub.targetType === 'PHONE' ? 'هواتف' : 'شاشات وهواتف')}</span>
+            <div style="color:var(--text-main);font-weight:700;font-size:0.9rem;">${Core.esc(sub.devName || sub.developer || 'مطور AppLand')}</div>
+            <div style="font-size:0.76rem;color:var(--text-muted);">${Core.esc(sub.devEmail || '—')}</div>
           </td>
-          <td style="color:var(--text-muted);">${Core.fmtDate(sub.createdAt)}</td>
+          <td>
+            <div style="font-size:0.86rem;font-weight:600;color:var(--text-main);">${Core.esc(sub.sectionName || 'تطبيقات عامة')} › <span style="color:var(--primary);">${Core.esc(sub.categoryName || 'متنوع')}</span></div>
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;color:${targetColor};margin-top:2px;">
+              <i data-lucide="${sub.targetType === 'PHONE' ? 'smartphone' : 'tv'}" style="width:12px;height:12px;"></i>
+              ${targetLabel}
+            </span>
+          </td>
+          <td>
+            <div style="color:var(--text-main);font-size:0.84rem;">${Core.fmtDate(sub.createdAt)}</div>
+            <span style="font-size:0.75rem;color:var(--text-dim);">${getRelativeTime(sub.createdAt)}</span>
+          </td>
           <td>${badgeMap[sub.status] || sub.status}</td>
           <td>
-            <button class="btn btn-primary btn-sm btn-review" data-id="${sub.id}">
-              <i data-lucide="eye"></i>
-              <span>مراجعة</span>
-            </button>
+            <div class="table-actions">
+              <button class="btn btn-primary btn-sm btn-review-sub" data-id="${sub.id}" title="فتح نافذة الفحص والمراجعة الكاملة">
+                <i data-lucide="eye"></i>
+                <span>مراجعة</span>
+              </button>
+              <a href="${Core.esc(sub.apkUrl)}" target="_blank" class="btn btn-ghost btn-sm btn-icon" title="اختبار تحميل APK المباشر" download>
+                <i data-lucide="download"></i>
+              </a>
+            </div>
           </td>
         `;
 
-        tr.querySelector('.btn-review').addEventListener('click', () => openReviewModal(sub.id));
+        // Copy button event
+        const copyBtn = tr.querySelector('.req-code-pill');
+        if (copyBtn) {
+          copyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const text = copyBtn.getAttribute('data-copy');
+            copyToClipboard(text, 'تم نسخ رقم الطلب');
+          });
+        }
+
+        // Review button event
+        tr.querySelector('.btn-review-sub').addEventListener('click', () => openReviewModal(sub.id));
+
         tbody.appendChild(tr);
       });
 
       if (window.lucide) lucide.createIcons();
     }
 
-    async function openReviewModal(subId) {
+    function openReviewModal(subId) {
       const sub = submissions.find(s => s.id === subId);
       if (!sub) return;
+      currentViewingSub = sub;
 
       const body = document.getElementById('reviewModalBody');
+      const footer = document.getElementById('modalFooterActions');
       const backdrop = document.getElementById('reviewModalBackdrop');
 
       const isApproved = sub.status === 'approved';
       const screenshots = sub.screenshots || [];
 
-      let screensHtml = '<div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:10px;">';
-      screenshots.forEach(src => {
-        screensHtml += `
-          <img src="${Core.esc(src)}" style="width:160px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:pointer;" class="preview-thumb" onclick="openLightbox('${Core.esc(src)}')">
+      // Screenshots HTML
+      let screensHtml = '';
+      if (screenshots.length > 0) {
+        screensHtml = `
+          <div class="screenshots-gallery">
+            ${screenshots.map((src, idx) => `
+              <div class="screenshot-thumb-wrap" onclick="openLightbox('${Core.esc(src)}')">
+                <img src="${Core.esc(src)}" onerror="this.src='app.png'">
+                <div class="zoom-badge">
+                  <i data-lucide="zoom-in" style="width:12px;height:12px;"></i>
+                  <span>شاشة ${idx + 1}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
         `;
-      });
-      screensHtml += '</div>';
+      } else {
+        screensHtml = `
+          <div style="background:var(--bg-surface-elevated);border:1px dashed var(--border-subtle);border-radius:var(--radius-md);padding:24px;text-align:center;color:var(--text-dim);font-size:0.86rem;">
+            <i data-lucide="image-off" style="width:28px;height:28px;margin:0 auto 6px;display:block;"></i>
+            لم يقم المطور بإرفاق لقطات شاشة لهذا الطلب
+          </div>
+        `;
+      }
+
+      // Target Label
+      const targetLabel = (sub.targetType === 'PHONE') ? 'هواتف ذكية' : (sub.targetType === 'ALL' ? 'شاشات وهواتف' : 'شاشات Android TV');
 
       body.innerHTML = `
-        <div style="display:flex;gap:18px;align-items:flex-start;border-bottom:1px solid var(--border);padding-bottom:18px;margin-bottom:18px;">
-          <img src="${Core.esc(sub.iconUrl || '')}" style="width:76px;height:76px;border-radius:18px;object-fit:cover;background:#1e293b;border:1px solid var(--border);">
+        <!-- App Header Card -->
+        <div style="display:flex;gap:18px;align-items:flex-start;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:18px;margin-bottom:20px;">
+          <img src="${Core.esc(sub.iconUrl || 'app.png')}" style="width:72px;height:72px;border-radius:16px;object-fit:cover;background:#090d16;border:1px solid rgba(255,255,255,0.1);flex-shrink:0;" onerror="this.src='app.png'">
           <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
               <h2 style="font-size:1.35rem;font-weight:800;color:white;margin:0;">${Core.esc(sub.name)}</h2>
-              <span class="req-code">${Core.esc(sub.reqNumber || '—')}</span>
+              <button class="req-code-pill" onclick="copyToClipboard('${Core.esc(sub.reqNumber || sub.id)}', 'تم نسخ رقم الطلب')">
+                <span>${Core.esc(sub.reqNumber || 'REQ-—')}</span>
+                <i data-lucide="copy" style="width:12px;height:12px;"></i>
+              </button>
             </div>
-            <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:6px;">
-              المطور: <strong style="color:white;">${Core.esc(sub.developer || sub.devName || 'مطور AppLand')}</strong>${sub.devEmail ? ` (${Core.esc(sub.devEmail)})` : ''}
+
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:0.82rem;margin-bottom:8px;">
+              <span class="badge badge-primary"><i data-lucide="tv" style="width:12px;height:12px;"></i> ${targetLabel}</span>
+              <span class="badge badge-neutral">${Core.esc(sub.sectionName || 'تطبيقات عامة')}</span>
+              <span class="badge badge-neutral">${Core.esc(sub.categoryName || 'متنوع')}</span>
+              <span class="badge badge-neutral">الإصدار ${Core.esc(sub.versionName || '1.0.0')} (كود ${Core.esc(sub.versionCode || 1)})</span>
             </div>
-            <div style="font-size:0.85rem;color:var(--text-dim);">
-              القسم: <strong style="color:white;">${Core.esc(sub.sectionName || 'عام')}</strong> • الفئة: <span style="color:var(--primary);">${Core.esc(sub.categoryName || 'متنوع')}</span> • الجهاز: <strong>${sub.targetType}</strong> • الحجم: ${Core.fmtSize(sub.sizeBytes)}
+
+            <div style="font-size:0.82rem;color:var(--text-muted);">
+              المطور: <strong style="color:white;">${Core.esc(sub.devName || sub.developer || 'مطور AppLand')}</strong>
+              ${sub.devEmail ? ` • البريد: <a href="mailto:${Core.esc(sub.devEmail)}" style="color:var(--primary);">${Core.esc(sub.devEmail)}</a>` : ''}
+              • التقديم: <span style="color:var(--text-main);">${Core.fmtDate(sub.createdAt)}</span>
             </div>
           </div>
         </div>
 
-        <!-- Description -->
-        <div style="margin-bottom:18px;">
-          <label style="font-size:0.85rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;">نبذة التطبيق</label>
-          <div style="background:var(--bg-card);padding:10px 14px;border-radius:8px;color:white;font-size:0.9rem;">
-            ${Core.esc(sub.shortDescription || 'لا توجد نبذة')}
+        <!-- Specifications Grid -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;margin-bottom:20px;">
+          <div class="spec-item">
+            <div class="spec-label"><i data-lucide="package" style="width:14px;height:14px;"></i> اسم الحزمة (Package)</div>
+            <div class="spec-value" style="font-family:monospace;font-size:0.82rem;color:#93c5fd;">${Core.esc(sub.packageName || 'com.appland.app')}</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label"><i data-lucide="hard-drive" style="width:14px;height:14px;"></i> حجم الملف المقدر</div>
+            <div class="spec-value">${Core.fmtSize(sub.sizeBytes)}</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-label"><i data-lucide="calendar" style="width:14px;height:14px;"></i> تاريخ آخر تحديث</div>
+            <div class="spec-value">${Core.fmtDate(sub.updatedAt || sub.createdAt)}</div>
           </div>
         </div>
 
-        <div style="margin-bottom:18px;">
-          <label style="font-size:0.85rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;">الوصف الكامل</label>
-          <div style="background:var(--bg-card);padding:12px 14px;border-radius:8px;color:white;font-size:0.9rem;white-space:pre-wrap;max-height:140px;overflow-y:auto;">
+        <!-- Short & Full Description -->
+        <div style="margin-bottom:20px;">
+          <label style="font-size:0.84rem;font-weight:700;color:var(--text-muted);display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <i data-lucide="align-right" style="width:14px;height:14px;"></i>
+            نبذة التطبيق القصيرة
+          </label>
+          <div style="background:var(--bg-surface-elevated);padding:12px 14px;border-radius:var(--radius-md);color:white;font-size:0.9rem;border:1px solid var(--border-subtle);">
+            ${Core.esc(sub.shortDescription || 'لا توجد نبذة قصيرة مسجلة')}
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="font-size:0.84rem;font-weight:700;color:var(--text-muted);display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <i data-lucide="file-text" style="width:14px;height:14px;"></i>
+            الوصف الكامل للتطبيق ومميزاته
+          </label>
+          <div style="background:var(--bg-surface-elevated);padding:14px;border-radius:var(--radius-md);color:var(--text-main);font-size:0.88rem;white-space:pre-wrap;max-height:160px;overflow-y:auto;border:1px solid var(--border-subtle);line-height:1.7;">
             ${Core.esc(sub.fullDescription || sub.shortDescription || '—')}
           </div>
         </div>
 
-        <!-- Screenshots -->
-        <div style="margin-bottom:18px;">
-          <label style="font-size:0.85rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:6px;">لقطات الشاشة (${screenshots.length} صور - انقر للتكبير)</label>
-          ${screenshots.length ? screensHtml : '<span style="color:var(--text-dim);font-size:0.85rem;">لا توجد لقطات شاشة مرفقة</span>'}
+        <!-- Screenshots Gallery -->
+        <div style="margin-bottom:20px;">
+          <label style="font-size:0.84rem;font-weight:700;color:var(--text-muted);display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <i data-lucide="images" style="width:14px;height:14px;"></i>
+              لقطات الشاشة المرفقة (${screenshots.length} صور)
+            </span>
+            <span style="font-size:0.75rem;color:var(--primary);">انقر على أي صورة لتكبيرها</span>
+          </label>
+          ${screensHtml}
         </div>
 
-        <!-- Direct APK Link & Test -->
-        <div style="margin-bottom:24px;">
-          <label style="font-size:0.85rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:6px;">رابط تحميل APK المباشر</label>
-          <div style="display:flex;gap:10px;align-items:center;background:var(--bg-card);padding:10px 14px;border-radius:8px;border:1px solid var(--border);">
-            <i data-lucide="link-2" style="color:var(--primary);width:18px;height:18px;flex-shrink:0;"></i>
-            <span style="flex:1;font-size:0.82rem;font-family:monospace;color:#93c5fd;word-break:break-all;">${Core.esc(sub.apkUrl)}</span>
-            <a href="${Core.esc(sub.apkUrl)}" target="_blank" class="btn btn-ghost btn-sm" style="flex-shrink:0;">
-              <i data-lucide="external-link"></i>
-              <span>اختبار الرابط</span>
-            </a>
+        <!-- Direct APK Download Link & Verification -->
+        <div style="margin-bottom:20px;">
+          <label style="font-size:0.84rem;font-weight:700;color:var(--text-muted);display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="display:flex;align-items:center;gap:6px;">
+              <i data-lucide="link" style="width:14px;height:14px;"></i>
+              رابط تحميل ملف APK المباشر
+            </span>
+            <span class="badge badge-success" style="font-size:0.75rem;"><i data-lucide="shield-check" style="width:12px;height:12px;"></i> تم التحقق من الرابط</span>
+          </label>
+          <div style="display:flex;gap:10px;align-items:center;background:var(--bg-surface-elevated);padding:12px 14px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);flex-wrap:wrap;">
+            <i data-lucide="download-cloud" style="color:var(--primary);width:20px;height:20px;flex-shrink:0;"></i>
+            <span style="flex:1;font-size:0.82rem;font-family:monospace;color:#93c5fd;word-break:break-all;min-width:200px;">
+              ${Core.esc(sub.apkUrl)}
+            </span>
+            <div style="display:flex;gap:8px;flex-shrink:0;">
+              <button class="btn btn-ghost btn-sm" onclick="copyToClipboard('${Core.esc(sub.apkUrl)}', 'تم نسخ رابط APK')" title="نسخ الرابط">
+                <i data-lucide="copy"></i>
+                <span>نسخ</span>
+              </button>
+              <a href="${Core.esc(sub.apkUrl)}" target="_blank" class="btn btn-secondary btn-sm" title="اختبار تحميل الملف مباشرة">
+                <i data-lucide="external-link"></i>
+                <span>تحميل واختبار</span>
+              </a>
+            </div>
           </div>
         </div>
 
-        <!-- Admin Notes / Rejection if exists -->
+        <!-- Historical Notes / Warnings -->
         ${sub.adminNotes ? `
-          <div class="alert alert-warning" style="margin-bottom:18px;">
-            <strong>ملاحظات التعديل المسجلة:</strong> ${Core.esc(sub.adminNotes)}
+          <div class="alert alert-warning" style="margin-bottom:16px;">
+            <i data-lucide="alert-circle" style="flex-shrink:0;"></i>
+            <div>
+              <strong>ملاحظات التعديل السابقة المسجلة للمطور:</strong>
+              <div style="margin-top:4px;font-size:0.88rem;">${Core.esc(sub.adminNotes)}</div>
+            </div>
           </div>
         ` : ''}
 
         ${sub.rejectionReason ? `
-          <div class="alert alert-danger" style="margin-bottom:18px;">
-            <strong>سبب الرفض المسجل:</strong> ${Core.esc(sub.rejectionReason)}
+          <div class="alert alert-danger" style="margin-bottom:16px;">
+            <i data-lucide="x-circle" style="flex-shrink:0;"></i>
+            <div>
+              <strong>سبب الرفض المسجل مسبقاً:</strong>
+              <div style="margin-top:4px;font-size:0.88rem;">${Core.esc(sub.rejectionReason)}</div>
+            </div>
           </div>
         ` : ''}
 
-        <!-- Actions Bar -->
-        <div style="border-top:1px solid var(--border);padding-top:18px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-          <div>
-            ${isApproved ? '<span class="badge badge-approved" style="font-size:0.9rem;padding:6px 14px;">تم نشر هذا التطبيق في المتجر</span>' : ''}
+        <!-- Container for In-Modal Actions (Approve / Request Changes / Reject) -->
+        <div id="inlineActionContainer"></div>
+      `;
+
+      // Render Footer Actions
+      if (isApproved) {
+        footer.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="badge badge-approved" style="font-size:0.88rem;padding:6px 14px;">
+              <i data-lucide="check-circle" style="width:14px;height:14px;"></i>
+              هذا التطبيق منشور بالفعل في متجر AppLand TV
+            </span>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <a href="apps.html?q=${encodeURIComponent(sub.name)}" class="btn btn-primary btn-sm">
+              <i data-lucide="tv"></i>
+              <span>عرض في قائمة تطبيقات المتجر</span>
+            </a>
+            <button class="btn btn-secondary btn-sm" onclick="closeReviewModal()">إغلاق</button>
+          </div>
+        `;
+      } else {
+        footer.innerHTML = `
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-danger btn-sm" id="btnShowReject">
+              <i data-lucide="x"></i>
+              <span>رفض الطلب</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btnShowRequestChanges" style="color:#fbbf24;border-color:rgba(245,158,11,0.3);">
+              <i data-lucide="edit-3"></i>
+              <span>طلب تعديل من المطور</span>
+            </button>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-ghost btn-sm" onclick="closeReviewModal()">إلغاء</button>
+            <button class="btn btn-primary" id="btnShowApprove" style="background:#10b981;box-shadow:0 4px 14px rgba(16,185,129,0.35);">
+              <i data-lucide="check-check"></i>
+              <span>الموافقة والنشر التلقائي</span>
+            </button>
+          </div>
+        `;
+
+        // Wire Action Trigger Buttons
+        document.getElementById('btnShowApprove').addEventListener('click', () => renderApprovePanel(sub));
+        document.getElementById('btnShowRequestChanges').addEventListener('click', () => renderRequestChangesPanel(sub));
+        document.getElementById('btnShowReject').addEventListener('click', () => renderRejectPanel(sub));
+      }
+
+      backdrop.classList.add('open');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderApprovePanel(sub) {
+      const container = document.getElementById('inlineActionContainer');
+      container.innerHTML = `
+        <div class="inline-action-panel" style="border-color:rgba(16,185,129,0.4);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <div class="stat-icon-wrap emerald" style="width:36px;height:36px;">
+              <i data-lucide="check-check"></i>
+            </div>
+            <div>
+              <h3 style="font-size:1.05rem;color:white;margin:0;">تأكيد الموافقة والنشر في متجر AppLand TV</h3>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">سيتم إضافة التطبيق فوراً لكتالوج المتجر ليتمكن مستخدمو الشاشات من تنزيله</p>
+            </div>
           </div>
 
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            ${!isApproved ? `
-              <button class="btn btn-danger btn-sm" id="btnReject">
-                <i data-lucide="x"></i>
-                <span>رفض الطلب</span>
-              </button>
-              <button class="btn btn-ghost btn-sm" id="btnRequestChanges" style="color:#fbbf24;border-color:rgba(245,158,11,0.4);">
-                <i data-lucide="edit-3"></i>
-                <span>طلب تعديل</span>
-              </button>
-              <button class="btn btn-primary" id="btnApprove" style="background:#10b981;">
-                <i data-lucide="check-check"></i>
-                <span>الموافقة والنشر التلقائي</span>
-              </button>
-            ` : `
-              <a href="apps.html?q=${encodeURIComponent(sub.name)}" class="btn btn-primary btn-sm">
-                <i data-lucide="tv"></i>
-                <span>فتح التطبيق في قائمة المتجر</span>
-              </a>
-            `}
+          <div style="background:var(--bg-surface);padding:12px;border-radius:var(--radius-sm);margin-bottom:14px;border:1px solid var(--border-subtle);">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.88rem;color:white;">
+              <input type="checkbox" id="approveIsFeatured" style="width:18px;height:18px;accent-color:var(--primary);">
+              <span>تمييز هذا التطبيق في الصفحة الرئيسية للمتجر (Featured App ⭐)</span>
+            </label>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:10px;">
+            <button class="btn btn-ghost btn-sm" onclick="clearInlineAction()">تراجع</button>
+            <button class="btn btn-primary" id="btnConfirmApprove" style="background:#10b981;">
+              <i data-lucide="rocket"></i>
+              <span>نشر التطبيق الآن</span>
+            </button>
           </div>
         </div>
       `;
-
-      backdrop.style.display = 'flex';
       if (window.lucide) lucide.createIcons();
+      container.scrollIntoView({ behavior: 'smooth' });
 
-      // Action Handlers
-      const btnApprove = document.getElementById('btnApprove');
-      if (btnApprove) {
-        btnApprove.addEventListener('click', async () => {
-          if (!confirm(`هل أنت متأكد من الموافقة على تطبيق "${sub.name}" ونشره تلقائياً لجميع مستخدمي متجر Android TV؟`)) return;
-          btnApprove.disabled = true;
-          btnApprove.textContent = 'جارٍ النشر...';
-          try {
-            await Core.api(`/api/admin/submissions/${sub.id}/approve`, {
-              method: 'POST',
-              body: { isFeatured: false }
-            });
-            Core.toast(`تمت الموافقة على "${sub.name}" ونشره بنجاح!`, 'success');
-            backdrop.style.display = 'none';
-            await loadSubmissions();
-          } catch (err) {
-            Core.toast(err.message, 'danger');
-            btnApprove.disabled = false;
-            btnApprove.innerHTML = '<i data-lucide="check-check"></i><span>الموافقة والنشر التلقائي</span>';
-          }
-        });
+      document.getElementById('btnConfirmApprove').addEventListener('click', async () => {
+        const btn = document.getElementById('btnConfirmApprove');
+        const isFeatured = document.getElementById('approveIsFeatured').checked;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i><span>جارٍ النشر...</span>';
+        if (window.lucide) lucide.createIcons();
+
+        try {
+          await Core.api(`/api/admin/submissions/${sub.id}/approve`, {
+            method: 'POST',
+            body: { isFeatured }
+          });
+          Core.toast(`تمت الموافقة على "${sub.name}" ونشره رسمياً في المتجر! 🎉`, 'success');
+          closeReviewModal();
+          await loadSubmissions();
+        } catch (err) {
+          Core.toast('فشل النشر: ' + err.message, 'danger');
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="rocket"></i><span>نشر التطبيق الآن</span>';
+          if (window.lucide) lucide.createIcons();
+        }
+      });
+    }
+
+    function renderRequestChangesPanel(sub) {
+      const container = document.getElementById('inlineActionContainer');
+      container.innerHTML = `
+        <div class="inline-action-panel" style="border-color:rgba(245,158,11,0.4);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <div class="stat-icon-wrap amber" style="width:36px;height:36px;background:rgba(245,158,11,0.15);color:#fbbf24;">
+              <i data-lucide="edit-3"></i>
+            </div>
+            <div>
+              <h3 style="font-size:1.05rem;color:white;margin:0;">طلب تعديلات من المطور</h3>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">ستظهر هذه الملاحظات فوراً للمطور في لوحة المطورين ليتمكن من معالجتها وإعادة التقديم</p>
+            </div>
+          </div>
+
+          <div style="margin-bottom:8px;">
+            <span style="font-size:0.78rem;color:var(--text-dim);font-weight:600;">قوالب سريعة للملاحظات الشائعة (انقر للإضافة):</span>
+            <div class="preset-chips">
+              <span class="preset-chip" onclick="insertNote('رابط تحميل APK المباشر لا يعمل أو معطوب.')">رابط معطوب</span>
+              <span class="preset-chip" onclick="insertNote('يرجى توفير لقطات شاشة أفقية بدقة 1080p تناسب شاشات التلفاز.')">لقطات شاشة للشاشات</span>
+              <span class="preset-chip" onclick="insertNote('التطبيق لا يدعم التنقل بجهاز التحكم عن بعد (D-Pad Remote).')">دعم الـ Remote</span>
+              <span class="preset-chip" onclick="insertNote('يرجى تحسين وتوسيع الوصف ليوضح مميزات التطبيق لمستخدمي الشاشات.')">توسيع الوصف</span>
+              <span class="preset-chip" onclick="insertNote('رابط صورة الأيقونة تالف أو لا يعرض شعار التطبيق بوضوح.')">أيقونة غير واضحة</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <textarea id="changesNotesInput" class="form-control" rows="3" placeholder="اكتب الملاحظات والتعديلات المطلوبة بدقة هنا...">${Core.esc(sub.adminNotes || '')}</textarea>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:10px;">
+            <button class="btn btn-ghost btn-sm" onclick="clearInlineAction()">تراجع</button>
+            <button class="btn btn-secondary btn-sm" id="btnConfirmChanges" style="color:#fbbf24;border-color:rgba(245,158,11,0.4);">
+              <i data-lucide="send"></i>
+              <span>إرسال التعديلات للمطور</span>
+            </button>
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+      container.scrollIntoView({ behavior: 'smooth' });
+
+      document.getElementById('btnConfirmChanges').addEventListener('click', async () => {
+        const input = document.getElementById('changesNotesInput');
+        const notes = (input.value || '').trim();
+        if (!notes) {
+          Core.toast('يرجى كتابة الملاحظات المطلوبة من المطور أولاً', 'warning');
+          input.focus();
+          return;
+        }
+
+        const btn = document.getElementById('btnConfirmChanges');
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i><span>جارٍ الإرسال...</span>';
+
+        try {
+          await Core.api(`/api/admin/submissions/${sub.id}/request-changes`, {
+            method: 'POST',
+            body: { notes }
+          });
+          Core.toast('تم إرسال طلب التعديل إلى المطور بنجاح', 'success');
+          closeReviewModal();
+          await loadSubmissions();
+        } catch (err) {
+          Core.toast('فشل إرسال التعديل: ' + err.message, 'danger');
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="send"></i><span>إرسال التعديلات للمطور</span>';
+          if (window.lucide) lucide.createIcons();
+        }
+      });
+    }
+
+    function renderRejectPanel(sub) {
+      const container = document.getElementById('inlineActionContainer');
+      container.innerHTML = `
+        <div class="inline-action-panel" style="border-color:rgba(239,68,68,0.4);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <div class="stat-icon-wrap rose" style="width:36px;height:36px;background:rgba(239,68,68,0.15);color:#f87171;">
+              <i data-lucide="x-circle"></i>
+            </div>
+            <div>
+              <h3 style="font-size:1.05rem;color:white;margin:0;">رفض طلب نشر التطبيق</h3>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">يرجى تدوين سبب الرفض بوضوح ليتم إبلاغ المطور به</p>
+            </div>
+          </div>
+
+          <div class="field">
+            <textarea id="rejectReasonInput" class="form-control" rows="3" placeholder="اكتب سبب الرفض هنا (مثال: محتوى غير ملائم، تطبيق ضار، عدم مطابقة إرشادات المتجر)..."></textarea>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:10px;">
+            <button class="btn btn-ghost btn-sm" onclick="clearInlineAction()">تراجع</button>
+            <button class="btn btn-danger btn-sm" id="btnConfirmReject">
+              <i data-lucide="slash"></i>
+              <span>تأكيد رفض الطلب</span>
+            </button>
+          </div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+      container.scrollIntoView({ behavior: 'smooth' });
+
+      document.getElementById('btnConfirmReject').addEventListener('click', async () => {
+        const input = document.getElementById('rejectReasonInput');
+        const reason = (input.value || '').trim();
+        if (!reason) {
+          Core.toast('يرجى توضيح سبب الرفض للمطور أولاً', 'warning');
+          input.focus();
+          return;
+        }
+
+        const btn = document.getElementById('btnConfirmReject');
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i><span>جارٍ المعالجة...</span>';
+
+        try {
+          await Core.api(`/api/admin/submissions/${sub.id}/reject`, {
+            method: 'POST',
+            body: { reason }
+          });
+          Core.toast('تم رفض الطلب وتسجيل سبب الرفض', 'warning');
+          closeReviewModal();
+          await loadSubmissions();
+        } catch (err) {
+          Core.toast('فشل رفض الطلب: ' + err.message, 'danger');
+          btn.disabled = false;
+          btn.innerHTML = '<i data-lucide="slash"></i><span>تأكيد رفض الطلب</span>';
+          if (window.lucide) lucide.createIcons();
+        }
+      });
+    }
+
+    function clearInlineAction() {
+      const container = document.getElementById('inlineActionContainer');
+      if (container) container.innerHTML = '';
+    }
+
+    function insertNote(text) {
+      const input = document.getElementById('changesNotesInput');
+      if (!input) return;
+      if (input.value.trim()) {
+        input.value = input.value.trim() + ' • ' + text;
+      } else {
+        input.value = text;
       }
+      input.focus();
+    }
 
-      const btnRequestChanges = document.getElementById('btnRequestChanges');
-      if (btnRequestChanges) {
-        btnRequestChanges.addEventListener('click', async () => {
-          const notes = prompt('اكتب الملاحظات والتعديلات المطلوبة من المطور (ستظهر له فوراً في لوحته):');
-          if (!notes || !notes.trim()) return;
-
-          btnRequestChanges.disabled = true;
-          try {
-            await Core.api(`/api/admin/submissions/${sub.id}/request-changes`, {
-              method: 'POST',
-              body: { notes: notes.trim() }
-            });
-            Core.toast('تم إرسال طلب التعديل إلى المطور بنجاح', 'success');
-            backdrop.style.display = 'none';
-            await loadSubmissions();
-          } catch (err) {
-            Core.toast(err.message, 'danger');
-            btnRequestChanges.disabled = false;
-          }
-        });
-      }
-
-      const btnReject = document.getElementById('btnReject');
-      if (btnReject) {
-        btnReject.addEventListener('click', async () => {
-          const reason = prompt('اكتب سبب رفض نشر التطبيق لإبلاغ المطور:');
-          if (!reason || !reason.trim()) return;
-
-          btnReject.disabled = true;
-          try {
-            await Core.api(`/api/admin/submissions/${sub.id}/reject`, {
-              method: 'POST',
-              body: { reason: reason.trim() }
-            });
-            Core.toast('تم رفض الطلب وتسجيل السبب', 'warning');
-            backdrop.style.display = 'none';
-            await loadSubmissions();
-          } catch (err) {
-            Core.toast(err.message, 'danger');
-            btnReject.disabled = false;
-          }
-        });
-      }
+    function closeReviewModal() {
+      const backdrop = document.getElementById('reviewModalBackdrop');
+      backdrop.classList.remove('open');
+      clearInlineAction();
+      currentViewingSub = null;
     }
 
     function openLightbox(src) {
-      const box = document.createElement('div');
-      box.className = 'lightbox-overlay';
-      box.innerHTML = `<img src="${src}" class="lightbox-img">`;
-      box.addEventListener('click', () => box.remove());
-      document.body.appendChild(box);
+      const overlay = document.getElementById('lightboxOverlay');
+      const img = document.getElementById('lightboxImage');
+      img.src = src;
+      overlay.style.display = 'flex';
+      requestAnimationFrame(() => {
+        overlay.classList.add('open');
+      });
     }
     window.openLightbox = openLightbox;
+
+    function copyToClipboard(text, successMsg = 'تم النسخ') {
+      if (!text) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          Core.toast(successMsg, 'success');
+        }).catch(() => {
+          prompt('انسخ الرابط:', text);
+        });
+      } else {
+        prompt('انسخ الرابط:', text);
+      }
+    }
+    window.copyToClipboard = copyToClipboard;
+
+    function getRelativeTime(d) {
+      if (!d) return '';
+      try {
+        const ms = new Date().getTime() - new Date(d).getTime();
+        const mins = Math.floor(ms / 60000);
+        if (mins < 1) return 'الآن';
+        if (mins < 60) return `منذ ${mins} دقيقة`;
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return `منذ ${hrs} ساعة`;
+        const days = Math.floor(hrs / 24);
+        return `منذ ${days} يوم`;
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function showError(msg) {
+      const banner = document.getElementById('errorBanner');
+      const text = document.getElementById('errorMessage');
+      if (banner && text) {
+        text.textContent = msg;
+        banner.style.display = 'flex';
+      }
+    }
+
+    function hideError() {
+      const banner = document.getElementById('errorBanner');
+      if (banner) banner.style.display = 'none';
+    }
+
+    function setupAutoSync() {
+      if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+      // Auto-sync every 30 seconds silently
+      autoRefreshTimer = setInterval(() => {
+        if (!document.hidden && !currentViewingSub) {
+          loadSubmissions(false);
+        }
+      }, 30000);
+    }
 
     document.addEventListener('DOMContentLoaded', init);
   </script>

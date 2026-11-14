@@ -124,7 +124,7 @@
           if (res.status === 401 && !path.includes('/login')) {
             Core.setToken('');
             window.location.href = 'login.html';
-            return;
+            throw new Error('جلسة الدخول منتهية أو غير صالحة');
           }
           const msg = (data && (data.error || data.message)) || ('خطأ في الطلب: ' + res.status);
           const err = new Error(msg);
@@ -145,6 +145,10 @@
       if (global.lucide && typeof global.lucide.createIcons === 'function') {
         global.lucide.createIcons();
       }
+    },
+
+    initCommon(activePage) {
+      this.setupLayout(activePage);
     },
 
     setupLayout(activePage) {
