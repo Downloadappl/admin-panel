@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تقديم تطبيق جديد — AppLand Developers</title>
   <link rel="stylesheet" href="css/dev.css">
-  <script src="../assets/lucide.min.js"></script>
+  <script src="assets/lucide.min.js"></script>
 </head>
 <body>
 
@@ -215,11 +215,12 @@
 
   <script src="js/dev.js"></script>
   <script>
-    if (!Dev.requireAuth()) throw new Error('Auth required');
     if (window.lucide) lucide.createIcons();
 
-    const user = Dev.getUser() || {};
-    if (user.fullName) document.getElementById('appDeveloper').value = user.fullName;
+    const savedDevName = Dev.getDevName();
+    if (savedDevName) {
+      document.getElementById('appDeveloper').value = savedDevName;
+    }
 
     let iconDataUrl = '';
     let screenshotsList = [];
@@ -386,11 +387,16 @@
       submitBtn.textContent = 'جارٍ إرسال وفحص التطبيق...';
 
       try {
+        if (developer) Dev.setDevName(developer);
+
         const res = await Dev.api('/api/dev/submissions', {
           method: 'POST',
           body: {
             name,
             developer,
+            developerName: developer,
+            devName: developer,
+            developerId: Dev.getDevId(),
             targetType,
             categoryId,
             versionName,
@@ -402,6 +408,10 @@
             apkUrl
           }
         });
+
+        if (res && res.id) {
+          Dev.recordMySubmission(res.id);
+        }
 
         document.getElementById('successReqNumber').textContent = res.reqNumber;
         form.style.display = 'none';

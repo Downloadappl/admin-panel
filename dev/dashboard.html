@@ -3,9 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة المطور — AppLand Developers</title>
+  <title>بوابة المطورين — AppLand Developers</title>
   <link rel="stylesheet" href="css/dev.css">
-  <script src="../assets/lucide.min.js"></script>
+  <script src="assets/lucide.min.js"></script>
+  <style>
+    .name-badge-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(14, 165, 233, 0.35);
+      color: #38bdf8;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .name-badge-btn:hover {
+      background: rgba(14, 165, 233, 0.22);
+      border-color: #38bdf8;
+    }
+    .onboarding-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .onboarding-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-focus);
+      border-radius: var(--radius-lg);
+      padding: 32px 28px;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes popIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
 
@@ -24,23 +71,18 @@
     </div>
 
     <div class="nav-actions">
-      <!-- Notification Bell -->
-      <button id="notifBellBtn" class="btn btn-ghost btn-sm" style="position:relative;" title="الإشعارات">
-        <i data-lucide="bell"></i>
-        <span id="notifBadge" style="display:none;position:absolute;top:4px;right:4px;width:9px;height:9px;background:var(--danger);border-radius:50%;"></span>
+      <!-- Developer Name / Change Name -->
+      <button id="changeNameNavBtn" class="name-badge-btn" title="انقر لتعديل اسم المطور">
+        <i data-lucide="user" style="width:16px;height:16px;"></i>
+        <span>المطور: <strong id="devNameNav">مطور جديد</strong></span>
+        <i data-lucide="edit-2" style="width:14px;height:14px;opacity:0.8;"></i>
       </button>
 
-      <!-- Profile -->
-      <button id="profileBtn" class="btn btn-ghost btn-sm">
-        <i data-lucide="user"></i>
-        <span id="devNameNav">المطور</span>
-      </button>
-
-      <!-- Logout -->
-      <button id="logoutBtn" class="btn btn-danger btn-sm" title="تسجيل الخروج">
-        <i data-lucide="log-out"></i>
-        <span>خروج</span>
-      </button>
+      <!-- Submit App Quick Button -->
+      <a href="submit.html" class="btn btn-primary btn-sm">
+        <i data-lucide="plus-circle"></i>
+        <span>تقديم تطبيق</span>
+      </a>
     </div>
   </header>
 
@@ -50,7 +92,7 @@
     <div class="page-head">
       <div class="page-title">
         <h1>لوحة تحكم المطور</h1>
-        <p>متابعة حالة طلبات التطبيقات وإرسال تطبيقات جديدة لمتجر شاشات Android TV</p>
+        <p>متابعة حالة طلباتك وإرسال تطبيقات جديدة لمتجر شاشات Android TV الذكية</p>
       </div>
 
       <div style="display:flex;gap:10px;">
@@ -66,7 +108,7 @@
       <i data-lucide="alert-triangle" style="width:22px;height:22px;flex-shrink:0;"></i>
       <div>
         <strong>تنبيه: لديك طلبات تحتاج إلى تعديل!</strong>
-        <p id="changesAlertText">راجع قسم "تحتاج إلى تعديل" للاطلاع على ملاحظات الإدارة وإعادة إرسال طلبك.</p>
+        <p id="changesAlertText">راجع قسم "تحتاج إلى تعديل" للاطلاع على ملاحظات الإدارة وتحديث طلبك.</p>
       </div>
     </div>
 
@@ -147,7 +189,7 @@
       <div id="emptyState" style="display:none;padding:56px 20px;text-align:center;">
         <i data-lucide="inbox" style="width:48px;height:48px;color:var(--text-dim);margin:0 auto 16px;display:block;"></i>
         <h3 style="font-size:1.15rem;color:white;margin-bottom:6px;">لا توجد طلبات في هذا القسم</h3>
-        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:20px;">يمكنك البدء بتقديم تطبيقك الأول لنشره في متجر شاشات AppLand</p>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:20px;">يمكنك البدء بتقديم تطبيقك لنشره في متجر شاشات AppLand</p>
         <a href="submit.html" class="btn btn-primary">
           <i data-lucide="plus"></i>
           <span>تقديم تطبيق جديد</span>
@@ -170,81 +212,127 @@
     </div>
   </main>
 
-  <!-- Notifications Modal -->
-  <div class="modal-overlay" id="notifModal">
-    <div class="modal-card">
-      <div class="modal-head">
-        <h3 class="modal-title" style="display:flex;align-items:center;gap:10px;">
-          <i data-lucide="bell" style="width:20px;height:20px;"></i>
-          <span>مركز إشعارات المطور</span>
-        </h3>
-        <button class="modal-close" id="closeNotifModal">&times;</button>
+  <!-- Onboarding Modal (Shown if developer has no saved name) -->
+  <div class="onboarding-overlay" id="onboardingModal" style="display:none;">
+    <div class="onboarding-card">
+      <div style="width:58px;height:58px;border-radius:16px;background:rgba(14, 165, 233, 0.15);color:#38bdf8;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <i data-lucide="code-2" style="width:32px;height:32px;"></i>
       </div>
+      <h2 style="font-size:1.4rem;font-weight:800;color:white;margin-bottom:8px;">مرحباً بك في بوابة مطوري AppLand</h2>
+      <p style="color:var(--text-muted);font-size:0.92rem;margin-bottom:22px;line-height:1.5;">
+        لا تحتاج لإنشاء حساب أو كلمة مرور. فقط أدخل اسمك أو اسم فريقك للبدء في تقديم ومتابعة تطبيقاتك.
+      </p>
 
-      <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-        <button id="markReadBtn" class="btn btn-ghost btn-sm">
-          <i data-lucide="check"></i>
-          <span>تحديد الكل كمقروء</span>
+      <form id="onboardingForm">
+        <div class="form-group" style="text-align:right;margin-bottom:20px;">
+          <label class="form-label" for="onboardInput"><span class="req">*</span> اسم المطور أو الاستوديو</label>
+          <input class="form-input" type="text" id="onboardInput" placeholder="مثال: أحمد العراقي أو DevStudio" required autofocus>
+          <div class="form-hint">يُحفظ هذا الاسم على جهازك ويظهر تلقائياً في طلباتك ولدى الإدارة.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          <i data-lucide="arrow-left"></i>
+          <span>ابدأ الآن</span>
         </button>
-      </div>
-
-      <div id="notifList" style="display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto;"></div>
+      </form>
     </div>
   </div>
 
-  <!-- Profile Modal -->
-  <div class="modal-overlay" id="profileModal">
+  <!-- Change Name Modal -->
+  <div class="modal-overlay" id="changeNameModal">
     <div class="modal-card">
       <div class="modal-head">
-        <h3 class="modal-title">الملف الشخصي للمطور</h3>
-        <button class="modal-close" id="closeProfileModal">&times;</button>
+        <h3 class="modal-title">تعديل اسم المطور</h3>
+        <button class="modal-close" id="closeChangeNameModal">&times;</button>
       </div>
 
-      <form id="profileForm">
+      <form id="changeNameForm">
         <div class="form-group">
-          <label class="form-label" for="profName">الاسم الكامل</label>
-          <input class="form-input" type="text" id="profName" required>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="profEmail">البريد الإلكتروني</label>
-          <input class="form-input" type="email" id="profEmail" required>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="profNewPass">تغيير كلمة المرور (اختياري)</label>
-          <input class="form-input" type="password" id="profNewPass" placeholder="اتركه فارغاً إذا لم ترغب بالتغيير">
+          <label class="form-label" for="changeNameInput">الاسم الجديد</label>
+          <input class="form-input" type="text" id="changeNameInput" required>
+          <div class="form-hint">سيتم حفظ الاسم محلياً واستخدامه في جميع طلباتك القادمة.</div>
         </div>
 
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
-          <button type="button" class="btn btn-ghost" id="cancelProfBtn">إلغاء</button>
-          <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+          <button type="button" class="btn btn-ghost" id="cancelChangeNameBtn">إلغاء</button>
+          <button type="submit" class="btn btn-primary">حفظ الاسم</button>
         </div>
       </form>
     </div>
   </div>
 
-  <style>
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  </style>
-
   <script src="js/dev.js"></script>
   <script>
-    if (!Dev.requireAuth()) throw new Error('Auth required');
-    if (window.lucide) lucide.createIcons();
-
     let allSubmissions = [];
     let currentFilter = 'all';
 
-    const user = Dev.getUser() || {};
-    document.getElementById('devNameNav').textContent = user.fullName || user.username || 'المطور';
+    function checkOnboarding() {
+      const devName = Dev.getDevName();
+      if (!devName) {
+        document.getElementById('onboardingModal').style.display = 'flex';
+        if (window.lucide) lucide.createIcons();
+        return false;
+      }
+      document.getElementById('devNameNav').textContent = devName;
+      document.getElementById('onboardingModal').style.display = 'none';
+      return true;
+    }
 
-    document.getElementById('logoutBtn').addEventListener('click', () => Dev.logout());
+    document.getElementById('onboardingForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = document.getElementById('onboardInput').value.trim();
+      if (!val) return;
+      Dev.setDevName(val);
+      document.getElementById('devNameNav').textContent = val;
+      document.getElementById('onboardingModal').style.display = 'none';
+      Dev.toast('أهلاً بك يا ' + val + ' في بوابة المطورين!', 'success');
+      loadDashboard();
+    });
+
+    // Change Name Modal Handlers
+    document.getElementById('changeNameNavBtn').addEventListener('click', () => {
+      document.getElementById('changeNameInput').value = Dev.getDevName() || '';
+      document.getElementById('changeNameModal').classList.add('open');
+      document.getElementById('changeNameInput').focus();
+    });
+
+    document.getElementById('closeChangeNameModal').addEventListener('click', () => {
+      document.getElementById('changeNameModal').classList.remove('open');
+    });
+
+    document.getElementById('cancelChangeNameBtn').addEventListener('click', () => {
+      document.getElementById('changeNameModal').classList.remove('open');
+    });
+
+    document.getElementById('changeNameForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = document.getElementById('changeNameInput').value.trim();
+      if (!val) return;
+      Dev.setDevName(val);
+      document.getElementById('devNameNav').textContent = val;
+      document.getElementById('changeNameModal').classList.remove('open');
+      Dev.toast('تم تحديث اسم المطور بنجاح', 'success');
+      loadDashboard();
+    });
 
     // Load Data
     async function loadDashboard() {
+      if (!checkOnboarding()) return;
+
+      const devId = Dev.getDevId();
+      const mySubs = Dev.getMySubmissions();
+      const devName = Dev.getDevName();
+
       try {
-        const subsRes = await Dev.api('/api/dev/submissions');
+        let query = `?devId=${encodeURIComponent(devId)}`;
+        if (mySubs.length > 0) {
+          query += `&ids=${encodeURIComponent(mySubs.join(','))}`;
+        }
+        if (devName) {
+          query += `&devName=${encodeURIComponent(devName)}`;
+        }
+
+        const subsRes = await Dev.api('/api/dev/submissions' + query);
         allSubmissions = subsRes.items || [];
 
         // Stats
@@ -268,7 +356,6 @@
         }
 
         renderTable();
-        loadNotifications();
       } catch (err) {
         Dev.toast('تعذر جلب البيانات: ' + err.message, 'danger');
       } finally {
@@ -357,85 +444,7 @@
       });
     });
 
-    // Notifications
-    async function loadNotifications() {
-      try {
-        const res = await Dev.api('/api/dev/notifications');
-        const notifs = res.items || [];
-        const unread = notifs.filter(n => !n.read).length;
-        const badge = document.getElementById('notifBadge');
-        if (unread > 0) badge.style.display = 'block';
-        else badge.style.display = 'none';
-
-        const list = document.getElementById('notifList');
-        if (notifs.length === 0) {
-          list.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:24px;">لا توجد إشعارات حتى الآن</div>';
-          return;
-        }
-
-        list.innerHTML = notifs.map(n => `
-          <div style="background:var(--bg-card);padding:14px;border-radius:var(--radius-sm);border:1px solid ${n.read ? 'var(--border)' : 'var(--primary)'};">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-              <span style="font-weight:700;color:white;font-size:0.9rem;">${Dev.esc(n.title)}</span>
-              <span style="font-size:0.75rem;color:var(--text-dim);">${Dev.fmtDate(n.createdAt)}</span>
-            </div>
-            <p style="font-size:0.85rem;color:var(--text-muted);">${Dev.esc(n.message)}</p>
-          </div>
-        `).join('');
-      } catch (_) {}
-    }
-
-    document.getElementById('notifBellBtn').addEventListener('click', () => {
-      document.getElementById('notifModal').classList.add('open');
-    });
-    document.getElementById('closeNotifModal').addEventListener('click', () => {
-      document.getElementById('notifModal').classList.remove('open');
-    });
-    document.getElementById('markReadBtn').addEventListener('click', async () => {
-      await Dev.api('/api/dev/notifications/read', { method: 'POST' });
-      document.getElementById('notifBadge').style.display = 'none';
-      loadNotifications();
-    });
-
-    // Profile modal
-    document.getElementById('profileBtn').addEventListener('click', async () => {
-      try {
-        const me = await Dev.api('/api/dev/me');
-        document.getElementById('profName').value = me.fullName || '';
-        document.getElementById('profEmail').value = me.email || '';
-        document.getElementById('profileModal').classList.add('open');
-      } catch (err) {
-        Dev.toast(err.message, 'danger');
-      }
-    });
-
-    document.getElementById('closeProfileModal').addEventListener('click', () => {
-      document.getElementById('profileModal').classList.remove('open');
-    });
-    document.getElementById('cancelProfBtn').addEventListener('click', () => {
-      document.getElementById('profileModal').classList.remove('open');
-    });
-
-    document.getElementById('profileForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fullName = document.getElementById('profName').value.trim();
-      const email = document.getElementById('profEmail').value.trim();
-      const newPassword = document.getElementById('profNewPass').value;
-
-      try {
-        const res = await Dev.api('/api/dev/profile', {
-          method: 'PUT',
-          body: { fullName, email, newPassword: newPassword || undefined }
-        });
-        Dev.setUser(res.developer);
-        document.getElementById('devNameNav').textContent = res.developer.fullName;
-        Dev.toast('تم تحديث الملف الشخصي بنجاح', 'success');
-        document.getElementById('profileModal').classList.remove('open');
-      } catch (err) {
-        Dev.toast(err.message, 'danger');
-      }
-    });
-
+    if (window.lucide) lucide.createIcons();
     loadDashboard();
   </script>
 </body>

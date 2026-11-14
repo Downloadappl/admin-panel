@@ -1,14 +1,17 @@
 /**
- * AppLand Developers Client Library
+ * AppLand Developers Client Library (Passwordless & Standalone)
  */
 (function (global) {
   'use strict';
+
+  const DEV_NAME_KEY = 'appland_dev_name';
+  const DEV_ID_KEY = 'appland_dev_id';
+  const DEV_MY_SUBS_KEY = 'appland_dev_my_subs';
 
   const Dev = {
     getBaseUrl() {
       const stored = localStorage.getItem('appland_api_base');
       if (stored) return stored.replace(/\/$/, '');
-      // If served from worker origin
       if (window.location.origin && !window.location.origin.includes('file:')) {
         return window.location.origin;
       }
@@ -20,48 +23,54 @@
       else localStorage.removeItem('appland_api_base');
     },
 
-    getToken() {
-      return localStorage.getItem('appland_dev_token') || '';
+    // Developer Name in localStorage
+    getDevName() {
+      return (localStorage.getItem(DEV_NAME_KEY) || '').trim();
     },
 
-    setToken(token) {
-      if (token) localStorage.setItem('appland_dev_token', token);
-      else localStorage.removeItem('appland_dev_token');
+    setDevName(name) {
+      const clean = String(name || '').trim();
+      if (clean) localStorage.setItem(DEV_NAME_KEY, clean);
+      else localStorage.removeItem(DEV_NAME_KEY);
+      return clean;
     },
 
-    getUser() {
+    // Persistent client device ID for developer
+    getDevId() {
+      let id = localStorage.getItem(DEV_ID_KEY);
+      if (!id) {
+        id = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+        localStorage.setItem(DEV_ID_KEY, id);
+      }
+      return id;
+    },
+
+    // Submissions recorded locally
+    getMySubmissions() {
       try {
-        return JSON.parse(localStorage.getItem('appland_dev_user') || 'null');
+        return JSON.parse(localStorage.getItem(DEV_MY_SUBS_KEY) || '[]');
       } catch (_) {
-        return null;
+        return [];
       }
     },
 
-    setUser(user) {
-      if (user) localStorage.setItem('appland_dev_user', JSON.stringify(user));
-      else localStorage.removeItem('appland_dev_user');
+    recordMySubmission(subId) {
+      if (!subId) return;
+      const subs = Dev.getMySubmissions();
+      if (!subs.includes(subId)) {
+        subs.unshift(subId);
+        localStorage.setItem(DEV_MY_SUBS_KEY, JSON.stringify(subs.slice(0, 100)));
+      }
     },
 
-    logout() {
-      const token = Dev.getToken();
-      if (token) {
-        fetch(Dev.getBaseUrl() + '/api/dev/logout', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token }
-        }).catch(() => {});
-      }
-      Dev.setToken('');
-      Dev.setUser(null);
-      window.location.href = 'login.html';
-    },
-
-    requireAuth() {
-      const token = Dev.getToken();
-      if (!token) {
-        window.location.href = 'login.html';
-        return false;
-      }
-      return true;
+    esc(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     },
 
     toast(msg, type = 'info') {
@@ -121,19 +130,11 @@
         'Content-Type': 'application/json'
       }, options.headers || {});
 
-      const token = Dev.getToken();
-      if (token) headers['Authorization'] = 'Bearer ' + token;
-
       const res = await fetch(url, {
         method: options.method || 'GET',
         headers,
         body: options.body ? JSON.stringify(options.body) : undefined
       });
-
-      if (res.status === 401 && !path.includes('/login') && !path.includes('/register')) {
-        Dev.logout();
-        throw new Error('انتهت صلاحية الجلسة، يرجى تسجيل الدخول مجدداً');
-      }
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {

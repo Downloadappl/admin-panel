@@ -131,7 +131,7 @@
             <i data-lucide="refresh-cw"></i>
             <span>تحديث</span>
           </button>
-          <a href="dev/login.html" target="_blank" class="btn btn-primary btn-sm">
+          <a href="dev/dashboard.html" target="_blank" class="btn btn-primary btn-sm">
             <i data-lucide="external-link"></i>
             <span>بوابة المطورين</span>
           </a>
@@ -415,7 +415,7 @@
               <span class="req-code">${Core.esc(sub.reqNumber || '—')}</span>
             </div>
             <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:6px;">
-              المطور: <strong style="color:white;">${Core.esc(sub.developer || sub.devName)}</strong> (${Core.esc(sub.devEmail)})
+              المطور: <strong style="color:white;">${Core.esc(sub.developer || sub.devName || 'مطور AppLand')}</strong>${sub.devEmail ? ` (${Core.esc(sub.devEmail)})` : ''}
             </div>
             <div style="font-size:0.85rem;color:var(--text-dim);">
               القسم: <span style="color:var(--primary);">${Core.esc(sub.categoryName)}</span> • الجهاز: <strong>${sub.targetType}</strong> • الحجم: ${Core.fmtSize(sub.sizeBytes)}
